@@ -33,7 +33,6 @@ class flowerwar extends Table
         parent::__construct();
         
         self::initGameStateLabels( array( 
-            self::initGameStateLabels( array( 
                 "faithThreshold" => 10,
                 "peopleThreshold" => 11,
                 "faithPenalty" => 12,
@@ -52,7 +51,7 @@ class flowerwar extends Table
                 "timeUpdateFlag" => 25,
                 "turnCount" => 26,
                 "numPlayers" => 27,
-            ) );
+        ) );
             $this->cards = self::getNew( "module.common.deck" );
             $this->cards ->init( "card" );
 	}
@@ -236,18 +235,50 @@ class flowerwar extends Table
         The action method of state X is called everytime the current game state is set to X.
     */
     
-    /*
-    
-    Example for game state "MyGameState":
+    function queryBoard() {
 
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
+    }
+    
+    function pickSpace() {
+
+    }
+    
+    function updateSpace() {
+
+    }
+    
+    function playersInSpace() {
+
+    }
+    
+    function drawCardState() {
+
+    }
+    
+    function resolveCard() {
+
+    }
+    
+    function ResourceLoop() {
+
+    }
+
+    function endTurn() {
+
+    }
+    
+    function loseCheck() {
+
+    }
+
+    function winCheck() {
+
+    }
+    
+    function gameWon() {
+
+    }
+    
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

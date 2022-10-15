@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `card` (
   `turn` int(4) NOT NULL,
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-/*
+
 CREATE TABLE IF NOT EXISTS `resources` (
     `player_id` int(3) NOT NULL,
     `Az` int(4) NOT NULL,
@@ -47,6 +47,4 @@ CREATE TABLE IF NOT EXISTS `tokens` (
     `Quad` int(2) NOT NULL,
     `Space` int(2) NOT NULL,
     `turn` int(4) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
-
-*/
+) ENGINE=InnoDB DEFAULT CHARSE
