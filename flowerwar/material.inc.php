@@ -27,8 +27,7 @@ $this-> board = array (
     "Space" => 1,
     "Az" => 0,
     "Cath" => 1,
-    "People" => 1,
-    "Terrain" => null
+    "People" => 1
   ),
 
   1=> array(
@@ -37,8 +36,7 @@ $this-> board = array (
     "Space" => 2,
     "Az" => 0,
     "Cath" => 2,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0   
   ),
   
   2=> array(
@@ -47,8 +45,7 @@ $this-> board = array (
     "Space" => 3,
     "Az" => 4,
     "Cath" => 0,
-    "People" => -2,
-    "Terrain" => null
+    "People" => -2    
   ),
 
   3=> array(
@@ -57,8 +54,7 @@ $this-> board = array (
     "Space" => 4,
     "Az" => 1,
     "Cath" => 1,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0    
   ),
 
   4=> array(
@@ -67,8 +63,7 @@ $this-> board = array (
     "Space" => 5,
     "Az" => 0,
     "Cath" => 3,
-    "People" => -1,
-    "Terrain" => null
+    "People" => -1    
   ),
 
   5=> array(
@@ -77,8 +72,7 @@ $this-> board = array (
     "Space" => 1,
     "Az" => 0,
     "Cath" => 2,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0
   ),
 
   6=> array(
@@ -87,9 +81,7 @@ $this-> board = array (
     "Space" => 2,
     "Az" => 1,
     "Cath" => 0,
-    "People" => 1,
-    "Terrain" => null
-
+    "People" => 1
   ),
 
   7=> array(
@@ -98,8 +90,7 @@ $this-> board = array (
     "Space" => 3,
     "Az" => 0,
     "Cath" => 0,
-    "People" => 2,
-    "Terrain" => null
+    "People" => 2
   ),
 
   8=> array(
@@ -108,8 +99,7 @@ $this-> board = array (
     "Space" => 4,
     "Az" => 3,
     "Cath" => 0,
-    "People" => -1,
-    "Terrain" => null
+    "People" => -1
   ),
 
   9=> array(
@@ -118,8 +108,7 @@ $this-> board = array (
     "Space" => 5,
     "Az" => 1,
     "Cath" => 1,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0
   ),
 
 
@@ -129,8 +118,7 @@ $this-> board = array (
     "Space" => 1,
     "Az" => 1,
     "Cath" => 1,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0
   ),
 
   11=> array(
@@ -139,8 +127,7 @@ $this-> board = array (
     "Space" => 2,
     "Az" => 0,
     "Cath" => 3,
-    "People" => -1,
-    "Terrain" => null
+    "People" => -1    
   ),
 
   12=> array(
@@ -149,8 +136,7 @@ $this-> board = array (
     "Space" => 3,
     "Az" => 0,
     "Cath" => 3,
-    "People" => -1,
-    "Terrain" => null
+    "People" => -1    
   ),
 
   13=> array(
@@ -159,8 +145,7 @@ $this-> board = array (
     "Space" => 4,
     "Az" => 0,
     "Cath" => 1,
-    "People" => 1,
-    "Terrain" => null
+    "People" => 1
   ),
 
   14=> array(
@@ -169,8 +154,7 @@ $this-> board = array (
     "Space" => 5,
     "Az" => 2,
     "Cath" => 0,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0    
   ),
 
   15=> array(
@@ -179,8 +163,7 @@ $this-> board = array (
     "Space" => 1,
     "Az" => 3,
     "Cath" => 0,
-    "People" => -2,
-    "Terrain" => null
+    "People" => -2
   ),
 
   16=> array(
@@ -189,8 +172,7 @@ $this-> board = array (
     "Space" => 2,
     "Az" => 1,
     "Cath" => 1,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0    
   ),
 
   17=> array(
@@ -199,8 +181,7 @@ $this-> board = array (
     "Space" => 3,
     "Az" => 0,
     "Cath" => 4,
-    "People" => -2,
-    "Terrain" => null
+    "People" => -2    
   ),
 
   18=> array(
@@ -209,8 +190,7 @@ $this-> board = array (
     "Space" => 4,
     "Az" => 2,
     "Cath" => 0,
-    "People" => 0,
-    "Terrain" => null
+    "People" => 0    
   ),
 
   19=> array(
@@ -219,8 +199,7 @@ $this-> board = array (
     "Space" => 5,
     "Az" => 1,
     "Cath" => 0,
-    "People" => 1,
-    "Terrain" => null
+    "People" => 1    
   )
 );
 
@@ -405,6 +384,36 @@ $this-> character = array (
   )
 );
 
+$this -> terrainName = array(
+    'Plains' => 1,
+    'River' => 2,
+    'Hills' => 3,
+    'Road' => 4,
+    'Jungle' => 5
+);
 
-
-
+$this -> eventName = array(
+  'aPenalty' => 1,
+  'cPenalty' => 2,
+  'gPenalty' => 3,
+  'pPenalty' => 4,
+  'aCheck' => 5,
+  'gCheck' => 6,
+  'pCheck' => 7,
+  'aConvert' => 8,
+  'cConvert' => 9,
+  'aCull' => 10,
+  'cCull' => 11,
+  'catchUp' => 12,
+  'aBonus' => 13,
+  'cBonus' => 14,
+  'gBonus' => 15,
+  'pBonus' => 16,
+  'uFigure' => 17,
+  'dFigure' => 18,
+  'iBlock' => 19,
+  'rBlock' => 21,
+  'nQuad' => 22,
+  'aSpace' => 23,
+  'rTime' => 24
+);

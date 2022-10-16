@@ -58,22 +58,23 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
+        "transitions" => array( "" => 3 )
     ),
     
     // Note: ID=2 => your first state
 
-    2 => array(
+
+    3 => array(
         "name" => "queryBoard",
         "description" => clienttranslate('Generating possible moves for ${actplayer}'),
         "descriptionmyturn" => clienttranslate('Generating possible moves for ${you}'),
         "type" => "activeplayer",
         "action" => "queryBoard",
         "possibleactions" => array( "pickSpace"),
-        "transitions" => array( "pickSpace" => 3 )
+        "transitions" => array( "pickSpace" => 5 )
     ),
 
-    3 => array(
+    5 => array(
         "name" => "pickSpace",
         "description" => clienttranslate('${actplayer}, pick an available space to move your token to'),
         "descriptionmyturn" => clienttranslate('Pick an available space to move your token to, ${you}'),

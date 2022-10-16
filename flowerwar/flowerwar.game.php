@@ -50,7 +50,9 @@ class flowerwar extends Table
                 "quadUpdateFlag" => 24,
                 "timeUpdateFlag" => 25,
                 "turnCount" => 26,
-                "numPlayers" => 27,
+                "roundCount" => 27,
+                "numPlayers" => 28,
+                "blockerSpace" => 29,
         ) );
             $this->cards = self::getNew( "module.common.deck" );
             $this->cards ->init( "card" );
@@ -90,19 +92,86 @@ class flowerwar extends Table
         self::DbQuery( $sql );
         self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
         self::reloadPlayersBasicInfos();
+
+        $sql = "INSERT INTO `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) VALUES ";
+        $values = array();
+        foreach( $players as $player_id => $player ) {
+            $values[] = "('".$player_id."',2,2,8,1,0,0)";
+        }
+        $sql .= implode( $values, ',' );
+        self::DbQuery( $sql );
+
+        $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ";
+        $values = array();
+        $tID = 1;
+        $startQuad = 0;
+        $startBoard = 0;
+        foreach( $players as $player_id => $player ) {
+            $startQuad = ($tID);
+            $startBoard = (($startQuad-1)*5);
+            $values[] = "('".$player_id."','".$tID."','".$startBoard."','".$startQuad."',1,0)";
+            $tID++;
+        }
+        $sql .= implode( $values, ',' );
+        self::DbQuery( $sql );
+
+        $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ";
+        $values = array();
+        $tID = 5;
+        $startQuad = 0;
+        $startBoard = 0;
+        for($i=1;$i<5;$i++){
+            $values[] = "(5,5,0,'".$i."',0,0)";
+        }
+        $sql .= implode( $values, ',' );
+        self::DbQuery( $sql );
+
         
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        self::setGameStateInitialValue( 'faithThreshold', 6 );
+        self::setGameStateInitialValue( 'peopleThreshold', 4 );
+        self::setGameStateInitialValue( 'faithPenalty', 2 );
+        self::setGameStateInitialValue( 'PeoplePenalty', 1 );
+        self::setGameStateInitialValue( 'faithBonus', 2 );
+        self::setGameStateInitialValue( 'peopleBonus', 1 );
+        self::setGameStateInitialValue( 'faithConversionRate', 2 );
+        self::setGameStateInitialValue( 'peopleConversionRate', 3 );
+        self::setGameStateInitialValue( 'templeMaxHeight', 7 );
+        self::setGameStateInitialValue( 'apocFlag', 0 );
+        self::setGameStateInitialValue( 'azFlag', false );
+        self::setGameStateInitialValue( 'cathFlag', false );
+        self::setGameStateInitialValue( 'azLevel', 0 );
+        self::setGameStateInitialValue( 'cathLevel', 0 );
+        self::setGameStateInitialValue( 'quadUpdateFlag', false );
+        self::setGameStateInitialValue( 'timeUpdateFlag', false );
+        self::setGameStateInitialValue( 'turnCount', 0 );
+        self::setGameStateInitialValue( 'roundCount', 0 );
+        self::setGameStateInitialValue( 'numPlayers', count($players) );
+        self::setGameStateInitialValue( 'blockerSpace', 0 );
         
-        // Init game statistics
-        // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
-        // TODO: setup the initial game situation here
-       
+        $nPlayers = self::getGameStateValue('numPlayers');
+
+        
+        $terrain = array();
+        foreach( $this->terrainName as $tName => $tValue) {
+            $terrain[] = array( 'type' => $tName, 'type_arg' => $tValue, 'nbr' => 4);
+        }
+        $this->cards->createCards( $terrain, 'terrain' );
+        
+        $events = array();
+        foreach( $this->eventName as $eName => $eValue) {
+            $events[] = array( 'type' => $eName, 'type_arg' => $eValue, 'nbr' => 2);
+        }
+        $this->cards->createCards( $events, 'deck' );
+
+        for($x=0;$x<20;$x++) {
+            $this->cards->pickCardForLocation("terrain", "board", $x);
+        }
+
+
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -161,7 +230,356 @@ class flowerwar extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function getBoardPosition($player_id) {
+        $pID = $player_id;
+        $tID = self::getCollectionFromDB( "SELECT `tokenID` FROM `tokens` WHERE `player_id` = $pID" );
+        $cBoard = self::getCollectionFromDB( "SELECT `boardID` FROM `tokens` WHERE `player_id` = $pID" );
+        $cQuad = self::getCollectionFromDB( "SELECT `Quad` FROM `tokens` WHERE `player_id` = $pID" );
+        $cSpace = self::getCollectionFromDB( "SELECT `Space` FROM `tokens` WHERE `player_id` = $pID" );
+        $blocker = self::getGameStateValue('blockerSpace');
+        
+        if ($blocker == $cSpace) {
+            $blockerFlag = false;
+        } else{
+            $blockerFlag = true;
+        }
 
+        $spaceOccupied = self::getCollectionFromDB("SELECT `tokenID` FROM `tokens` WHERE `boardID` = $cBoard AND `player_id` != $player_id");
+        if(count($spaceOccupied) == 0) {
+            $oFlag = false;
+        } else {
+            $oFlag = true;
+        }
+
+        $boardPos = array(
+            "tokenID" => $tID, "boardID" => $cBoard, "Quad" => $cQuad, "Space" => $cSpace, "Blocked" => $blockerFlag, "Occupied" => $oFlag
+        );
+
+        return $boardPos;
+    }
+
+    function checkMoves($quad, $qFlag) {
+        $pID = self::getActivePlayerId();
+        $boardPos = getBoardPosition($pID);
+        $pResources =getPlayerResources($pID);
+        $cBoardID = $boardPos['boardID'];
+        $cQuad = $quad;
+        $quadFlag = $qFlag;
+        $cTime = $pResources['Time'];
+        $lastSpace = 0;
+        $blockedSpace = self::getGameStateValue('blockerSpace');
+        $possibleMoves = array();
+        $blockedMoves = array();
+        $allMoves = array();
+        
+        if ($quadFlag == false) {
+            $testSpace = $cBoardID++;    
+        } else if ($quadFlag == true) {
+            if($cTime <4) {
+                if($cQuad <4)
+                {
+                    $cQuad++;
+                } else if($cQuad ==4) {
+                    $cQuad = 1;
+                }
+                $testSpace = (($cQuad-1)*5);    
+            } else if ($cTime == 4) {
+                if($cQuad <4)
+                {
+                    $cQuad++;
+                } else if($cQuad ==4) {
+                    $cQuad = 1;
+                }
+                $testSpace = (($cQuad-1)*5);    
+            }
+            $lastSpace = (($cQuad*5)-1);
+            for($z=$testSpace;$z<=$lastSpace;$z++) {
+                if((($z+1)-($cQuad-1)*5) == $blockedSpace) {
+                    array_push($blockedMoves, $z);
+                } else {
+                    array_push($possibleMoves, $z);
+                }
+            }
+        }
+        $allMoves = array(
+            "Possible" => $possibleMoves, "Blocked" => $blockedMoves
+        );
+        
+        return $allMoves;
+    }
+
+    function updateBoard($player_id, $actualMove) {
+        $pID = $player_id;
+        $cPos = getBoardPosition();
+        $tID = $cPos["tokenID"];
+        $newMove = $actualMove;
+        $newQuad = $this ->board[$actualMove]["Quad"];
+        $newSpace = $this ->board[$actualMove]["Space"];
+        $turn = $this ->getGameStateValue("turnCount");
+
+        $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ( '".$pID."', '".$tID."', '".$newMove."', '".$newQuad."', '".$newSpace."', '".$turn."') ";
+
+    }
+
+    function getPlayerResources($player_id) {
+        $pID = $player_id;
+        $cAz = self::getCollectionFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID" );
+        $cCath = self::getCollectionFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID" );
+        $cPeople = self::getCollectionFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID" );
+        $cTime = self::getCollectionFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID" );
+        $cID = self::getCollectionFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID" );
+        
+        $pResources = array(
+            'Az' => $cAz, 'Cath' => $cCath, 'People' => $cPeople, 'Time' => $cTime, 'cID' => $cID
+        );
+
+        return $pResources;
+
+    }
+
+    function updateResources($player_id, $resource, $newTotal) {
+        $pID = $player_id;
+        $cResources = getPlayerResources($pID);
+        $cAz = $cResources['Az'];
+        $cCath = $cResources['Cath'];
+        $cPeople = $cResources['People'];
+        $cTime = $cResources['Time'];
+        $cID = $cResources['cID'];
+
+        switch ($resource) {
+            case 'A':
+                $cAz = $newTotal;
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                self::DbQuery( $sql );
+            break;
+            case 'C':
+                $cCath = $newTotal;
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                self::DbQuery( $sql );
+            break;
+            case 'P':
+                $cPeople = $newTotal;
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                self::DbQuery( $sql );
+            break;
+            case 'T':
+                $cTime = $newTotal;
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                self::DbQuery( $sql );
+            break;
+        }
+    }
+
+    function setBlocker() {
+
+    }
+
+    function convertFaith($player_id, $fromWhich) {
+        $pID = $player_id;
+        $cResources = getPlayerResources($pID);
+        $cAz = $cResources['Az'];
+        $cCath = $cResources['Cath'];
+        $fRate = $this ->getGameStateValue("faithConversionRate");
+
+        switch ($fromWhich) {
+            case 'A':
+                if ($cAz < $fRate) {
+                    throw new BgaUserException( self::_("You don't have enough Aztec Faith.") );
+                } else {
+                    $cAz -= $fRate;
+                    $cCath++;
+                    updateResources($pID, 'A', $cAz);
+                    updateResources($pID, 'C', $cCath);
+                }
+            break;
+            case 'C':
+                if ($cCath < $fRate) {
+                    throw new BgaUserException( self::_("You don't have enough Catholic Faith.") );
+                } else{
+                    $cCath -= $fRate;
+                    $cAz++;
+                    updateResources($pID, 'A', $cAz);
+                    updateResources($pID, 'C', $cCath);
+                }
+            break;
+        }
+    }
+
+    function convertPeople($player_id, $fromWhich) {
+        $pID = $player_id;
+        $cResources = getPlayerResources($pID);
+        $cAz = $cResources['Az'];
+        $cCath = $cResources['Cath'];
+        $cPeople = $cResources['People'];
+        $pRate = $this ->getGameStateValue("peopleConversionRate");
+
+        switch ($fromWhich) {
+            case 'A':
+                if ($cAz < $fRate) {
+                    throw new BgaUserException( self::_("You don't have enough Aztec Faith.") );
+                } else {
+                    $cAz -= $pRate;
+                    $cPeople++;
+                    updateResources($pID, 'A', $cAz);
+                    updateResources($pID, 'P', $cPeople);
+                }
+            break;
+            case 'C':
+                if ($cCath < $pRate) {
+                    throw new BgaUserException( self::_("You don't have enough Catholic Faith.") );
+                } else{
+                    $cCath -= $fRate;
+                    $cPeople++;
+                    updateResources($pID, 'C', $cAz);
+                    updateResources($pID, 'P', $cPeople);
+                }
+            break;
+        }
+    }
+    
+    function cardConvert($player_id, $fromWhich) {
+        $pID = $player_id;
+        $cResources = getPlayerResources($pID);
+        $cAz = $cResources['Az'];
+        $cCath = $cResources['Cath'];
+        $cPeople = $cResources['People'];
+        $pRate = $this ->getGameStateValue("peopleConversionRate");
+        $aFlag = $this ->getGameStateValue("apocFlag");
+
+        switch ($fromWhich) {
+            case 'A':
+                if($aFlag != 2) {
+                    $cAz += $pRate;
+                    $cPeople--;
+                    updateResources($pID, 'A', $cAz);
+                    updateResources($pID, 'P', $cPeople);
+                } else if ($aFlag == 2) {
+                    $cAz -= ($pRate-1);
+                    $cPeople++;
+                    updateResources($pID, 'A', $cAz);
+                    updateResources($pID, 'P', $cPeople);
+                }
+                loseCheck($pID);
+            break;
+            case 'C':
+                if($aFlag != 1) {
+                    $cCath += $pRate;
+                    $cPeople--;
+                    updateResources($pID, 'C', $cAz);
+                    updateResources($pID, 'P', $cPeople);
+                } else if ($aFlag == 1) {
+                    $cCath -= ($pRate-1);
+                    $cPeople++;
+                    updateResources($pID, 'C', $cAz);
+                    updateResources($pID, 'P', $cPeople);
+                }
+                loseCheck($pID);
+            break;
+        }
+    }
+
+    function calcTempleCost($which) {
+        $azFlag = $this ->getGameStateValue("azFlag");
+        $cathFlag = $this ->getGameStateValue("cathFlag");
+        $tMax = $this ->getGameStateValue("templeMaxHeight");
+        $aLevel = $this ->getGameStateValue("azLevel");
+        $cLevel = $this ->getGameStateValue("cathLevel");
+        $tCost = 0;
+
+        switch ($which) {
+            case 'A':
+                if ($azFlag == false) {
+                    $tCost = ($aLevel +1);
+                } else if ($azFlag == true) {
+                    $tCost = (($tMax - $aLevel)+1);
+                }
+                return $tCost;
+            break;
+            case 'C':
+                if ($cathFlag == false) {
+                    $tCost = ($cLevel +1);
+                } else if ($cathFlag == true) {
+                    $tCost = (($tMax - $cLevel)+1);
+                }
+                return $tCost;
+            break;
+        }
+    }
+
+    function updateTemple($which, $player_id) {
+        $azFlag = $this ->getGameStateValue("azFlag");
+        $cathFlag = $this ->getGameStateValue("cathFlag");
+        $tMax = $this ->getGameStateValue("templeMaxHeight");
+        $aLevel = $this ->getGameStateValue("azLevel");
+        $cLevel = $this ->getGameStateValue("cathLevel");
+        $aflag = $this ->getGameStateValue("apocFlag");
+        $pID = $player_id;
+
+        switch ($which) {
+            case 'A':
+                if($azFlag == false) {
+                    if ($aLevel < ($tMax-1)) {
+                        $aLevel++;
+                        $this->setGameStateValue( "azLevel", $aLevel );
+                    } else if ($aLevel = ($tMax-1)) {
+                        $aLevel++;
+                        $this->setGameStateValue( "azLevel", $aLevel );
+                        $this->setGameStateValue( "azFlag", true );
+                        if ($aFlag == 0) {
+                            $this->setGameStateValue( "apocFlag", 1 );
+                        }
+                    }
+                }else if ($azFlag == true) {
+                    if ($aLevel >1) {
+                        $aLevel--;
+                        $this->setGameStateValue( "azLevel", $aLevel );
+                    } else if ($aLevel == 1) {
+                        $aLevel--;
+                        $this->setGameStateValue( "azLevel", $aLevel );
+                        winCheck($pID);
+                    }
+                }
+            break;
+            case 'C':
+                if($cathFlag == false) {
+                    if ($cLevel < ($tMax-1)) {
+                        $cLevel++;
+                        $this->setGameStateValue( "cathLevel", $cLevel );
+                    } else if ($cLevel = ($tMax-1)) {
+                        $cLevel++;
+                        $this->setGameStateValue( "cathLevel", $cLevel );
+                        $this->setGameStateValue( "cathFlag", true );
+                        if ($aFlag == 0) {
+                            $this->setGameStateValue( "apocFlag", 2 );
+                        }
+                    }
+                }else if ($cathFlag == true) {
+                    if ($cLevel >1) {
+                        $cLevel--;
+                        $this->setGameStateValue( "cathLevel", $cLevel );
+                    } else if ($cLevel == 1) {
+                        $cLevel--;
+                        $this->setGameStateValue( "cathLevel", $cLevel );
+                        winCheck($pID);
+                    }
+                }
+            break;
+        }
+    }
+
+    function getCard($player_id) {
+        $pID = $player_id;
+        $heldCardInfo = array();
+        $heldCardType = "";
+
+        $this->cards->pickCardForLocation('deck', 'held', $pID);
+
+        $heldCardInfo = $this->cards->getCardsInLocation('held', $pID);
+        $heldCardType = $heldCardInfo["card_type"];
+
+        return $heldCardID;
+
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
@@ -267,7 +685,7 @@ class flowerwar extends Table
 
     }
     
-    function loseCheck() {
+    function loseCheck($player_id) {
 
     }
 

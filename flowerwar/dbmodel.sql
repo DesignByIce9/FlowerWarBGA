@@ -41,10 +41,10 @@ CREATE TABLE IF NOT EXISTS `resources` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 CREATE TABLE IF NOT EXISTS `tokens` (
-    `tokenID` int(3) NOT NULL,
     `player_id` int(2) NOT NULL,
+    `tokenID` int(3) NOT NULL,
     `boardID` int(2) NOT NULL,
     `Quad` int(2) NOT NULL,
     `Space` int(2) NOT NULL,
     `turn` int(4) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
