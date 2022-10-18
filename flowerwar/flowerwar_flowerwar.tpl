@@ -25,7 +25,13 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-
+<div id="fw-container">
+<h1 id="header">Header</h1>
+<div class="spaceRow" id="topRow"></div>
+<div class="spaceColumn" id="rightColumn"></div>
+<div class="spaceColumn" id="leftColumn"></div>
+<div class="spaceRow" id="bottomRow"></div>
+</div>
 
 <script type="text/javascript">
 
@@ -36,6 +42,8 @@ var jstpl_player_board = '<div class="cpboard">\
     <div id="cFaithCounter${id}" class="cFaithCounter"></div>Catholic Faith: <span id="cathFaithCounter${id}">0</span>\
     <div id="pCounter${id}" class="pCounter"></div>People: <span id="peopleCounter${id}">0</span>\
 </div>';
+
+var jstpl_boardSpace = '<div class="space" id="space_${boardID}"><p> class="spaceText">Space ${boardID}</p></div>';
 
 </script>  
 

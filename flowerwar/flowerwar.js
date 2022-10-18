@@ -66,9 +66,104 @@ function (dojo, declare) {
             this.peopleCounter[player_id].create('peopleCounter'+player_id);
             
           }
-      
+
+          for(i=0;i<5;i++) {
+            let space = document.createElement("div");
+            let spaceP = document.createElement("p");
+            spaceP.classList.add("spaceText");
+            space.classList.add('space');
+            let topRow = document.getElementById("topRow");
+            let spaceName = "space_"+i;
+            let spaceText = "Space "+(i+1);
+            space.id=spaceName;
+            let spacePtext = document.createTextNode(spaceText);
+            spaceP.appendChild(spacePtext);
+            space.appendChild(spaceP);
+            topRow.appendChild(space);
+        }
+        for(i=5;i<10;i++) {
+            let space = document.createElement("div");
+            let spaceP = document.createElement("p");
+            spaceP.classList.add("spaceText");
+            space.classList.add('space');
+            let rightColumn = document.getElementById("rightColumn");
+            let spaceName = "space_"+i;
+            let spaceText = "Space "+(i+1);
+            space.id=spaceName;
+            let spacePtext = document.createTextNode(spaceText);
+            spaceP.appendChild(spacePtext);
+            space.appendChild(spaceP);
+            rightColumn.appendChild(space);
+        }
+        for(i=14;i>9;i--) {
+            let space = document.createElement("div");
+            let spaceP = document.createElement("p");
+            spaceP.classList.add("spaceText");
+            space.classList.add('space');
+            let bottomRow = document.getElementById("bottomRow");
+            let spaceName = "space_"+i;
+            let spaceText = "Space "+(i+1);
+            space.id=spaceName;
+            let spacePtext = document.createTextNode(spaceText);
+            spaceP.appendChild(spacePtext);
+            space.appendChild(spaceP);
+            bottomRow.appendChild(space);
+        }
+        for(i=19;i>14;i--) {
+            let space = document.createElement("div");
+            let spaceP = document.createElement("p");
+            spaceP.classList.add("spaceText");
+            space.classList.add('space');
+            let leftColumn = document.getElementById("leftColumn");
+            let spaceName = "space_"+i;
+            let spaceText = "Space "+(i+1);
+            space.id=spaceName;
+            let spacePtext = document.createTextNode(spaceText);
+            spaceP.appendChild(spacePtext);
+            space.appendChild(spaceP);
+            leftColumn.appendChild(space);
+        }   
+            player1= gamedatas.tokens.at(0).at(0);
+            player2= gamedatas.tokens.at(1).at(0);
+            if (gamedatas.tokens.length>=3) {
+                player3= gamedatas.tokens.at(2).at(0);
+            }
+            if (gamedatas.tokens.length>=4) {
+                player4= gamedatas.tokens.at(3).at(0);
+            }
           // TODO: Set up your game interface here, according to "gamedatas"
+          for(b=0;b<20;b++) {
+            for(p=0;p<gamedatas.tokens.length;p++) {
+                if(gamedatas.tokens.at(p).at(1) == b) { 
+                    let token = document.createElement("div");
+                    token = document.createElement("div");              
+                    token.classList.add("token");
+                    token.id="test-token";
+                    boardID = "space_"+b;
+                    playerContainer = document.getElementById(boardID);
+                    switch (p) {
+                        case 0:
+                            color = gamedatas.players[player1].color;
+                            break;
+                        case 1:
+                            color = gamedatas.players[player2].color
+                            break;
+                        case 2:
+                            color = gamedatas.players[player3].color
+                            break;
+                        case 3:
+                            color = gamedatas.players[player4].color
+                            break;
+                    }
+                    color = "filter_" +color;
+                    token.classList.add(color);                                       
+                    playerContainer = document.getElementById(boardID);
+                    playerContainer.appendChild(token);
+                }
+            }
+        }
           
+
 
           // Setup game notifications to handle (see "setupNotifications" method below)
           this.setupNotifications();

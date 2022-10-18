@@ -199,8 +199,25 @@ class flowerwar extends Table
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
-  
+
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        
+        $blocker = self::getGameStateValue('blockerSpace');
+        $cardsInHand = array();
+        $tokenArray = array();
+
+        $players = $this->loadPlayersBasicInfos();
+        foreach( $players as $player_id => $player ) {
+            $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `tokens` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+
+            $tokenArray[] = array($player_id, $cBoard);
+
+            $cardsInHand[] = $this->cards->getCardsInLocation("hand",$player_id);
+        }
+
+        $result['tokens'] = $tokenArray;
+        $resunt['cards'] = $cardsInHand;
+        $result['blocker'] = $blocker;
   
         return $result;
     }
@@ -217,9 +234,29 @@ class flowerwar extends Table
     */
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        $tMax = $this ->getGameStateValue("templeMaxHeight");
+        $aLevel = $this ->getGameStateValue("azLevel");
+        $cLevel = $this ->getGameStateValue("cathLevel");
+        $aflag = $this ->getGameStateValue("apocFlag");
+        $spacesRemaining = (($tMax*2)-1);
+        $progress = 0;
 
-        return 0;
+        if($aflag != 0) {
+            if($aLevel<=$cLevel) {
+                $progress = ceil(((($spacesRemaining-$aLevel)/$spacesRemaining)*100));
+            } else if ($aLevel>$cLevel) {
+                $progress = ceil(((($spacesRemaining-$cLevel)/$spacesRemaining)*100));
+            }
+        } else if ($aflag == 0) {
+            if ($aLevel<=$cLevel) {
+                $progress = ceil(($aLevel/$spacesRemaining)*100);
+            } else {
+                $progress = ceil(($cLevel/$spacesRemaining)*100);
+            }
+
+        }
+
+        return $progress;
     }
 
 
@@ -233,10 +270,10 @@ class flowerwar extends Table
 
     function getBoardPosition($player_id) {
         $pID = $player_id;
-        $tID = self::getCollectionFromDB( "SELECT `tokenID` FROM `tokens` WHERE `player_id` = $pID" );
-        $cBoard = self::getCollectionFromDB( "SELECT `boardID` FROM `tokens` WHERE `player_id` = $pID" );
-        $cQuad = self::getCollectionFromDB( "SELECT `Quad` FROM `tokens` WHERE `player_id` = $pID" );
-        $cSpace = self::getCollectionFromDB( "SELECT `Space` FROM `tokens` WHERE `player_id` = $pID" );
+        $tID = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `tokens` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1"  );
+        $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `tokens` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `tokens` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cSpace = self::getUniqueValueFromDB( "SELECT `Space` FROM `tokens` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
         $blocker = self::getGameStateValue('blockerSpace');
         
         if ($blocker == $cSpace) {
@@ -324,11 +361,11 @@ class flowerwar extends Table
 
     function getPlayerResources($player_id) {
         $pID = $player_id;
-        $cAz = self::getCollectionFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID" );
-        $cCath = self::getCollectionFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID" );
-        $cPeople = self::getCollectionFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID" );
-        $cTime = self::getCollectionFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID" );
-        $cID = self::getCollectionFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID" );
+        $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cCath = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
         
         $pResources = array(
             'Az' => $cAz, 'Cath' => $cCath, 'People' => $cPeople, 'Time' => $cTime, 'cID' => $cID
@@ -377,26 +414,27 @@ class flowerwar extends Table
         $cPeople = $cResources['People'];
         $cTime = $cResources['Time'];
         $cID = $cResources['cID'];
+        $turn = $this ->getGameStateValue("turnCount");
 
         switch ($resource) {
             case 'A':
                 $cAz = $newTotal;
-                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID.", '".$turn."') ";
                 self::DbQuery( $sql );
             break;
             case 'C':
                 $cCath = $newTotal;
-                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."', '".$turn."') ";
                 self::DbQuery( $sql );
             break;
             case 'P':
                 $cPeople = $newTotal;
-                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."', '".$turn."') ";
                 self::DbQuery( $sql );
             break;
             case 'T':
                 $cTime = $newTotal;
-                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."') ";
+                $sql = "insert into `resources` (`player_id`, `Az`, `Cath`,`People`,`Time`,`CharID`,`turn`) values ('".$pID."', '".$cAz."','".$cCath."', '".$cPeople."','".$cTime."', '".$cID."', '".$turn."') ";
                 self::DbQuery( $sql );
             break;
         }
