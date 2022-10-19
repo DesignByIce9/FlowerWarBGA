@@ -116,16 +116,35 @@ class flowerwar extends Table
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
 
-        $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ";
+        $sql = "";
         $values = array();
-        $tID = 5;
-        $startQuad = 0;
-        $startBoard = 0;
-        for($i=1;$i<5;$i++){
-            $values[] = "(5,5,0,'".$i."',0,0)";
+        $blockerRoll = bga_rand(1,6);
+        $turn = $this ->getGameStateValue("turnCount");
+        $bBoard = 0;
+        switch ($blockerRoll) {
+            case 6:
+                $this->setGameStateValue("blockerSpace", 0);
+                $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ";
+                for($i=1;$i<5;$i++){
+                    $blockerID = (4+$i);
+                    $bBoard = (0);
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."',0,'".$turn."')";
+                }
+                $sql .= implode( $values, ',' );
+                self::DbQuery( $sql );
+            break;
+            default:
+            $this->setGameStateValue("blockerSpace", $blockerRoll);
+                $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ";
+                for($i=1;$i<5;$i++){
+                    $blockerID = (4+$i);
+                    $bBoard = (((($i)-1)*5)+(($blockerRoll)-1));
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."','".$blockerRoll."','".$turn."')";
+                }
+                $sql .= implode( $values, ',' );
+                self::DbQuery( $sql );            
         }
-        $sql .= implode( $values, ',' );
-        self::DbQuery( $sql );
+
 
         
         /************ Start the game initialization *****/
@@ -150,7 +169,6 @@ class flowerwar extends Table
         self::setGameStateInitialValue( 'turnCount', 0 );
         self::setGameStateInitialValue( 'roundCount', 0 );
         self::setGameStateInitialValue( 'numPlayers', count($players) );
-        self::setGameStateInitialValue( 'blockerSpace', 0 );
         
 
         $nPlayers = self::getGameStateValue('numPlayers');
@@ -172,6 +190,7 @@ class flowerwar extends Table
             $this->cards->pickCardForLocation("terrain", "board", $x);
         }
 
+        
 
 
         // Activate first player (which is in general a good idea :) )
@@ -298,8 +317,8 @@ class flowerwar extends Table
 
     function checkMoves($quad, $qFlag) {
         $pID = self::getActivePlayerId();
-        $boardPos = getBoardPosition($pID);
-        $pResources =getPlayerResources($pID);
+        $boardPos = self::getBoardPosition($pID);
+        $pResources = $this->getPlayerResources($pID);
         $cBoardID = $boardPos['boardID'];
         $cQuad = $quad;
         $quadFlag = $qFlag;
@@ -332,18 +351,13 @@ class flowerwar extends Table
             }
             $lastSpace = (($cQuad*5)-1);
             for($z=$testSpace;$z<=$lastSpace;$z++) {
-                if((($z+1)-($cQuad-1)*5) == $blockedSpace) {
-                    array_push($blockedMoves, $z);
-                } else {
+                if((($z+1)-($cQuad-1)*5) != $blockedSpace) {
                     array_push($possibleMoves, $z);
                 }
             }
         }
-        $allMoves = array(
-            "Possible" => $possibleMoves, "Blocked" => $blockedMoves
-        );
         
-        return $allMoves;
+        return $possibleMoves;
     }
 
     function updateBoard($player_id, $actualMove) {
@@ -402,8 +416,6 @@ class flowerwar extends Table
             break;
         }
 
-        return $pResources;
-
     }
 
     function updateResources($player_id, $resource, $newTotal) {
@@ -441,6 +453,33 @@ class flowerwar extends Table
     }
 
     function setBlocker() {
+        $blockerRoll = bga_rand(1,6);
+        $turn = $this ->getGameStateValue("turnCount");
+        $bBoard = 0;
+        switch ($blockerRoll) {
+            case 6:
+                $this->setGameStateValue("blockerSpace", 0);
+                $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ";
+                for($i=1;$i<5;$i++){
+                    $blockerID = (0);
+                    $bBoard = (0);
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."',0,'".$turn."')";
+                }
+                $sql .= implode( $values, ',' );
+                self::DbQuery( $sql );
+            break;
+            default:
+            $this->setGameStateValue("blockerSpace", 0);
+                $sql = "INSERT INTO `tokens` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`,`turn`) VALUES ";
+                for($i=1;$i<5;$i++){
+                    $blockerID = (4+$i);
+                    $blockerID = (4+$i);
+                    $bBoard = (($i-1)*5);
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."','".$blockerRoll."','".$turn."')";
+                }
+                $sql .= implode( $values, ',' );
+                self::DbQuery( $sql );            
+        }
 
     }
 
@@ -571,7 +610,7 @@ class flowerwar extends Table
                         ) );
                     return $results;
                 }
-                loseCheck($pID);
+                st_loseCheck($pID);
             break;
             case 'C':
                 if($aFlag != 1) {
@@ -597,7 +636,7 @@ class flowerwar extends Table
                         ) );
                     return $cCath;
                 }
-                loseCheck($pID);
+                st_loseCheck($pID);
             break;
         }
     }
@@ -890,7 +929,7 @@ class flowerwar extends Table
                 ) );
             break;
             case 'aCheck':
-                if($cAz<$fThresh) {
+                if($cAz<$cCath) {
                     if($cAz>=$fPen) {
                         $cAz-=$fPen;
                         updateResources($pID, 'A', $cAz);
@@ -902,15 +941,14 @@ class flowerwar extends Table
                         $cAz-=$fPen;
                         updateResources($pID, 'A', $cAz);
                     }
-                    self::notifyAllPlayers( "aCheckFail", clienttranslate( '${player_name} is below ${fThresh} Aztec faith and so has lost ${fPen} Aztec faith' ),
+                    self::notifyAllPlayers( "aCheckFail", clienttranslate( '${player_name}\'s Aztec faith is lower than their Catholic faith, and so has lost ${fPen} Aztec faith' ),
                             array(
                                 'player_id' => $player_id,
                                 'player_name' => self::getActivePlayerName(),
-                                'fThresh' => $fThresh,
                                 'fPen' => $fPen,
                             ) );
                 } else {
-                    self::notifyAllPlayers( "aCheckPass", clienttranslate( '${player_name} is above ${fThresh} Aztec faith and so retains their believers' ),
+                    self::notifyAllPlayers( "aCheckPass", clienttranslate( '${player_name}\'s Aztec faith is higher than their Catholic faith and so retains their believers' ),
                             array(
                                 'player_id' => $player_id,
                                 'player_name' => self::getActivePlayerName(),
@@ -919,7 +957,7 @@ class flowerwar extends Table
                 }
             break;
             case 'cCheck':
-                if($cCath<$fThresh) {
+                if($cCath<$cAz) {
                     if($cCath>=$fPen) {
                         $cCath-=$fPen;
                         updateResources($pID, 'C', $cCath);
@@ -931,19 +969,17 @@ class flowerwar extends Table
                         $cCath-=$fPen;
                         updateResources($pID, 'C', $cCath);
                     }
-                    self::notifyAllPlayers( "cCheckFail", clienttranslate( '${player_name} is below ${fThresh} Catholic faith and so has lost ${fPen} Catholic faith' ),
+                    self::notifyAllPlayers( "cCheckFail", clienttranslate( '${player_name}\'s Aztec faith is higher than their Catholic faith and so has lost ${fPen} Catholic faith' ),
                             array(
                                 'player_id' => $player_id,
                                 'player_name' => self::getActivePlayerName(),
-                                'fThresh' => $fThresh,
                                 'fPen' => $fPen,
                             ) );
                 } else {
-                    self::notifyAllPlayers( "cCheckPass", clienttranslate( '${player_name} is above ${fThresh} Catholic faith and so retains their believers' ),
+                    self::notifyAllPlayers( "cCheckPass", clienttranslate( '${player_name}\'s Aztec faith is higher than their Catholic faith and so retains their believers' ),
                             array(
                                 'player_id' => $player_id,
                                 'player_name' => self::getActivePlayerName(),
-                                'fThresh' => $fThresh,
                             ) );
                 }
             break;
@@ -1090,7 +1126,7 @@ class flowerwar extends Table
                     'pPen' => $pPen,
                     'pRate' => $pRate,
                 ) );   
-                loseCheck();
+                st_loseCheck();
             break;
             case 'cCull':
                 $cPeople -=$pPen;
@@ -1104,7 +1140,7 @@ class flowerwar extends Table
                         'pPen' => $pPen,
                         'pRate' => $pRate,
                     ) );   
-                loseCheck();
+                    st_loseCheck();
             break;
             case 'catchUp':
                 if($cPeople<$pThresh) {
@@ -1379,6 +1415,36 @@ class flowerwar extends Table
         game state.
     */
 
+    function argspickSpace() {
+        
+        return array(
+            $possibleMoves => self::checkMoves()
+        );
+    }
+
+    function argsupdateSpace() {
+        //actualMove
+    }
+
+    function argsplayersInSpace() {
+        //encounteredPlayers
+    }
+
+    function argsresolveCard() {
+        //actualCard
+    }
+
+    function argsloseCheck() {
+        //playersToCheck
+        //lastState
+    }
+
+    function argswinCheck() {
+        //playersToCheck
+        //lastState
+    }   
+
+
     /*
     
     Example for game state "MyGameState":
@@ -1405,39 +1471,40 @@ class flowerwar extends Table
         The action method of state X is called everytime the current game state is set to X.
     */
     
-    function queryBoard() {
+    function st_queryBoard() {
+        
 
     }
     
-    function pickSpace() {
+    function st_pickSpace($spaceList, $blocker) {
+        
+    }
+    
+    function st_updateSpace() {
 
     }
     
-    function updateSpace() {
+    function st_playersInSpace() {
 
     }
     
-    function playersInSpace() {
+    function st_drawCardState() {
 
     }
     
-    function drawCardState() {
+    function st_resolveCard() {
 
     }
     
-    function resolveCard() {
+    function st_ResourceLoop() {
+
+    }
+
+    function st_endTurn() {
 
     }
     
-    function ResourceLoop() {
-
-    }
-
-    function endTurn() {
-
-    }
-    
-    function loseCheck($player_id) {
+    function st_loseCheck($player_id) {
         $pID = $player_id;
         $peopleCheck = getSpecificResources($pID, 'P');
         if($peopleCheck<=0) {
@@ -1450,12 +1517,12 @@ class flowerwar extends Table
         }
     }
 
-    function winCheck() {
+    function st_winCheck() {
         
 
     }
     
-    function gameWon() {
+    function st_gameWon() {
 
     }
     

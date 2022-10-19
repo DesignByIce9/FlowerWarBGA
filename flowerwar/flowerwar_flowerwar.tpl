@@ -26,7 +26,6 @@
 -->
 
 <div id="fw-container">
-<h1 id="header">Header</h1>
 <div class="spaceRow" id="topRow"></div>
 <div class="spaceColumn" id="rightColumn"></div>
 <div class="spaceColumn" id="leftColumn"></div>

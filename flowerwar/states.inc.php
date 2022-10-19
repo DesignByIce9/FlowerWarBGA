@@ -57,7 +57,7 @@ $machinestates = array(
         "name" => "gameSetup",
         "description" => "",
         "type" => "manager",
-        "action" => "stGameSetup",
+        "action" => "st_stGameSetup",
         "transitions" => array( "" => 3 )
     ),
     
@@ -68,8 +68,8 @@ $machinestates = array(
         "name" => "queryBoard",
         "description" => clienttranslate('Generating possible moves for ${actplayer}'),
         "descriptionmyturn" => clienttranslate('Generating possible moves for ${you}'),
-        "type" => "activeplayer",
-        "action" => "queryBoard",
+        "type" => "game",
+        "action" => "st_queryBoard",
         "possibleactions" => array( "pickSpace"),
         "transitions" => array( "pickSpace" => 5 )
     ),
@@ -79,8 +79,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer}, pick an available space to move your token to'),
         "descriptionmyturn" => clienttranslate('Pick an available space to move your token to, ${you}'),
         "type" => "activeplayer",
-        "action" => "displayPossibleMoves",
-        "args" => "possibleMoves",
+        "action" => "st_displayPossibleMoves",
+        "args" => "argspickSpace",
         "possibleactions" => array( "updateBoard"),
         "transitions" => array( "updateBoard" => 9 )
     ),
@@ -90,8 +90,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer}, moving your token to space ${actualMove}'),
     	"descriptionmyturn" => clienttranslate('Moving your token to space ${actualMove}, ${you}'),
         "type" => "activeplayer",
-        "action" => "updateSpace",
-        "args" => "actualMove",
+        "action" => "st_updateSpace",
+        "args" => "argsupdateSpace",
         "possibleactions" => array( "playersInSpace", "drawCardState"),
         "transitions" => array( "playersInSpace" => 11, "drawCardState" => 30 )  
     ),
@@ -101,8 +101,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} has encountered players ${encounteredPlayers}. Waiting for action'),
     	"descriptionmyturn" => clienttranslate('${you} have encountered players ${encounteredPlayers}. Choose an action'),
         "type" => "activeplayer",
-        "action" => "playersInSpace",
-        "args" => "encounteredPlayers",
+        "action" => "st_playersInSpace",
+        "args" => "argsplayersInSpace",
         "possibleactions" => array( "drawCardState"),
         "transitions" => array( "drawCardState" => 30)
     ),
@@ -112,7 +112,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} is drawing a card'),
     	"descriptionmyturn" => clienttranslate('${you} are drawing a card'),
         "type" => "activeplayer",
-        "action" => "drawCardState",
+        "action" => "st_drawCardState",
         "possibleactions" => array( "resolveCard"),
         "transitions" => array( "resolveCard" => 35)
     ),
@@ -122,8 +122,8 @@ $machinestates = array(
         "description" => clienttranslate('Resolving Card'),
     	"descriptionmyturn" => clienttranslate('Resolving Card'),
         "type" => "game",
-        "action" => "resolveCard",
-        "args" => "actualCard",
+        "action" => "st_resolveCard",
+        "args" => "argsresolveCard",
         "possibleactions" => array( "resourceLoop", "loseCheck", "winCheck"),
         "transitions" => array( "resourceLoop" => 40, "loseCheck" => 60, "winCheck" => 70)
     ),
@@ -133,8 +133,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} is spending their resources'),
     	"descriptionmyturn" => clienttranslate('${you}, you may now spend your resources. Choose an action'),
         "type" => "activeplayer",
-        "action" => "resolveCard",
-        "args" => "actualCard",
+        "action" => "ResourceLoop",
         "possibleactions" => array( "endTurn"),
         "transitions" => array( "endTurn" => 50)
     ),
@@ -144,7 +143,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} has ended their turn'),
         "descriptionmyturn" => clienttranslate('${you} have ended your turn'),
         "type" => "activeplayer",
-        "action" => "endTurn",
+        "action" => "st_endTurn",
         "possibleactions" => array( "queryBoard"),
         "transitions" => array( "queryBoard" => 2)
     ),
@@ -154,8 +153,8 @@ $machinestates = array(
         "description" => clienttranslate('Checking'),
         "descriptionmyturn" => clienttranslate('Checking'),
         "type" => "game",
-        "action" => "loseCheck",
-        "args" => "playersToCheck", "lastState",
+        "action" => "st_loseCheck",
+        "args" => "argsloseCheck",
         "possibleactions" => array( "drawCardState", "ResourceLoop"),
         "transitions" => array( "drawCardState"  => 30, "ResourceLoop" => 40)
     ),
@@ -165,8 +164,8 @@ $machinestates = array(
         "description" => clienttranslate('Checking'),
         "descriptionmyturn" => clienttranslate('Checking'),
         "type" => "game",
-        "action" => "winCheck",
-        "args" => "activeplayer",
+        "action" => "st_winCheck",
+        "args" => "argswinCheck",
         "possibleactions" => array( "ResourceLoop", "gameWon"),
         "transitions" => array( "ResourceLoop" => 40, "gameWon"  => 75)
     ),
@@ -176,7 +175,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} has won the game!'),
         "descriptionmyturn" => clienttranslate('${you} have won the game!'),
         "type" => "game",
-        "action" => "gameWon",
+        "action" => "st_gameWon",
         "possibleactions" => array( "gameEnd"),
         "transitions" => array( "gameWon" => 99)
     ),
@@ -187,10 +186,19 @@ $machinestates = array(
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
-        "action" => "stGameEnd",
+        "action" => "st_GameEnd",
         "args" => "argGameEnd"
-    )
+    ),
 
+    101 => array(
+        "name" => "charSelect",
+        "description" => clienttranslate('${actplayer} is selecting a character'),
+        "descriptionmyturn" => clienttranslate('${you}, select a character'),
+        "type" => "activeplayer",
+        "action" => "st_charSelect",
+        "possibleactions" => array( "queryBoard"),
+        "transitions" => array( "queryBoard" => 3)
+    ),
 );
 
 

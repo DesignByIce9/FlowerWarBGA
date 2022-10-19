@@ -123,6 +123,7 @@ function (dojo, declare) {
             space.appendChild(spaceP);
             leftColumn.appendChild(space);
         }   
+        
             player1= gamedatas.tokens.at(0).at(0);
             player2= gamedatas.tokens.at(1).at(0);
             if (gamedatas.tokens.length>=3) {
@@ -132,13 +133,12 @@ function (dojo, declare) {
                 player4= gamedatas.tokens.at(3).at(0);
             }
           // TODO: Set up your game interface here, according to "gamedatas"
-          for(b=0;b<20;b++) {
+        for(b=0;b<20;b++) {
             for(p=0;p<gamedatas.tokens.length;p++) {
                 if(gamedatas.tokens.at(p).at(1) == b) { 
-                    let token = document.createElement("div");
-                    token = document.createElement("div");              
+                    let token = document.createElement("div");        
                     token.classList.add("token");
-                    token.id="test-token";
+                    token.id="token";
                     boardID = "space_"+b;
                     playerContainer = document.getElementById(boardID);
                     switch (p) {
@@ -157,13 +157,45 @@ function (dojo, declare) {
                     }
                     color = "filter_" +color;
                     token.classList.add(color);                                       
-                    playerContainer = document.getElementById(boardID);
+                    playerContainer = $(boardID);
                     playerContainer.appendChild(token);
                 }
             }
         }
-          
-
+        
+        let blockerID="";
+        let q1Block = (gamedatas.blocker-1);
+        let q2Block = q1Block+5;
+        let q3Block = q1Block+10;
+        let q4Block = q1Block+15;
+        switch(gamedatas.blocker) {
+            case 6:
+            break;
+            default:
+                for(let i=0;i<4;i++) {
+                    let blocker = document.createElement("div");        
+                    blocker.classList.add("blocker");
+                    if(i==0) {
+                        blockerID = "blocker_"+5;
+                        boardID = "space_"+q1Block;
+                        blocker.id=blockerID;
+                    }else if(i==1){
+                        blockerID = "blocker_"+6;
+                        boardID = "space_"+q2Block;
+                        blocker.id=blockerID;
+                    }else if(i==2){
+                        blockerID = "blocker_"+7;
+                        boardID = "space_"+q3Block;
+                        blocker.id=blockerID;
+                    }else if(i==3){
+                        blockerID = "blocker_"+8;
+                        boardID = "space_"+q4Block;
+                        blocker.id=blockerID;
+                    }
+                    playerContainer = $(boardID);
+                    playerContainer.appendChild(blocker);
+                }                
+            }
 
           // Setup game notifications to handle (see "setupNotifications" method below)
           this.setupNotifications();
@@ -194,6 +226,12 @@ function (dojo, declare) {
               
               break;
          */
+
+            case 'pickSpace':
+
+
+            break;
+
          
          
           case 'dummmy':
@@ -220,7 +258,9 @@ function (dojo, declare) {
               
               break;
          */
-         
+         case 'pickSpace':
+            addActionButton(id:"advQuad", "Move to the next Quadrant", )
+
          
           case 'dummmy':
               break;
