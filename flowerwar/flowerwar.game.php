@@ -1417,9 +1417,9 @@ class flowerwar extends Table
 
     function argspickSpace() {
         
-        return array(
-            $possibleMoves => self::checkMoves()
-        );
+        //return array(
+            //$possibleMoves => self::checkMoves()
+        //);
     }
 
     function argsupdateSpace() {

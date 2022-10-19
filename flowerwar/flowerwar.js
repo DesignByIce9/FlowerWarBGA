@@ -258,8 +258,7 @@ function (dojo, declare) {
               
               break;
          */
-         case 'pickSpace':
-            addActionButton(id:"advQuad", "Move to the next Quadrant", )
+            
 
          
           case 'dummmy':
@@ -290,6 +289,9 @@ function (dojo, declare) {
                   this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
                   break;
 */
+                case 'pickSpace':
+                    addActionButton("advQuad_button", "Move to the next Quadrant", 'onAdvQuad');
+                    
               }
           }
       },        
@@ -318,7 +320,9 @@ function (dojo, declare) {
           _ make a call to the game server
       
       */
-      
+        //onAdvQuad: function (evt) {
+            //this.ajaxcallwrapper('onAdvQuad', {player: id});
+        //}
       /* Example:
       
       onMyMethodToCall1: function( evt )
