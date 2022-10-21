@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * Flower War. Original game by Ice 9 Games. Designed and developed by Tug Brice. Designsbyice9@gmail.com
+ * FlowerWarThree implementation : © <Your name here> <Your email address here>
  * 
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -10,7 +10,7 @@
  *
  * material.inc.php
  *
- * flowerwar game material description
+ * FlowerWarThree game material description
  *
  * Here, you can describe the material of your game with PHP variables.
  *   
@@ -18,7 +18,6 @@
  * are available everywhere in your game logic code.
  *
  */
-
 
 
 $this-> board = array (
@@ -417,4 +416,38 @@ $this -> eventName = array(
   'nQuad' => 22,
   'aSpace' => 23,
   'rTime' => 24
+);
+
+$this -> azTemple = array(
+  '0' => 0,
+  '1' => 2,
+  '2' => 3,
+  '3' => 4,
+  '4' => 5,
+  '5' => 6,
+  '6' => 7,
+  '7' => 8,
+  '7' => 2,
+  '8' => 3,
+  '9' => 4,
+  '10' => 5,
+  '11' => 6,
+  '12' => 7
+);
+
+$this -> cathTemple = array(
+  '0' => 0,
+  '1' => 2,
+  '2' => 3,
+  '3' => 4,
+  '4' => 5,
+  '5' => 6,
+  '6' => 7,
+  '7' => 8,
+  '7' => 2,
+  '8' => 3,
+  '9' => 4,
+  '10' => 5,
+  '11' => 6,
+  '12' => 7
 );

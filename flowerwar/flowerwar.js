@@ -178,21 +178,26 @@ function (dojo, declare) {
                     if(i==0) {
                         blockerID = "blocker_"+5;
                         boardID = "space_"+q1Block;
+                        console.log("bid: "+boardID);
                         blocker.id=blockerID;
                     }else if(i==1){
                         blockerID = "blocker_"+6;
                         boardID = "space_"+q2Block;
+                        console.log("bid: "+boardID);
                         blocker.id=blockerID;
                     }else if(i==2){
                         blockerID = "blocker_"+7;
                         boardID = "space_"+q3Block;
+                        console.log("bid: "+boardID);
                         blocker.id=blockerID;
                     }else if(i==3){
                         blockerID = "blocker_"+8;
                         boardID = "space_"+q4Block;
+                        console.log("bid: "+boardID);
                         blocker.id=blockerID;
                     }
                     playerContainer = $(boardID);
+                    console.dir(boardID);
                     playerContainer.appendChild(blocker);
                 }                
             }
@@ -291,6 +296,8 @@ function (dojo, declare) {
 */
                 case 'pickSpace':
                     addActionButton("advQuad_button", "Move to the next Quadrant", 'onAdvQuad');
+                    addActionButton("resetTime_button", "Reset Time", 'onResetTime');
+                break;
                     
               }
           }
@@ -320,9 +327,9 @@ function (dojo, declare) {
           _ make a call to the game server
       
       */
-        //onAdvQuad: function (evt) {
-            //this.ajaxcallwrapper('onAdvQuad', {player: id});
-        //}
+        onAdvQuad: function (evt) {
+            this.ajaxcallwrapper('onAdvQuad');
+        }
       /* Example:
       
       onMyMethodToCall1: function( evt )

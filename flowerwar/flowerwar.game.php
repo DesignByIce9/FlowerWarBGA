@@ -286,7 +286,7 @@ class flowerwar extends Table
     /*
         In this space, you can put any utility methods useful for your game logic
     */
-
+    
     function getBoardPosition($player_id) {
         $pID = $player_id;
         $tID = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `tokens` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1"  );

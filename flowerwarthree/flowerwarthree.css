@@ -1,0 +1,255 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * FlowerWarThree implementation : © <Your name here> <Your email address here>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * flowerwarthree.css
+ *
+ * FlowerWarThree stylesheet
+ *
+ */
+
+ #fw-container {
+    position: relative;
+    background: rgb(218, 209, 209);
+    border:3pt solid rgb(0, 0, 0);
+    width: 800px;
+    height: 960px;
+    padding: 10px;
+    margin: 10px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+    align-items: center;
+}
+
+.spaceRow {
+    background: rgb(116, 114, 114);
+    padding: 3px;
+    border:3pt solid blue;
+    height: 100px;
+    width:625px;
+    margin-left:auto;
+    margin-right:auto;
+    display:flex;
+    flex-direction: row;
+    justify-content:space-evenly;
+}
+
+.spaceColumn {
+    background: rgb(116, 114, 114);
+    padding: 3px;
+    border:3pt solid blue;
+    height: 95%;
+    width:100px;
+    margin: auto 5px;
+    display:flex;
+    flex-direction: column;
+    justify-content:space-evenly;
+}
+
+#topRow {
+    grid-area: 2 / 1 / 3 / 6;
+}
+
+#bottomRow {
+    grid-area: 8 / 1 / 9 / 6;
+}
+
+#leftColumn {
+    grid-area: 3 / 1 / 8 / 2; 
+}
+
+#rightColumn {
+    grid-area: 3 / 5 / 8 / 6;
+}
+
+.space {
+    border:2px solid green;
+    width:80%;
+    height:80%;
+    margin:3px;
+    padding:5px;
+    background: lightgray;
+}
+
+.spaceText {
+    text-align: center;
+    vertical-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+}
+
+.token {
+    height:25px;
+    width:25px;
+    padding:2px;
+    margin:2px;
+    background-image: url("img/meeple-white.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.filter_008000 {
+    background-blend-mode: multiply;
+    background-color: #008000;
+    mask: url("img/meeple-white.png");
+    -webkit-mask: url("img/meeple-white.png");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.filter_0000ff {
+    background-blend-mode: multiply;
+    background-color: #0000ff;
+    mask: url("img/meeple-white.png");
+    -webkit-mask: url("img/meeple-white.png");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.filter_ff0000 {
+    background-blend-mode: multiply;
+    background-color: #ff0000;
+    mask: url("img/meeple-white.png");
+    -webkit-mask: url("img/meeple-white.png");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.filter_ffa500 {
+    background-blend-mode: multiply;
+    background-color: #ffa500;
+    mask: url("img/meeple-white.png");
+    -webkit-mask: url("img/meeple-white.png");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.highlight {
+    filter:brightness(120%);
+}
+
+.blocker {
+    height:25px;
+    width:25px;
+    padding:2px;
+    margin:2px;
+    background-image: url("img/meeple-white.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    background-color: #000000;
+    mask: url("img/meeple-white.png");
+    -webkit-mask: url("img/meeple-white.png");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+#temple {
+    width: 95%;
+    height: 95%;
+    background: green;
+    border: 2px solid black;
+    padding: 5px;
+    margin: auto;
+    display:flex;
+    flex-direction: column;
+    justify-content: space-between;
+    grid-area: 3 / 2 / 8 / 5;
+
+}
+
+#templeTracks {
+    display:flex;
+    flex-direction: row;
+    justify-content:space-around;
+    align-content: center;
+    align-items: center;
+    height: 100%;
+    width:100;
+
+}
+
+.templeTrack {
+    width: 45%;
+    height: 95%;
+    border: 2px solid black;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.trackSpace {
+    border: 1px solid lightblue;
+    width:75%;
+    height:12%;
+    margin:3px;
+    padding:5px;
+    vertical-align: center;
+    display: flex;
+    align-items: center;
+}
+
+.trackHeader {
+    text-align:center;
+    width: auto;
+    padding: 2px;
+    margin:2px auto;
+}
+
+.templeToken {
+    height:30px;
+    width:30px;
+    margin:auto;
+    padding: auto;
+    background-image: url("img/meeple-white.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: center;
+}
+
+#apocFlag {
+    display: flex;
+    flex-direction: row;
+    width:100%;
+    height: 20px;
+    padding:2px;
+    margin:1px;
+}
+
+.upArrow {
+    background-image: url("img/aiga_up_arrow.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: center;
+    height:30px;
+    width:30px;
+}
+
+.downArrow {
+    background-image: url("img/aiga_down_arrow.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: center;
+    height:30px;
+    width:30px;
+}
+
+#button-container {
+    grid-area: 1 / 1 / 2 / 6;
+}
+
+.hidden {
+    display:none;
+    visibility: hidden;
+}
