@@ -41,23 +41,22 @@
   	
   	// TODO: defines your action entry points there
 
-    public function onUpdateQuadA() {
+    public function updateQuadA () {
       self::setAjaxMode();
-      quadUpdate('A');
-      self::ajaxResponse( );
+      //$this->game->quadUpdate('A');
+      self::ajaxResponse();
     }
 
-    public function onUpdateQuadC() {
+    public function updateQuadC () {
       self::setAjaxMode();
-      quadUpdate('C');
-      self::ajaxResponse( );
+      $this->game->quadUpdate('C');
+      self::ajaxResponse( );      
     }
 
-    public function onResetTime() {
-      self::setAjaxMode();
-      updateTime();
-      self::ajaxResponse( );
+    public function ResetTime () {
+      
     }
+    
     /*
     
     Example:

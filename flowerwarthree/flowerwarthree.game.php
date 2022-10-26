@@ -102,11 +102,11 @@ class FlowerWarThree extends Table
         // DB Setup
         
         $sql = "INSERT INTO `resources` (`turn`, `player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
-        $tID = 1;
+        $tID = 0;
         $startQuad = 0;
         $startBoard = 0;
         foreach( $players as $player_id => $player ) {
-            $startQuad = ($tID);
+            $startQuad = ($tID+1);
             $startBoard = (($startQuad-1)*5);
             $playerValues[] = "(0,'".$player_id."','".$tID."','".$startBoard."','".$startQuad."',1,2,2,8,1,0)";
             $tID++;
@@ -386,7 +386,7 @@ class FlowerWarThree extends Table
     */
 
     function quadUpdate($type) {
-        $this->checkAction('nextQuadA' || 'nextQuadC');
+        //$this->checkAction('nextQuadA' || 'nextQuadC');
         $pID = $this->getActivePlayerId();
         switch ($type) {
             case 'A':
@@ -395,38 +395,45 @@ class FlowerWarThree extends Table
             case 'C':
                 $resource = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
         }
+        if ($resource==0) {
+            throw new BgaUserException ( self::_("You don't have enough Faith to do that"));
+        }
         $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-      if( $cQuad < 4 ) {
+        if( $cQuad < 4 ) {
         $cQuad++;
-      } else if ($cQuad < 4) {
+        } else if ($cQuad < 4) {
         $cQuad = 1;
-      }
-      $resource--;
-      switch ($type) {
-        case 'A':
-            updateResources($pID, 'A', $resource);
-        break;
-        case 'C':
-            updateResources($pID, 'C', $resource);
-        break;
-      }
-      updateResources($pID, 'Q', $cQuad);
-      switch ($type) {
-        case 'A':
-            $this->gamestate->nextState( 'nextQuadA' );
-        break;
-        case 'C':
-            $this->gamestate->nextState( 'nextQuadC' );
-        break;
+        }
+        $resource--;
+        switch ($type) {
+            case 'A':
+                updateResources($pID, 'A', $resource);
+            break;
+            case 'C':
+                updateResources($pID, 'C', $resource);
+            break;
+        }
+        updateResources($pID, 'Q', $cQuad);
+        switch ($type) {
+            case 'A':
+                $this->gamestate->nextState("nextQuadA");
+            break;
+            case 'C':
+                $this->gamestate->nextState("nextQuadC");
+            break;
+        }
     }
 
     function updateTime() {
         $pID = $this->getActivePlayerId();
-      $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-      $Time = 1;
-      updateResources($pID, 'P', $cPeople);
-      updateResources($pID, 'T', $Time);
-      $this->gamestate->nextState( 'resetTime' );
+        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        if ($cPeople<2) {
+            throw new BgaUserException ( self::_("You don't have enough People to do that"));
+        }
+        $Time = 1;
+        updateResources($pID, 'P', $cPeople);
+        updateResources($pID, 'T', $Time);
+        $this->gamestate->nextState("resetTime");
     }
 
     /*
@@ -465,6 +472,46 @@ class FlowerWarThree extends Table
         These methods function is to return some additional information that is specific to the current
         game state.
     */
+    
+    function argsBoardState() {
+        $pID = $this->getActivePlayerId();
+        $boardState = array();
+        $blocker = self::getGameStateValue('blockerSpace');
+        $pInfo = array();
+        $aFlag = false;
+        $cFlag = false;
+        $pFlag = false;        
+
+        $boardState['playerID'] = $pID;
+        $boardState['tokenID'] = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['boardID'] = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['Quad'] = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['Space'] = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['Az'] = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['Cath'] = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['People'] = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['Time'] = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['charID'] = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+
+        if($boardState['Az'] >0) {
+            $aFlag = true;
+        }
+        if($boardState['Cath'] >0) {
+            $cFlag = true;
+        }
+        if($boardState['People'] >1) {
+            $pFlag = true;
+        }
+
+        $boardState['blocker'] = $blocker;
+        $boardState['aFlag'] = $aFlag;
+        $boardState['cFlag'] = $cFlag;
+        $boardState['pFlag'] = $pFlag;
+
+        return array(
+            'boardState' => $boardState
+        );
+    }
 
     /*
     
@@ -492,8 +539,12 @@ class FlowerWarThree extends Table
         The action method of state X is called everytime the current game state is set to X.
     */
     
-    function stNextQuad() {
+    function stStartTurn() {
         
+    }
+
+    function stMoveToken() {
+
     }
 
     /*

@@ -13,6 +13,7 @@
  *
  */
 
+
  #fw-container {
     position: relative;
     background: rgb(218, 209, 209);
@@ -85,7 +86,6 @@
     font-size: 15px;
     font-weight: bold;
     font-family: Arial, Helvetica, sans-serif;
-    cursor: pointer;
 }
 
 .token {
@@ -132,10 +132,6 @@
     -webkit-mask: url("img/meeple-white.png");
     -webkit-mask-size: contain;
     mask-size: contain;
-}
-
-.highlight {
-    filter:brightness(120%);
 }
 
 .blocker {
@@ -246,10 +242,22 @@
 }
 
 #button-container {
+    visibility: hidden;
+    display: none;
     grid-area: 1 / 1 / 2 / 6;
 }
 
 .hidden {
     display:none;
     visibility: hidden;
+}
+
+.possibleMove {
+    background-color: #7d7dec !important;
+    cursor: pointer;
+}
+
+.blockedMove {
+    background-color: #ff8080 !important;
+    cursor: pointer;
 }

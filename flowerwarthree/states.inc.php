@@ -62,12 +62,22 @@ $machinestates = array(
     ),
     
     // Note: ID=2 => your first state
-
+/*
+    2 => array(
+        "name" => "startTurn",
+        "description" => clienttranslate('Doing turn start stuff'),
+        "descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
+        "type" => "game",
+        "action" => "stStartTurn",
+        "transitions" => array( "moveToken" => 3 )
+),
+*/
     2 => array(
     		"name" => "moveToken",
     		"description" => clienttranslate('${actplayer} is deciding where to move'),
     		"descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
     		"type" => "activeplayer",
+            "args" => "argsBoardState",
             "action" => "stMoveToken",
     		"possibleactions" => array( "nextQuadA", "nextQuadC", "resetTime", "updateBoard" ),
     		"transitions" => array( "nextQuadA" => 2, "nextQuadC" => 2,"resetTime" => 2, "updateBoard" => 5 )

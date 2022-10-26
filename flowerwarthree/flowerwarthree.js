@@ -16,6 +16,10 @@
  */
 
  
+let resources = [
+];
+let blockerSpace = 0;
+ 
 
 define([
     "dojo","dojo/_base/declare",
@@ -138,7 +142,7 @@ function (dojo, declare) {
             space.appendChild(spaceP);
             leftColumn.appendChild(space);
         }   
-        
+            console.dir(gamedatas); 
             player1= gamedatas.tokens.at(0).at(0);
             player2= gamedatas.tokens.at(1).at(0);
             if (gamedatas.tokens.length>=3) {
@@ -178,13 +182,12 @@ function (dojo, declare) {
             }
         }
         
-        let blockerID="";
+        blockerSpace = gamedatas.blocker;
         let q1Block = (gamedatas.blocker-1);
         let q2Block = q1Block+5;
         let q3Block = q1Block+10;
         let q4Block = q1Block+15;
-        console.dir(gamedatas);
-        switch(gamedatas.blocker) {
+        switch(blockerSpace) {
             case "0":
             break;
             default:
@@ -294,13 +297,62 @@ function (dojo, declare) {
         onEnteringState: function( stateName, args )
         {
             console.log( 'Entering state: '+stateName );
-            
-            
+        
             switch( stateName )
             {
-            
+                case 'startTurn':
+                   
+
+                break
                 case 'moveToken':
                     this.updatePageTitle();
+                    this.clearResources();
+                    pID = args.args.boardState.playerID;
+                    tokenID = args.args.boardState.tokenID;
+                    cBoardID = args.args.boardState.boardID;
+                    cQuad = args.args.boardState.Quad;
+                    cSpace = args.args.boardState.Space;
+                    cTime = args.args.boardState.Time;
+                    cAz = args.args.boardState.Az;
+                    cCath = args.args.boardState.Cath;
+                    cPeople = args.args.boardState.People;
+                    charID = args.args.boardState.charID;
+                    aFlag = args.args.boardState.aFlag;
+                    cFlag = args.args.boardState.cFlag;
+                    pFlag = args.args.boardState.pFlag;
+
+                    this.cachePlayer(pID, tokenID, boardID, cQuad, cSpace, cAz, aFlag, cCath, cFlag, cPeople, pFlag, cTime, charID);
+
+                    let openSpace =[];
+                    openSpace = this.possibleMoves(cBoardID, resources[0].qUpdateFlag);
+                    console.dir(openSpace);
+                    let blockedQuad = (((resources[0].Quad-1)*5)+(blockerSpace-1));
+                    console.log('bq:'+blockedQuad);
+                    for(let p=0; p<openSpace.length; p++) {
+                        highlightSpace = document.getElementById("space_"+openSpace[p]);
+                        highlightSpace.classList.add("possibleMove");
+                    }
+                    highlightSpace = document.getElementById("space_"+blockedQuad);
+                    highlightSpace.classList.add("blockedMove");
+
+                    clickableSpace = document.getElementsByClassName("possibleMove");
+                    console.dir(clickableSpace);
+                    clickableSpace.addEventListener("click", callUpdateSpace);
+
+
+                    if(aFlag == false) {
+                        aButton = document.getElementById("updateQuadA");
+                        aButton.classList.add("hidden");
+                    }
+                    if(cFlag == false) {
+                        cButton = document.getElementById("updateQuadC");
+                        cButton.classList.add("hidden");
+                    }
+                    if(pFlag == false) {
+                        pButton = document.getElementById("resetTime");
+                        pButton.classList.add("hidden");
+                    }
+
                 break;
            
            
@@ -320,7 +372,7 @@ function (dojo, declare) {
             switch( stateName ) {
 
                 case'moveToken':
-                    
+                                        
                 break;
             
             /* Example:
@@ -346,9 +398,7 @@ function (dojo, declare) {
         onUpdateActionButtons: function( stateName, args )
         {
             console.log( 'onUpdateActionButtons: '+stateName );
-            console.log('stateName: '+stateName);
             testID = this.isCurrentPlayerActive();
-            console.log( 'testID: '+testID );
                       
             if( this.isCurrentPlayerActive() )
             {
@@ -358,9 +408,9 @@ function (dojo, declare) {
 
                     case 'moveToken':
                         console.log( 'state: '+stateName );
-                        this.addActionButton( 'updateQuadA', _('1 Aztec Faith: Move to the next Quadrant'), 'onUpdateQuadA' ); 
-                        this.addActionButton( 'updateQuadC', _('1 Catholic Faith: Move to the next Quadrant'), 'onUpdateQuadC' ); 
-                        this.addActionButton( 'resetTime', _("1 People: Reset your Time"), 'onResetTime' );
+                            this.addActionButton( 'updateQuadA', _('1 Aztec Faith: Move to the next Quadrant'), 'onUpdateQuadA' ); 
+                            this.addActionButton( 'updateQuadC', _('1 Catholic Faith: Move to the next Quadrant'), 'onUpdateQuadC' ); 
+                            this.addActionButton( 'resetTime', _("1 People: Reset your Time"), 'onResetTime' );
                     break;
 
                     /*               
@@ -388,8 +438,59 @@ function (dojo, declare) {
             script.
         
         */
+            clearResources: function () {
+                resources.length = 0;
+            },
 
+            cachePlayer: function (pID, tokenID, boardID, Quad, Space, Az, aFlag, Cath, cFlag, People, pFlag, Time, charID) {
+                
+                player = {
+                    "player": pID,
+                    "token": tokenID,
+                    "boardID":boardID,
+                    "Quad":Quad,
+                    "qUpdateFlag": false,
+                    "Space":Space,
+                    "Az":Az,
+                    "AzButton": aFlag,
+                    "Cath":Cath,
+                    "CathButton": cFlag,
+                    "People":People,
+                    "PeopleButton": pFlag,
+                    "Time":Time,
+                    "charID":charID,
+                }
+                resources.push(player);
+            },
 
+            possibleMoves: function (boardID, qFlag) {
+                let testSpace = boardID;
+                let lastSpace = 0;
+                let quad = resources[0].Quad;
+                console.dir(resources);
+                console.log('rq '+quad);
+                let blocker = (((quad-1)*5)+(blockerSpace-1));
+                let openSpaces = [];        
+                
+                console.log("checking");
+
+                if(qFlag == false) {
+                    testSpace++;
+                } 
+                lastSpace = ((quad*5)-1);
+
+                for(let i=testSpace;i<=lastSpace;i++) {
+                    if(i != blocker) {
+                        openSpaces.push(i);
+                    } 
+                }
+                return openSpaces;
+            },
+
+            callUpdateSpace: function () {
+                boardID = this.id;
+                console.log("bid:"+boardID);
+            },
         ///////////////////////////////////////////////////
         //// Player's action
         
@@ -405,23 +506,19 @@ function (dojo, declare) {
         */
         
             onUpdateQuadA: function (evt) {
-                dojo.stopEvent( evt );
-                this.ajaxcall( "/flowerwarthree/flowerwarthree/myAction.html", { 
-                    lock: true, 
-                 }, this, (result)=>{} );
+                this.ajaxcall( '/mygame/mygame/myaction.html', { lock: true, }, this, (result)=>{} );
+                resources[0].qUpdateFlag = true;
             },
+
             onUpdateQuadC: function (evt) {
                 dojo.stopEvent( evt );
-                this.ajaxcall( "/flowerwarthree/flowerwarthree/myAction.html", { 
-                    lock: true, 
-                 }, this, (result)=>{} );
+                    this.ajaxcall( '/mygame/mygame/myaction.html', { lock: true, }, this, (result)=>{} );
+                    resources[0].qUpdateFlag = true;                
             },
             onResetTime: function (evt) {
                 dojo.stopEvent( evt );
-                this.ajaxcall( "/flowerwarthree/flowerwarthree/myAction.html", { 
-                    lock: true, 
-                 }, this, (result)=>{} );
-            }
+                    this.ajaxcall( '/mygame/mygame/myaction.html', { lock: true, }, this, (result)=>{} );
+            },
         
         /* Example:
         
