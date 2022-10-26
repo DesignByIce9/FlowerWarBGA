@@ -82,7 +82,7 @@ function (dojo, declare) {
             
           }
 
-          for(i=0;i<5;i++) {
+        for(i=0;i<5;i++) {
             let space = document.createElement("div");
             let spaceP = document.createElement("p");
             spaceP.classList.add("spaceText");
@@ -186,10 +186,8 @@ function (dojo, declare) {
         console.dir(gamedatas);
         switch(gamedatas.blocker) {
             case "0":
-                console.log('0');
             break;
             default:
-                console.log('not 0');
                 for(let i=0;i<4;i++) {
                     let blocker = document.createElement("div");        
                     blocker.classList.add("blocker");
@@ -297,11 +295,12 @@ function (dojo, declare) {
         {
             console.log( 'Entering state: '+stateName );
             
+            
             switch( stateName )
             {
             
                 case 'moveToken':
-                    
+                    this.updatePageTitle();
                 break;
            
            
@@ -318,8 +317,11 @@ function (dojo, declare) {
             
             console.log( 'Leaving state: '+stateName );
             
-            switch( stateName )
-            {
+            switch( stateName ) {
+
+                case'moveToken':
+                    
+                break;
             
             /* Example:
             
@@ -344,12 +346,22 @@ function (dojo, declare) {
         onUpdateActionButtons: function( stateName, args )
         {
             console.log( 'onUpdateActionButtons: '+stateName );
+            console.log('stateName: '+stateName);
+            testID = this.isCurrentPlayerActive();
+            console.log( 'testID: '+testID );
                       
             if( this.isCurrentPlayerActive() )
             {
                 
                 switch( stateName )
                 {
+
+                    case 'moveToken':
+                        console.log( 'state: '+stateName );
+                        this.addActionButton( 'updateQuadA', _('1 Aztec Faith: Move to the next Quadrant'), 'onUpdateQuadA' ); 
+                        this.addActionButton( 'updateQuadC', _('1 Catholic Faith: Move to the next Quadrant'), 'onUpdateQuadC' ); 
+                        this.addActionButton( 'resetTime', _("1 People: Reset your Time"), 'onResetTime' );
+                    break;
 
                     /*               
                  Example:
@@ -391,6 +403,25 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+        
+            onUpdateQuadA: function (evt) {
+                dojo.stopEvent( evt );
+                this.ajaxcall( "/flowerwarthree/flowerwarthree/myAction.html", { 
+                    lock: true, 
+                 }, this, (result)=>{} );
+            },
+            onUpdateQuadC: function (evt) {
+                dojo.stopEvent( evt );
+                this.ajaxcall( "/flowerwarthree/flowerwarthree/myAction.html", { 
+                    lock: true, 
+                 }, this, (result)=>{} );
+            },
+            onResetTime: function (evt) {
+                dojo.stopEvent( evt );
+                this.ajaxcall( "/flowerwarthree/flowerwarthree/myAction.html", { 
+                    lock: true, 
+                 }, this, (result)=>{} );
+            }
         
         /* Example:
         

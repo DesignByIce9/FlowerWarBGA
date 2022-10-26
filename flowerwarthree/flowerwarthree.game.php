@@ -315,9 +315,64 @@ class FlowerWarThree extends Table
 //////////// Utility functions
 ////////////    
 
-    /*
-        In this space, you can put any utility methods useful for your game logic
-    */
+    function updateResources($player_ID, $resource, $new_value) {
+        $pID = $player_ID;
+        $rID = $resource;
+        $rValue = $new_value;
+        $values = array();
+        $turn = $this ->getGameStateValue("turnCount");
+        $cToken = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $cSpace = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $cCath= self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $ccharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+        $sql = "INSERT INTO `resources` (`turn`, `player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+    
+        switch($rID) {
+            case 'A':
+                $cAz = $rValue;
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;
+            case 'C':
+                $cCath = $rValue;
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;
+            case 'P':
+                $cPeople = $rValue;
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;
+            case 'T':
+                $cTime = $rValue;
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;
+            case 'H':
+                $ccharID = $rValue;
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;
+            case 'Q':
+                $cQuad = $rValue;
+                $cSpace = 1;
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;
+            case 'B':
+                $cBoard = $rValue;
+                $cQuad = floor(($cBoard-1)/5);
+                $cSpace = (($cBoard+1)-(($cQuad-1)*5));
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;
+            case 'H':
+                $ccharID = $rValue;
+                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+            break;            
+            }
+        $sql .= implode( $values, ',' );
+        self::DbQuery( $sql );  
+    }
+
 
 
 
@@ -329,6 +384,50 @@ class FlowerWarThree extends Table
         Each time a player is doing some game action, one of the methods below is called.
         (note: each method below must match an input method in flowerwarthree.action.php)
     */
+
+    function quadUpdate($type) {
+        $this->checkAction('nextQuadA' || 'nextQuadC');
+        $pID = $this->getActivePlayerId();
+        switch ($type) {
+            case 'A':
+                $resource = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+            break;
+            case 'C':
+                $resource = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        }
+        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+      if( $cQuad < 4 ) {
+        $cQuad++;
+      } else if ($cQuad < 4) {
+        $cQuad = 1;
+      }
+      $resource--;
+      switch ($type) {
+        case 'A':
+            updateResources($pID, 'A', $resource);
+        break;
+        case 'C':
+            updateResources($pID, 'C', $resource);
+        break;
+      }
+      updateResources($pID, 'Q', $cQuad);
+      switch ($type) {
+        case 'A':
+            $this->gamestate->nextState( 'nextQuadA' );
+        break;
+        case 'C':
+            $this->gamestate->nextState( 'nextQuadC' );
+        break;
+    }
+
+    function updateTime() {
+        $pID = $this->getActivePlayerId();
+      $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+      $Time = 1;
+      updateResources($pID, 'P', $cPeople);
+      updateResources($pID, 'T', $Time);
+      $this->gamestate->nextState( 'resetTime' );
+    }
 
     /*
     
@@ -393,6 +492,10 @@ class FlowerWarThree extends Table
         The action method of state X is called everytime the current game state is set to X.
     */
     
+    function stNextQuad() {
+        
+    }
+
     /*
     
     Example for game state "MyGameState":

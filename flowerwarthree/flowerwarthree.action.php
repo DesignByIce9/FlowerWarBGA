@@ -41,7 +41,23 @@
   	
   	// TODO: defines your action entry points there
 
+    public function onUpdateQuadA() {
+      self::setAjaxMode();
+      quadUpdate('A');
+      self::ajaxResponse( );
+    }
 
+    public function onUpdateQuadC() {
+      self::setAjaxMode();
+      quadUpdate('C');
+      self::ajaxResponse( );
+    }
+
+    public function onResetTime() {
+      self::setAjaxMode();
+      updateTime();
+      self::ajaxResponse( );
+    }
     /*
     
     Example:

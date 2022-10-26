@@ -68,8 +68,19 @@ $machinestates = array(
     		"description" => clienttranslate('${actplayer} is deciding where to move'),
     		"descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
     		"type" => "activeplayer",
-    		"possibleactions" => array( "nextQuad", "resetTime", "updateBoard" ),
-    		"transitions" => array( "nextQuad" => 3, "resetTime" => 3, "updateBoard" => 5 )
+            "action" => "stMoveToken",
+    		"possibleactions" => array( "nextQuadA", "nextQuadC", "resetTime", "updateBoard" ),
+    		"transitions" => array( "nextQuadA" => 2, "nextQuadC" => 2,"resetTime" => 2, "updateBoard" => 5 )
+    ),
+
+    5 => array(
+        "name" => "updateBoard",
+        "description" => clienttranslate('${actplayer} is moving to the next quadrant'),
+        "descriptionmyturn" => clienttranslate('${you} are moving to the next quadrant'),
+        "type" => "game",
+        "action" => "stNextQuad",
+        "possibleactions" => array( "moveToken" ),
+        "transitions" => array( "moveToken" => 2 )
     ),
     
 /*
