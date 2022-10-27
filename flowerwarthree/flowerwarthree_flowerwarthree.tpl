@@ -27,7 +27,6 @@
 
 
 <div id="fw-container">
-<div id="button-container"></div>
 <div class="spaceRow" id="topRow"></div>
 <div class="spaceColumn" id="rightColumn"></div>
 <div id="temple">

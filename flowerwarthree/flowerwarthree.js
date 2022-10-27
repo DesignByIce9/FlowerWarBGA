@@ -139,13 +139,13 @@ function (dojo, declare) {
             space.appendChild(spaceP);
             leftColumn.appendChild(space);
         }   
-            player1= gamedatas.tokens.at(0).at(0);
-            player2= gamedatas.tokens.at(1).at(0);
+            player1= gamedatas.tokens[0][0];
+            player2= gamedatas.tokens[1][0];
             if (gamedatas.tokens.length>=3) {
-                player3= gamedatas.tokens.at(2).at(0);
+                player3= gamedatas.tokens[2][0];
             }
             if (gamedatas.tokens.length>=4) {
-                player4= gamedatas.tokens.at(3).at(0);
+                player4= gamedatas.tokens[3][0];
             }
           // TODO: Set up your game interface here, according to "gamedatas"
         for(b=0;b<20;b++) {
@@ -303,19 +303,16 @@ function (dojo, declare) {
                 case 'moveToken':
                     // handle action buttons
                     this.updatePageTitle(); 
-                    for(let i=0;i<20; i++) {
-                        removeTags = document.getElementById("space_"+i);
-                        removeTags.classList.remove("possibleMoves");
-                        removeTags.classList.remove("blockedMoves");
-                    }
-
-
+                   
                     aFlag = args.args.boardState.aFlag;
                     cFlag = args.args.boardState.cFlag;
                     pFlag = args.args.boardState.pFlag;
                     cQuad = args.args.boardState.Quad;
                     cTime = args.args.boardState.Time;
+                    cQuad = args.args.boardState.Quad;
                     cBoardID = args.args.boardState.boardID;
+                    bQuad = Math.ceil(((cBoardID+1)/5));
+                    cTime = args.args.boardState.Time;
                     availableMoves = args.args.boardState.possibleMoves;
 
                     if (this.isCurrentPlayerActive() == true) {
@@ -332,6 +329,51 @@ function (dojo, declare) {
                             pButton.classList.add("hidden");
                         }
 
+                        if(bQuad != cQuad) {
+                            switch(bQuad) {
+                                case 1:
+                                    if(cQuad == 4) {
+                                        aButton = document.getElementById("updateQuadA");
+                                        aButton.classList.add("hidden");
+                                        cButton = document.getElementById("updateQuadC");
+                                        cButton.classList.add("hidden");
+                                        pButton = document.getElementById("resetTime");
+                                        pButton.classList.add("hidden");
+                                    }
+                                break;
+                                case 2:
+                                    if(cQuad == 1) {
+                                        aButton = document.getElementById("updateQuadA");
+                                        aButton.classList.add("hidden");
+                                        cButton = document.getElementById("updateQuadC");
+                                        cButton.classList.add("hidden");
+                                    }
+                                break;
+                                case 3:
+                                    if(cQuad == 2) {
+                                        aButton = document.getElementById("updateQuadA");
+                                        aButton.classList.add("hidden");
+                                        cButton = document.getElementById("updateQuadC");
+                                        cButton.classList.add("hidden");
+                                    }
+                                break;
+                                case 4:
+                                    if(cQuad == 3) {
+                                        aButton = document.getElementById("updateQuadA");
+                                        aButton.classList.add("hidden");
+                                        cButton = document.getElementById("updateQuadC");
+                                        cButton.classList.add("hidden");
+                                    }
+                                break;
+                            }
+                        }
+                        
+                        if (cTime = 1) {
+                            pButton = document.getElementById("resetTime");
+                            pButton.classList.add("hidden");
+                        }
+
+
                         // get active spaces 
                         let blockedQuad = (((cQuad-1)*5)+(blockerSpace-1));
                         let openSpace =[];
@@ -341,8 +383,10 @@ function (dojo, declare) {
                             highlightSpace = document.getElementById("space_"+openSpace[p]);
                             highlightSpace.classList.add("possibleMove");
                         }
-                        highlightSpace = document.getElementById("space_"+blockedQuad);
-                        highlightSpace.classList.add("blockedMove");
+                        if(blockerSpace > 0) {
+                            highlightSpace = document.getElementById("space_"+blockedQuad);
+                            highlightSpace.classList.add("blockedMove");
+                        }
     
                         clickableSpace = document.getElementsByClassName("possibleMove");
                         clickableSpace = document.getElementsByClassName("possibleMove");
@@ -455,24 +499,18 @@ function (dojo, declare) {
                 let lastSpace = 0;
                 let openSpaces = [];
                 let blocker = 0;
-                console.dir(Moves);
 
                 
                     testSpace = ((aQuad-1)*5);
                     lastSpace = ((aQuad*5)-1);
                     blocker = (((aQuad-1)*5)+(blockerSpace-1));
-                    console.log('blocker space '+blocker);
-                    console.log('test space '+testSpace);
-                    console.dir(Moves);
                     for (i=testSpace;i<=lastSpace;i++) {
                         if(Moves.includes(i) == true) {
                             if (i != blocker){
-                                openSpaces.push(i);
-                                console.log('push '+i);   
+                                openSpaces.push(i);  
                             }
                         }
                     }
-                console.dir(openSpaces);
                 return openSpaces;
             },
 
@@ -495,16 +533,32 @@ function (dojo, declare) {
         */
         
             onUpdateQuadA: function (evt) {
+                for(let i=0;i<20; i++) {
+                    removeTags = document.getElementById("space_"+i);
+                    removeTags.classList.remove("possibleMove");
+                    removeTags.classList.remove("blockedMove");
+                }
                 this.ajaxCallWrapper("updateQuadA",);
                 this.updatePageTitle(); 
             },
 
             onUpdateQuadC: function (evt) {
+                for(let i=0;i<20; i++) {
+                    removeTags = document.getElementById("space_"+i);
+                    
+                    removeTags.classList.remove("possibleMove");
+                    removeTags.classList.remove("blockedMove");
+                }
                 dojo.stopEvent( evt );
                 this.ajaxCallWrapper("updateQuadC",);    
                 this.updatePageTitle();         
             },
             onResetTime: function (evt) {
+                for(let i=0;i<20; i++) {
+                    removeTags = document.getElementById("space_"+i);
+                    removeTags.classList.remove("possibleMove");
+                    removeTags.classList.remove("blockedMove");
+                }
                 dojo.stopEvent( evt );
                 this.ajaxCallWrapper("resetTime",);
                 this.updatePageTitle(); 
