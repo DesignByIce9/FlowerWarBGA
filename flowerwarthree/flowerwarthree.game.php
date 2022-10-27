@@ -101,14 +101,14 @@ class FlowerWarThree extends Table
         
         // DB Setup
         
-        $sql = "INSERT INTO `resources` (`turn`, `player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+        $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
         $tID = 0;
         $startQuad = 0;
         $startBoard = 0;
         foreach( $players as $player_id => $player ) {
             $startQuad = ($tID+1);
             $startBoard = (($startQuad-1)*5);
-            $playerValues[] = "(0,'".$player_id."','".$tID."','".$startBoard."','".$startQuad."',1,2,2,8,1,0)";
+            $playerValues[] = "('".$player_id."','".$tID."','".$startBoard."','".$startQuad."',1,2,2,8,1,0)";
             $tID++;
         }
         $sql .= implode( $playerValues, ',' );
@@ -119,27 +119,26 @@ class FlowerWarThree extends Table
         
         // adding blockers
         $blockerRoll = bga_rand(1,6);
-        $turn = $this ->getGameStateValue("turnCount");
         $bBoard = 0;
         switch ($blockerRoll) {
             case 6:
                 $this->setGameStateValue("blockerSpace", 0);
-				$sql = "INSERT INTO `resources` (`turn`, `player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+				$sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
                 for($i=1;$i<5;$i++){
                     $blockerID = (4+$i);
                     $bBoard = (0);
-                    $values[] = "('".$turn."',5,'".$blockerID."','".$bBoard."','".$i."',0,0,0,0,0,0)";
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."',0,0,0,0,0,0)";
                 }
                 $sql .= implode( $values, ',' );
                 self::DbQuery( $sql );
             break;
             default:
             $this->setGameStateValue("blockerSpace", $blockerRoll);
-                $sql = "INSERT INTO `resources` (`turn`, `player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+                $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
                 for($i=1;$i<5;$i++){
                     $blockerID = (4+$i);
                     $bBoard = (((($i)-1)*5)+(($blockerRoll)-1));
-                    $values[] = "('".$turn."', 5,'".$blockerID."','".$bBoard."','".$i."','".$blockerRoll."',0,0,0,0,0)";
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."','".$blockerRoll."',0,0,0,0,0)";
                 }
                 $sql .= implode( $values, ',' );
                 self::DbQuery( $sql );            
@@ -238,16 +237,16 @@ class FlowerWarThree extends Table
         
         $players = $this->loadPlayersBasicInfos();
         foreach( $players as $player_id => $player ) {
-            $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+            $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
 
             $tokenArray[] = array($player_id, $cBoard);
             $cardsInHand[] = $this->cards->getCardsInLocation("hand",$player_id);
 
-            $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-            $cCath = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-            $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-            $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-            $cCharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
+            $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
+            $cCath = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
+            $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
+            $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
+            $cCharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
 
             $resourceArray[] = array($cAz, $cCath, $cPeople, $cTime, $cCharID);
         }
@@ -320,53 +319,52 @@ class FlowerWarThree extends Table
         $rID = $resource;
         $rValue = $new_value;
         $values = array();
-        $turn = $this ->getGameStateValue("turnCount");
-        $cToken = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $cSpace = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $cCath= self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $ccharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `turn` DESC LIMIT 0,1" );
-        $sql = "INSERT INTO `resources` (`turn`, `player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+        $cToken = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cSpace = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cCath= self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $ccharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
     
         switch($rID) {
             case 'A':
                 $cAz = $rValue;
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;
             case 'C':
                 $cCath = $rValue;
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;
             case 'P':
                 $cPeople = $rValue;
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;
             case 'T':
                 $cTime = $rValue;
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;
             case 'H':
                 $ccharID = $rValue;
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;
             case 'Q':
                 $cQuad = $rValue;
                 $cSpace = 1;
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;
             case 'B':
                 $cBoard = $rValue;
-                $cQuad = floor(($cBoard-1)/5);
+                $cQuad = ceil(($cBoard+1)/5);
                 $cSpace = (($cBoard+1)-(($cQuad-1)*5));
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;
             case 'H':
                 $ccharID = $rValue;
-                $values = array("( '".$turn."', '".$pID.", '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
             break;            
             }
         $sql .= implode( $values, ',' );
@@ -386,19 +384,18 @@ class FlowerWarThree extends Table
     */
 
     function quadUpdate($type) {
-        //$this->checkAction('nextQuadA' || 'nextQuadC');
         $pID = $this->getActivePlayerId();
         switch ($type) {
             case 'A':
-                $resource = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+                $resource = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'C':
-                $resource = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+                $resource = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         }
         if ($resource==0) {
             throw new BgaUserException ( self::_("You don't have enough Faith to do that"));
         }
-        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         if( $cQuad < 4 ) {
         $cQuad++;
         } else if ($cQuad < 4) {
@@ -407,13 +404,13 @@ class FlowerWarThree extends Table
         $resource--;
         switch ($type) {
             case 'A':
-                updateResources($pID, 'A', $resource);
+                $this->updateResources($pID, 'A', $resource);
             break;
             case 'C':
-                updateResources($pID, 'C', $resource);
+                $this->updateResources($pID, 'C', $resource);
             break;
         }
-        updateResources($pID, 'Q', $cQuad);
+        $this->updateResources($pID, 'Q', $cQuad);
         switch ($type) {
             case 'A':
                 $this->gamestate->nextState("nextQuadA");
@@ -426,13 +423,13 @@ class FlowerWarThree extends Table
 
     function updateTime() {
         $pID = $this->getActivePlayerId();
-        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         if ($cPeople<2) {
             throw new BgaUserException ( self::_("You don't have enough People to do that"));
         }
         $Time = 1;
-        updateResources($pID, 'P', $cPeople);
-        updateResources($pID, 'T', $Time);
+        $this->updateResources($pID, 'P', $cPeople);
+        $this->updateResources($pID, 'T', $Time);
         $this->gamestate->nextState("resetTime");
     }
 
@@ -477,21 +474,22 @@ class FlowerWarThree extends Table
         $pID = $this->getActivePlayerId();
         $boardState = array();
         $blocker = self::getGameStateValue('blockerSpace');
-        $pInfo = array();
         $aFlag = false;
         $cFlag = false;
-        $pFlag = false;        
+        $pFlag = false;     
+        $availableMoves = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19);
+        $removeSpace = array();
 
         $boardState['playerID'] = $pID;
-        $boardState['tokenID'] = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['boardID'] = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['Quad'] = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['Space'] = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['Az'] = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['Cath'] = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['People'] = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['Time'] = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
-        $boardState['charID'] = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `turn` DESC LIMIT 0,1" );
+        $boardState['tokenID'] = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['boardID'] = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['Quad'] = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['Space'] = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['Az'] = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['Cath'] = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['People'] = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['Time'] = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $boardState['charID'] = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
 
         if($boardState['Az'] >0) {
             $aFlag = true;
@@ -507,6 +505,73 @@ class FlowerWarThree extends Table
         $boardState['aFlag'] = $aFlag;
         $boardState['cFlag'] = $cFlag;
         $boardState['pFlag'] = $pFlag;
+
+        if($boardState['Time'] < 4) {
+            $testSpace = $boardState['boardID'];
+            switch($boardState['Quad']) {
+                case 1:
+                    for($i=$testSpace;$i>=0;$i--) {
+                        array_push($removeSpace, $testSpace);
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+                case 2:
+                    for($i=$testSpace;$i>=5;$i--) {
+                        array_push($removeSpace, $testSpace);                        
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+                case 3:
+                    for($i=$testSpace;$i>=10;$i--) {
+                        array_push($removeSpace, $testSpace);                        
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+                case 4:
+                    for($i=$testSpace;$i>=15;$i--) {
+                        array_push($removeSpace, $testSpace);                        
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+            }         
+        } else if($boardState['Time'] = 4) {
+            switch($boardState['Quad']) {
+                case 1:
+                    for($i=4;$i>=0;$i--) {
+                        array_push($removeSpace, $i);                        
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+                case 2:
+                    for($i=9;$i>=5;$i--) {
+                        array_push($removeSpace, $i);                        
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+                case 3:
+                    for($i=14;$i>=10;$i--) {
+                        array_push($removeSpace, $i);                        
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+                case 4:
+                    for($i=19;$i>=15;$i--) {
+                        array_push($removeSpace, $i);                        
+                    }
+                    $availableMoves = array_diff($availableMoves, $removeSpace);
+                    $availableMoves = array_values($availableMoves);
+                break;
+            }
+        }
+        
+        $boardState['possibleMoves'] = $availableMoves;
 
         return array(
             'boardState' => $boardState
@@ -538,13 +603,9 @@ class FlowerWarThree extends Table
         Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
         The action method of state X is called everytime the current game state is set to X.
     */
-    
-    function stStartTurn() {
-        
-    }
 
     function stMoveToken() {
-
+        
     }
 
     /*

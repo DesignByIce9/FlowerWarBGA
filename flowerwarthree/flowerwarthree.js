@@ -15,11 +15,8 @@
  *
  */
 
- 
-let resources = [
-];
-let blockerSpace = 0;
- 
+
+let blockerSpace = 0; 
 
 define([
     "dojo","dojo/_base/declare",
@@ -142,7 +139,6 @@ function (dojo, declare) {
             space.appendChild(spaceP);
             leftColumn.appendChild(space);
         }   
-            console.dir(gamedatas); 
             player1= gamedatas.tokens.at(0).at(0);
             player2= gamedatas.tokens.at(1).at(0);
             if (gamedatas.tokens.length>=3) {
@@ -305,54 +301,54 @@ function (dojo, declare) {
 
                 break
                 case 'moveToken':
-                    this.updatePageTitle();
-                    this.clearResources();
-                    pID = args.args.boardState.playerID;
-                    tokenID = args.args.boardState.tokenID;
-                    cBoardID = args.args.boardState.boardID;
-                    cQuad = args.args.boardState.Quad;
-                    cSpace = args.args.boardState.Space;
-                    cTime = args.args.boardState.Time;
-                    cAz = args.args.boardState.Az;
-                    cCath = args.args.boardState.Cath;
-                    cPeople = args.args.boardState.People;
-                    charID = args.args.boardState.charID;
+                    // handle action buttons
+                    this.updatePageTitle(); 
+                    for(let i=0;i<20; i++) {
+                        removeTags = document.getElementById("space_"+i);
+                        removeTags.classList.remove("possibleMoves");
+                        removeTags.classList.remove("blockedMoves");
+                    }
+
+
                     aFlag = args.args.boardState.aFlag;
                     cFlag = args.args.boardState.cFlag;
                     pFlag = args.args.boardState.pFlag;
+                    cQuad = args.args.boardState.Quad;
+                    cTime = args.args.boardState.Time;
+                    cBoardID = args.args.boardState.boardID;
+                    availableMoves = args.args.boardState.possibleMoves;
 
-                    this.cachePlayer(pID, tokenID, boardID, cQuad, cSpace, cAz, aFlag, cCath, cFlag, cPeople, pFlag, cTime, charID);
+                    if (this.isCurrentPlayerActive() == true) {
+                        if(aFlag == false) {
+                            aButton = document.getElementById("updateQuadA");
+                            aButton.classList.add("hidden");
+                        }
+                        if(cFlag == false) {
+                            cButton = document.getElementById("updateQuadC");
+                            cButton.classList.add("hidden");
+                        }
+                        if(pFlag == false) {
+                            pButton = document.getElementById("resetTime");
+                            pButton.classList.add("hidden");
+                        }
 
-                    let openSpace =[];
-                    openSpace = this.possibleMoves(cBoardID, resources[0].qUpdateFlag);
-                    console.dir(openSpace);
-                    let blockedQuad = (((resources[0].Quad-1)*5)+(blockerSpace-1));
-                    console.log('bq:'+blockedQuad);
-                    for(let p=0; p<openSpace.length; p++) {
-                        highlightSpace = document.getElementById("space_"+openSpace[p]);
-                        highlightSpace.classList.add("possibleMove");
+                        // get active spaces 
+                        let blockedQuad = (((cQuad-1)*5)+(blockerSpace-1));
+                        let openSpace =[];
+                        openSpace = this.possibleMoves(availableMoves, cBoardID, cQuad, cTime);
+
+                        for(let p=0; p<openSpace.length; p++) {
+                            highlightSpace = document.getElementById("space_"+openSpace[p]);
+                            highlightSpace.classList.add("possibleMove");
+                        }
+                        highlightSpace = document.getElementById("space_"+blockedQuad);
+                        highlightSpace.classList.add("blockedMove");
+    
+                        clickableSpace = document.getElementsByClassName("possibleMove");
+                        clickableSpace = document.getElementsByClassName("possibleMove");
+                        Array.from(clickableSpace).forEach(
+                        (elem) => elem.addEventListener("click", this.callUpdateSpace));
                     }
-                    highlightSpace = document.getElementById("space_"+blockedQuad);
-                    highlightSpace.classList.add("blockedMove");
-
-                    clickableSpace = document.getElementsByClassName("possibleMove");
-                    console.dir(clickableSpace);
-                    clickableSpace.addEventListener("click", callUpdateSpace);
-
-
-                    if(aFlag == false) {
-                        aButton = document.getElementById("updateQuadA");
-                        aButton.classList.add("hidden");
-                    }
-                    if(cFlag == false) {
-                        cButton = document.getElementById("updateQuadC");
-                        cButton.classList.add("hidden");
-                    }
-                    if(pFlag == false) {
-                        pButton = document.getElementById("resetTime");
-                        pButton.classList.add("hidden");
-                    }
-
                 break;
            
            
@@ -438,58 +434,51 @@ function (dojo, declare) {
             script.
         
         */
-            clearResources: function () {
-                resources.length = 0;
-            },
 
-            cachePlayer: function (pID, tokenID, boardID, Quad, Space, Az, aFlag, Cath, cFlag, People, pFlag, Time, charID) {
-                
-                player = {
-                    "player": pID,
-                    "token": tokenID,
-                    "boardID":boardID,
-                    "Quad":Quad,
-                    "qUpdateFlag": false,
-                    "Space":Space,
-                    "Az":Az,
-                    "AzButton": aFlag,
-                    "Cath":Cath,
-                    "CathButton": cFlag,
-                    "People":People,
-                    "PeopleButton": pFlag,
-                    "Time":Time,
-                    "charID":charID,
+            ajaxCallWrapper: function (action, args) {
+                if (!args) {
+                    args = {};
                 }
-                resources.push(player);
+                args.lock = true;
+                this.ajaxcall('/' + this.game_name + '/' + this.game_name + '/' + action + '.html', args, this,
+                    (result) => {}, (is_error) => {});
             },
 
-            possibleMoves: function (boardID, qFlag) {
-                let testSpace = boardID;
+
+            possibleMoves: function (availableMoves, boardID, Quad, Time) {
+                let Moves = availableMoves;
+                let cboard = boardID;
+                let sQuad = Math.ceil((cboard +1)/5);
+                let aQuad = Quad;
+                let time = Time;
+                let testSpace = 0;
                 let lastSpace = 0;
-                let quad = resources[0].Quad;
-                console.dir(resources);
-                console.log('rq '+quad);
-                let blocker = (((quad-1)*5)+(blockerSpace-1));
-                let openSpaces = [];        
+                let openSpaces = [];
+                let blocker = 0;
+                console.dir(Moves);
+
                 
-                console.log("checking");
-
-                if(qFlag == false) {
-                    testSpace++;
-                } 
-                lastSpace = ((quad*5)-1);
-
-                for(let i=testSpace;i<=lastSpace;i++) {
-                    if(i != blocker) {
-                        openSpaces.push(i);
-                    } 
-                }
+                    testSpace = ((aQuad-1)*5);
+                    lastSpace = ((aQuad*5)-1);
+                    blocker = (((aQuad-1)*5)+(blockerSpace-1));
+                    console.log('blocker space '+blocker);
+                    console.log('test space '+testSpace);
+                    console.dir(Moves);
+                    for (i=testSpace;i<=lastSpace;i++) {
+                        if(Moves.includes(i) == true) {
+                            if (i != blocker){
+                                openSpaces.push(i);
+                                console.log('push '+i);   
+                            }
+                        }
+                    }
+                console.dir(openSpaces);
                 return openSpaces;
             },
 
             callUpdateSpace: function () {
                 boardID = this.id;
-                console.log("bid:"+boardID);
+                
             },
         ///////////////////////////////////////////////////
         //// Player's action
@@ -506,18 +495,19 @@ function (dojo, declare) {
         */
         
             onUpdateQuadA: function (evt) {
-                this.ajaxcall( '/mygame/mygame/myaction.html', { lock: true, }, this, (result)=>{} );
-                resources[0].qUpdateFlag = true;
+                this.ajaxCallWrapper("updateQuadA",);
+                this.updatePageTitle(); 
             },
 
             onUpdateQuadC: function (evt) {
                 dojo.stopEvent( evt );
-                    this.ajaxcall( '/mygame/mygame/myaction.html', { lock: true, }, this, (result)=>{} );
-                    resources[0].qUpdateFlag = true;                
+                this.ajaxCallWrapper("updateQuadC",);    
+                this.updatePageTitle();         
             },
             onResetTime: function (evt) {
                 dojo.stopEvent( evt );
-                    this.ajaxcall( '/mygame/mygame/myaction.html', { lock: true, }, this, (result)=>{} );
+                this.ajaxCallWrapper("resetTime",);
+                this.updatePageTitle(); 
             },
         
         /* Example:

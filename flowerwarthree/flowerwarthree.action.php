@@ -43,7 +43,7 @@
 
     public function updateQuadA () {
       self::setAjaxMode();
-      //$this->game->quadUpdate('A');
+      $this->game->quadUpdate('A');
       self::ajaxResponse();
     }
 
@@ -53,7 +53,7 @@
       self::ajaxResponse( );      
     }
 
-    public function ResetTime () {
+    public function resetTime () {
       
     }
     
