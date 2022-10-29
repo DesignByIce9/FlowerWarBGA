@@ -424,7 +424,6 @@ function (dojo, declare) {
                     
                     currentBoard = document.getElementById(tokenID);
                     currentBoard.remove();
-                    //currentBoard.parentNode.removeChild(currentBoard);
 
                     let token = document.createElement("div");        
                     token.classList.add("token");
@@ -442,13 +441,21 @@ function (dojo, declare) {
 
                 case 'cardHandler':
                     cardType = args.args.cardState.cardType;
-                    cardFlag = args.args.cardState.faithChoiceFlag;
+                    cardFaithFlag = args.args.cardState.faithChoiceFlag;
+                    cardTempleFlag = args.args.cardState.faithChoiceFlag;
+                    moveAD = args.args.cardState.moveAD;
+                    moveAU = args.args.cardState.moveAU;
+                    moveCD = args.args.cardState.moveCD;
+                    moveCU = args.args.cardState.moveCU;
+                    cLevel = args.args.cardState.cathLevel;
+                    maxHeight = args.args.cardState.maxHeight;
+
                     const faiths = ["Aztec", "Catholic"];
 
                     switch(cardType) {
                         case 'gPenalty':
                         case 'gCheck':
-                            if(cardFlag == true) {
+                            if(cardFaithFlag == true) {
                                 this.multipleChoiceDialog(_("Which Faith would you like to spend to pay the penalty?"), faiths, (choice) => {
                                     var faithChoice = faiths[choice];
                                     this.ajaxcallwrapper("faithCardChoice", { string: faithChoice });
@@ -458,13 +465,48 @@ function (dojo, declare) {
                         break;
                         case 'catchUp':
                         case 'gBonus':
-                            if(cardFlag == true) {
+                            if(cardFaithFlag == true) {
                                 this.multipleChoiceDialog(_("Which Faith would you like to gain?"), faiths, (choice) => {
                                     var faithChoice = faiths[choice];
                                     this.ajaxcallwrapper("faithCardChoice", { string: faithChoice });
                                   });
                                   return;
                             }
+                        break;
+                        case "uFigure":
+                            if(cardTempleFlag == true) {
+                                actualChoices = [];
+                                if(MoveAU == true) {
+                                    actualChoices.push("Aztec");
+                                }
+                                if(MoveCU == true) {
+                                    actualChoices.push("Catholiic");
+                                }
+                                this.multipleChoiceDialog(_("Choose a figure to move up a step"), actualChoices, (choice) => {
+                                    var templeChoice = actualChoices[choice];
+                                    this.ajaxcallwrapper("templeCardChoice", { string: templeChoice });
+                                  });
+                                  return;
+                            }
+                        break;
+                        case "dFigure":
+                            if(cardTempleFlag == true) {
+                                actualChoices = [];
+                                if(MoveAD == true) {
+                                    actualChoices.push("Aztec");
+                                }
+                                if(MoveCD == true) {
+                                    actualChoices.push("Catholiic");
+                                }
+                                this.multipleChoiceDialog(_("Choose a figure to move down a step"), actualChoices, (choice) => {
+                                    var templeChoice = actualChoices[choice];
+                                    this.ajaxcallwrapper("templeCardChoice", { string: templeChoice });
+                                  });
+                                  return;
+                            }
+                        break;
+                        case "nQuad":
+                            
                         break;
                     }
 

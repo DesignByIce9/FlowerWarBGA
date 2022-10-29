@@ -52,7 +52,9 @@ class FlowerWarThree extends Table
             "turnCount" => 26,
             "roundCount" => 27,
             "numPlayers" => 28,
-            "blockerSpace" => 29,
+            "cardChoiceFaith" => 29,
+            "cardChoiceTemple" => 30,
+            "blockerSpace" => 31,
     ) );
 
     // setting up Deck
@@ -166,7 +168,8 @@ class FlowerWarThree extends Table
         self::setGameStateInitialValue( 'turnCount', 0 );
         self::setGameStateInitialValue( 'roundCount', 0 );
         self::setGameStateInitialValue( 'numPlayers', count($players) );
-        self::setGameStateInitialValue( 'cardChoice', "" );
+        self::setGameStateInitialValue( 'cardChoiceFaith', "" );
+        self::setGameStateInitialValue( 'cardChoiceTemple', "" );
 
         // setting up state tables
 
@@ -318,14 +321,24 @@ class FlowerWarThree extends Table
 //////////// Utility functions
 ////////////    
 
-    function cardChoice($cardChoice) {
+    function cardChoice($cardChoice, $type) {
         $pID = $this->getActivePlayerId();
         $cChoice = $cardChoice;
 
-        $this->setGameStateValue("cardChoice", "");
-        $this->setGameStateValue("cardChoice", $cChoice);
-        $this->notifyPlayer($pID, 'playerLog', clienttranslate('You chose ${cChoice}'),
-            array('cChoice' =>$cChoice));
+        $this->setGameStateValue("cardChoiceFaith", "");
+        $this->setGameStateValue("cardChoiceTemple", "");
+
+        switch($type) {
+            case "F":
+                $this->setGameStateValue("cardChoiceFaith", $cChoice);
+                $this->notifyPlayer($pID, 'playerLog', clienttranslate('You chose ${cChoice}'), array('cChoice' =>$cChoice));
+            break;
+            case "T":
+                $this->setGameStateValue("cardChoiceTemple", $cChoice);
+                $this->notifyPlayer($pID, 'playerLog', clienttranslate('You chose ${cChoice}'), array('cChoice' =>$cChoice));
+            break;
+        }
+        
     }
 
     function boardQuery($bID) {
@@ -502,12 +515,167 @@ class FlowerWarThree extends Table
         self::DbQuery( $sql );  
     }
 
+    function checkTemple($which) {
+        $pID = $this->getActivePlayerId();
+        $aLevel = $this ->getGameStateValue("azLevel");
+        $cLevel = $this ->getGameStateValue("cathLevel");
+        $apocFlag = $this ->getGameStateValue("apocFlag");
+        $aFlag = $this ->getGameStateValue("azFlag");
+        $cFlag = $this ->getGameStateValue("cathFlag");
+        $maxHeight = $this ->getGameStateValue("templeMaxHeight");
+
+        switch ($which) {
+            case 'A':
+                if($aFlag == false) {
+                    if($aLevel == $maxHeight) {
+                        $this->setGameStateValue("azFlag", true);
+                        if($apocFlag == 0) {
+                            $this->setGameStateValue("apocFlag", 1);
+                        }
+                    }
+                } else if ($aFlag == true) {
+                    if($aLevel == 0) {
+                        $this->winCheck($pID);
+                    }
+                }
+            break;
+            case 'C':
+                if($cFlag == false) {
+                    if($cLevel == $maxHeight) {
+                        $this->setGameStateValue("cathFlag", true);
+                        if($apocFlag == 0) {
+                            $this->setGameStateValue("apocFlag", 2);
+                        }
+                    }
+                } else if ($aFlag == true) {
+                    if($cLevel == 0) {
+                        $this->winCheck($pID);
+                    }
+                }
+            break;
+        }
+    }
+
+    function moveTemple($which, $dir, $card) {
+        $pID = $this->getActivePlayerId();
+        $aLevel = $this ->getGameStateValue("azLevel");
+        $cLevel = $this ->getGameStateValue("cathLevel");
+        $apocFlag = $this ->getGameStateValue("apocFlag");
+        $aFlag = $this ->getGameStateValue("azFlag");
+        $cFlag = $this ->getGameStateValue("cathFlag");
+        $maxLevel = $this ->getGameStateValue("templeMaxHeight");
+        $override = $card;
+
+        switch($which) {
+            case 'A':
+                if($dir == 'D') {
+                    if($aLevel >0) {
+                        if ($aFlag || $override) {
+                            $aLevel--;
+                            $this->setGameStateValue("azLevel", $aLevel);
+                            $this->checkTemple('A');
+                            self::notifyAllPlayers( "message", clienttranslate( '${player_name} has moved Shield Flower down a level' ),
+                            array(
+                            'player_id' => $pID,
+                            'player_name' => self::getActivePlayerName(),
+                        ) );  
+                        }
+                    } else {
+                        throw new BgaUserException ( self::_("You can't move that figure down"));   
+                    }
+                } else if($dir == 'U') {
+                    if($aLevel < $maxLevel) {
+                        $aLevel++;
+                        $this->setGameStateValue("azLevel", $aLevel);
+                        $this->checkTemple('A');
+                        self::notifyAllPlayers( "message", clienttranslate( '${player_name} has moved Shield Flower up a level' ),
+                        array(
+                        'player_id' => $pID,
+                        'player_name' => self::getActivePlayerName(),
+                    ) );  
+                    } else {
+                        throw new BgaUserException ( self::_("You can't move that figure up"));   
+                    }
+                }
+            break;
+            case 'C':
+                if($dir == 'D') {
+                    if($cLevel >0) {
+                        if ($cFlag || $override) {
+                            $cLevel--;
+                            $this->setGameStateValue("cathFlag", $cLevel);
+                            $this->checkTemple('C');
+                            self::notifyAllPlayers( "message", clienttranslate( '${player_name} has moved Juan Diego down a level' ),
+                            array(
+                            'player_id' => $pID,
+                            'player_name' => self::getActivePlayerName(),
+                        ) );
+                        }
+                    } else {
+                        throw new BgaUserException ( self::_("You can't move that figure down"));   
+                    }
+                } else if($dir == 'U') {
+                    if($cLevel < $maxLevel) {
+                        $cLevel++;
+                        $this->setGameStateValue("cathFlag", $cLevel);
+                        $this->checkTemple('C');
+                        self::notifyAllPlayers( "message", clienttranslate( '${player_name} has moved Juan Diego up a level' ),
+                        array(
+                        'player_id' => $pID,
+                        'player_name' => self::getActivePlayerName(),
+                    ) );  
+                    } else {
+                        throw new BgaUserException ( self::_("You can't move that figure up"));   
+                    }
+                }
+            break;
+        }
+    }
+
     function loseCheck($player_id) {
         $pID = $player_id;
         $cPeople = resourceQuery($pID, "P");
         if($cPeople <=0) {
             self::eliminatePlayer( $pID );
         }
+    }
+
+    function winCheck($player_id) {
+        $pID = $player_id;
+        $aLevel = $this ->getGameStateValue("azLevel");
+        $cLevel = $this ->getGameStateValue("cathLevel");
+        $aFlag = $this ->getGameStateValue("azFlag");
+        $cFlag = $this ->getGameStateValue("cathFlag");
+        $apocFlag = $this ->getGameStateValue("apocFlag");
+        $cPeople = 0;
+
+        $levelCheck = false;
+        $peopleCheck = false;
+        $apocCheck = false;
+        $templeCheck = false;
+
+        if(($aLevel == 0) || ($cLevel == 0)) {
+            $levelCheck = true;
+        }
+
+        $cPeople = $this->resourceQuery($pID, 'P');
+        if ($cPeople >0) {
+            $peopleCheck = true;
+        }
+
+        if($apocFlag != 0) {
+            $apocCheck = true;
+        }
+
+        if(($aFlag == true) || ($cFlag == true)) {
+            $templeCheck = true;
+        }
+
+        $finalCheck = array($levelCheck, $peopleCheck, $apocCheck, $templeCheck);
+
+        if (!in_array(false, $finalCheck)) {
+            $this->gamestate->nextState("winState");
+        } 
     }
 
 
@@ -640,6 +808,8 @@ class FlowerWarThree extends Table
         // Move to the next state
         $this->gamestate->nextState("boardUpdate");
     }
+
+
 
     /*
     
@@ -788,17 +958,41 @@ class FlowerWarThree extends Table
         $cardState['apocflag'] = $this ->getGameStateValue("apocFlag");
         $cardState['aflag'] = $this ->getGameStateValue("azFlag");
         $cardState['cflag'] = $this ->getGameStateValue("cathFlag");
+        $cardState['maxHeight'] = $this ->getGameStateValue("templeMaxHeight");
         $cardState['faithChoiceFlag'] = false;
-
-        if($cardState['Az']==$cardState['Cath']) {
-            $cardState['faithChoiceFlag'] = true;
-        }
+        $cardState['templeChoiceFlag'] = false;
+        $cardState['moveAU'] = false;
+        $cardState['moveAD'] = false;
+        $cardState['moveCU'] = false;
+        $cardState['moveCD'] = false;
         
         // get event card type
         $currentCard = array();
-        $currentCardType = "";
         $currentCard = $this->cards->getCardOnTop('hand', $pID);
         $cardState['cardType'] = $currentCard["type"];
+        
+        $cardChoiceFaith = array("gPenalty","gCheck","catchUp","gBonus");
+        $cardChoiceTemple = array("uFigure","dFigure");
+
+        if((in_array($cardState['cardType'], $cardChoiceFaith)) && ($cardState['Az']==$cardState['Cath'])) {
+            $cardState['faithChoiceFlag'] = true;
+        }
+        if(in_array($cardState['cardType'], $cardChoiceTemple)) {
+            $cardState['templeChoiceFlag'] = true;
+        }
+
+        if ($cardState['aLevel'] > 0) {
+            $cardState['moveAD'] = true;
+        }
+        if ($cardState['aLevel'] < $cardState['maxHeight']) {
+            $cardState['moveAU'] = true;
+        }
+        if ($cardState['cLevel'] > 0) {
+            $cardState['moveCD'] = true;
+        }
+        if ($cardState['cLevel'] < $cardState['maxHeight']) {
+            $cardState['moveCU'] = true;
+        }
 
         return $cardState;
         
@@ -908,7 +1102,8 @@ class FlowerWarThree extends Table
         $currentCardType = $currentCard["type"];
         $highest = 0;
         $highestValue = 0;
-        $cardChoice = $this->getGameStateValue("cardChoice");
+        $cardChoiceF = $this->getGameStateValue("cardChoiceFaith");
+        $cardChoiceT = $this->getGameStateValue("cardChoiceTemple");
         
         if($cAz == $cCath) {
             $highest = 0;
@@ -929,7 +1124,7 @@ class FlowerWarThree extends Table
                     $this->updateResources($pID, 'A', $cAz);
                 } else {
                     do {
-                        cardConvert($pID, 'A');
+                        $this->cardConvert($pID, 'A');
                         $cAz = $this->resourceQuery($pID, 'A');
                     } while($cAz <$fPen);
                     $cAz -= $fPen;
@@ -937,7 +1132,7 @@ class FlowerWarThree extends Table
                 }
                 self::notifyAllPlayers( "message", clienttranslate( '${player_name} has lost ${fPen} Aztec faith' ),
                     array(
-                        'player_id' => $player_id,
+                        'player_id' => $pID,
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
@@ -950,7 +1145,7 @@ class FlowerWarThree extends Table
                     $this->updateResources($pID, 'C', $cCath);
                 } else {
                     do {
-                        cardConvert($pID, 'C');
+                        $this->cardConvert($pID, 'C');
                         $cCath = $this->resourceQuery($pID, 'C');
                     } while($cCath <$fPen);
                     $cCath -= $fPen;
@@ -958,21 +1153,21 @@ class FlowerWarThree extends Table
                 }
                 self::notifyAllPlayers( "message", clienttranslate( '${player_name} has lost ${fPen} Catholic faith' ),
                     array(
-                        'player_id' => $player_id,
+                        'player_id' => $pID,
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
                 $this->cards->moveAllCardsInLocation('held','discard');
             break;
             case 'gPenalty':
-                if (($highest == 1) || ($cardChoice == "Aztec")){
+                if (($highest == 1) || ($cardChoiceF == "Aztec")){
                     if($cAz >=$fPen)
                     {
                         $cAz -= $fPen;
                         $this->updateResources($pID, 'A', $cAz);
                     } else {
                         do {
-                            cardConvert($pID, 'A');
+                            $this->cardConvert($pID, 'A');
                             $cAz = $this->resourceQuery($pID, 'A');
                         } while($cAz <$fPen);
                         $cAz -= $fPen;
@@ -980,20 +1175,20 @@ class FlowerWarThree extends Table
                     }
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name} has lost ${fPen} Aztec faith' ),
                         array(
-                            'player_id' => $player_id,
+                            'player_id' => $pID,
                             'player_name' => self::getActivePlayerName(),
                             'fPen' => $fPen,
                         ) );
                     $this->cards->moveAllCardsInLocation('held','discard');
 
-                } else if(($highest == 2) || ($cardChoice == "Catholic")) {
+                } else if(($highest == 2) || ($cardChoiceF == "Catholic")) {
                     if($cCath >=$fPen)
                     {
                         $cCath -= $fPen;
                         $this->updateResources($pID, 'C', $cCath);
                     } else {
                         do {
-                            cardConvert($pID, 'C');
+                            $this->cardConvert($pID, 'C');
                             $cCath = $this->resourceQuery($pID, 'C');
                         } while($cCath <$fPen);
                         $cCath -= $fPen;
@@ -1001,7 +1196,7 @@ class FlowerWarThree extends Table
                     }
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name} has lost ${fPen} Catholic faith' ),
                         array(
-                            'player_id' => $player_id,
+                            'player_id' => $pID,
                             'player_name' => self::getActivePlayerName(),
                             'fPen' => $fPen,
                         ) );
@@ -1013,7 +1208,7 @@ class FlowerWarThree extends Table
                 $this->updateResources($pID, 'P', $cPeople);
                 self::notifyAllPlayers( "message", clienttranslate( '${player_name} has lost ${pPen} People' ),
                     array(
-                        'player_id' => $player_id,
+                        'player_id' => $pID,
                         'player_name' => self::getActivePlayerName(),
                         'pPen' => $pPen,
                     ) );
@@ -1028,7 +1223,7 @@ class FlowerWarThree extends Table
                         $this->updateResources($pID, 'A', $cAz);
                     } else {
                         do {
-                            cardConvert($pID, 'A');
+                            $this->cardConvert($pID, 'A');
                             $cAz = $this->resourceQuery($pID, 'A');
                         } while($cAz <$fPen);
                         $cAz -= $fPen;
@@ -1036,7 +1231,7 @@ class FlowerWarThree extends Table
                     }
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s Aztec faith is lower than their Catholic faith, and so has lost ${fPen} Aztec faith' ),
                     array(
-                        'player_id' => $player_id,
+                        'player_id' => $pID,
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
@@ -1044,7 +1239,7 @@ class FlowerWarThree extends Table
                 } else {
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s Aztec faith is higher than their Catholic faith and so retains their Aztec believers' ),
                             array(
-                                'player_id' => $player_id,
+                                'player_id' => $pID,
                                 'player_name' => self::getActivePlayerName(),
                                 'fThresh' => $fThresh,
                             ) );
@@ -1058,7 +1253,7 @@ class FlowerWarThree extends Table
                         $this->updateResources($pID, 'C', $cCath);
                     } else {
                         do {
-                            cardConvert($pID, 'A');
+                            $this->cardConvert($pID, 'A');
                             $cCath = $this->resourceQuery($pID, 'C');
                         } while($cCath <$fPen);
                         $cCath -= $fPen;
@@ -1066,7 +1261,7 @@ class FlowerWarThree extends Table
                     }
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s Catholic faith is lower than their Aztec faith, and so has lost ${fPen} Catholic faith' ),
                     array(
-                        'player_id' => $player_id,
+                        'player_id' => $pID,
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
@@ -1074,7 +1269,7 @@ class FlowerWarThree extends Table
                 } else {
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s Catholic faith is higher than their Aztec faith and so retains their Catholic believers' ),
                             array(
-                                'player_id' => $player_id,
+                                'player_id' => $pID,
                                 'player_name' => self::getActivePlayerName(),
                                 'fThresh' => $fThresh,
                             ) );
@@ -1082,14 +1277,14 @@ class FlowerWarThree extends Table
             break;
             case 'gCheck':
                 if ($highestValue < $fThresh) {
-                    if (($highest == 1) || ($cardChoice == "Aztec")) {
+                    if (($highest == 1) || ($cardChoiceF == "Aztec")) {
                         if($cAz >=$fPen)
                         {
                             $cAz -= $fPen;
                             $this->updateResources($pID, 'A', $cAz);
                         } else {
                             do {
-                                cardConvert($pID, 'A');
+                                $this->cardConvert($pID, 'A');
                                 $cAz = $this->resourceQuery($pID, 'A');
                             } while($cAz <$fPen);
                             $cAz -= $fPen;
@@ -1097,21 +1292,21 @@ class FlowerWarThree extends Table
                         }
                         self::notifyAllPlayers( "message", clienttranslate( '${player_name} doesn\`t have both faiths above ${fThresh} faith and so loses ${fPen} faith from their highest faith' ),
                             array(
-                                'player_id' => $player_id,
+                                'player_id' => $pID,
                                 'player_name' => self::getActivePlayerName(),
                                 'fThresh' => $fThresh,
                                 'fPen' => $fPen,
                             ) );
                         $this->cards->moveAllCardsInLocation('held','discard');
     
-                    } else if(($highest == 2) || ($cardChoice == "Catholic")) {
+                    } else if(($highest == 2) || ($cardChoiceF == "Catholic")) {
                         if($cCath >=$fPen)
                         {
                             $cCath -= $fPen;
                             $this->updateResources($pID, 'C', $cCath);
                         } else {
                             do {
-                                cardConvert($pID, 'C');
+                                $this->cardConvert($pID, 'C');
                                 $cCath = $this->resourceQuery($pID, 'C');
                             } while($cCath <$fPen);
                             $cCath -= $fPen;
@@ -1119,7 +1314,7 @@ class FlowerWarThree extends Table
                         }
                         self::notifyAllPlayers( "message", clienttranslate( '${player_name} doesn\`t have both faiths above ${fThresh} faith and so loses ${fPen} faith from their highest faith' ),
                         array(
-                            'player_id' => $player_id,
+                            'player_id' => $pID,
                             'player_name' => self::getActivePlayerName(),
                             'fThresh' => $fThresh,
                             'fPen' => $fPen,
@@ -1129,7 +1324,7 @@ class FlowerWarThree extends Table
                 } else {
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name} has both faiths above ${fThresh} faith and so retains all of their believers' ),
                             array(
-                                'player_id' => $player_id,
+                                'player_id' => $pID,
                                 'player_name' => self::getActivePlayerName(),
                                 'fThresh' => $fThresh,
                             ) );
@@ -1141,7 +1336,7 @@ class FlowerWarThree extends Table
                     $this->updateResources($pID, 'P', $cPeople);
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s People is below ${pThresh} and so has lost ${pPen} People' ),
                         array(
-                            'player_id' => $player_id,
+                            'player_id' => $pID,
                             'player_name' => self::getActivePlayerName(),
                             'pPen' => $pPen,
                             'pThresh' => $pThresh
@@ -1151,35 +1346,188 @@ class FlowerWarThree extends Table
                 }
             break;
             case 'aConvert':
-
+                if($cAz >=$fPen)
+                {
+                    $cAz -= $fPen;
+                    $this->updateResources($pID, 'A', $cAz);
+                } else {
+                    do {
+                        $this->cardConvert($pID, 'A');
+                        $cAz = $this->resourceQuery($pID, 'A');
+                    } while($cAz <$fPen);
+                    $cAz -= $fPen;
+                    $this->updateResources($pID, 'A', $cAz);
+                }
+                $cCath += (2*$fPen);
+                $this->updateResources($pID, 'C', $cCath);
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${fPen} Aztec faith to ${(fPen*2)} Catholic faith' ),
+                            array(
+                                'player_id' => $pID,
+                                'player_name' => self::getActivePlayerName(),
+                                'fPen' => $fPen,
+                            ) );
             break;
             case 'cConvert':
+                if($cCath >=$fPen)
+                {
+                    $cCath -= $fPen;
+                    $this->updateResources($pID, 'C', $cCath);
+                } else {
+                    do {
+                        $this->cardConvert($pID, 'C');
+                        $cCath = $this->resourceQuery($pID, 'C');
+                    } while($cCath <$fPen);
+                    $cCath -= $fPen;
+                    $this->updateResources($pID, 'C', $cCath);
+                }
+                $cAz += (2*$fPen);
+                $this->updateResources($pID, 'A', $cAz);
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${fPen} Catholic faith to ${(fPen*2)} Aztec faith' ),
+                            array(
+                                'player_id' => $pID,
+                                'player_name' => self::getActivePlayerName(),
+                                'fPen' => $fPen,
+                            ) );
             break;
             case 'aCull':
+                $cPeople -=$pPen;
+                $cAz += $pRate;
+                $this->updateResources($pID, 'P', $cPeople);
+                $this->updateResources($pID, 'A', $cAz);
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${pPen} People faith to ${pRate) Aztec faith' ),
+                    array(
+                        'player_id' => $pID,
+                        'player_name' => self::getActivePlayerName(),
+                        'pPen' => $pPen,
+                        'pRate' => $pRate,
+                    ) );
+                    $this-> loseCheck($pID);
             break;
             case 'cCull':
+                $cPeople -=$pPen;
+                $cCath += $pRate;
+                $this->updateResources($pID, 'P', $cPeople);
+                $this->updateResources($pID, 'C', $cCath);
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${pPen} People faith to ${pRate) Catholic faith' ),
+                    array(
+                        'player_id' => $pID,
+                        'player_name' => self::getActivePlayerName(),
+                        'pPen' => $pPen,
+                        'pRate' => $pRate,
+                    ) );
+                    $this-> loseCheck($pID);
             break;
             case 'catchUp':
+                if($cPeople<$pThresh) {
+                    $cPeople++;
+                    $this->updateResources($pID, 'P', $cPeople);
+                    self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s tribe has grown! People up by 1' ),
+                    array(
+                        'player_id' => $pID,
+                        'player_name' => self::getActivePlayerName(),
+                    ) );
+                } else if(($highest == 1) || ($cardChoiceF == "Catholic")) {
+                    $cCath = $cCath +2;
+                    $this->updateResources($pID, 'C', $cCath);
+                    self::notifyAllPlayers( "message", clienttranslate( '${player_name} has gained 2 to their lowest Faith' ),
+                        array(
+                            'player_id' => $pID,
+                            'player_name' => self::getActivePlayerName(),
+                        ) );
+                } else if(($highest == 2) || ($cardChoiceF == "Aztec")) {
+                    $cAz = $cCath +2;
+                    $this->updateResources($pID, 'A', $cAz);
+                    self::notifyAllPlayers( "message", clienttranslate( '${player_name} has gained 2 to their lowest Faith' ),
+                        array(
+                            'player_id' => $pID,
+                            'player_name' => self::getActivePlayerName(),
+                        ) );
+                }
             break;
             case 'aBonus':
+                $cAz += $fBon;
+                $this->updateResources($pID, 'A', $cAz); 
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} has gained ${fBon} Aztec Faith' ),
+                    array(
+                        'player_id' => $pID,
+                        'player_name' => self::getActivePlayerName(),
+                        'fBon' => $fBon,
+                    ) );
             break;
             case 'cBonus':
+                $cCath += $fBon;
+                $this->updateResources($pID, 'C', $cCath); 
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} has gained ${fBon} Catholic Faith' ),
+                    array(
+                        'player_id' => $pID,
+                        'player_name' => self::getActivePlayerName(),
+                        'fBon' => $fBon,
+                    ) ); 
             break;
             case 'gBonus':
+                if(($highest == 1) || ($cardChoiceF == "Catholic")) {
+                    $cCath += $fBon;
+                    $this->updateResources($pID, 'C', $cCath); 
+                    self::notifyAllPlayers( "message", clienttranslate( '${player_name} has gained ${fBon} Catholic Faith' ),
+                        array(
+                            'player_id' => $pID,
+                            'player_name' => self::getActivePlayerName(),
+                            'fBon' => $fBon,
+                        ) );
+                } else if(($highest == 2) || ($cardChoiceF == "Aztec")) {
+                    $cAz += $fBon;
+                    $this->updateResources($pID, 'A', $cAz);
+                    self::notifyAllPlayers( "message", clienttranslate( '${player_name} has gained ${fBon} Aztec Faith' ),
+                        array(
+                            'player_id' => $pID,
+                            'player_name' => self::getActivePlayerName(),
+                            'fBon' => $fBon,
+                        ) );
+                }
             break;
             case 'pBonus':
+                $cPeople += $pBon;
+                $this->updateResources($pID, 'P', $cPeople);
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} has gained ${pBon} People' ),
+                        array(
+                            'player_id' => $pID,
+                            'player_name' => self::getActivePlayerName(),
+                            'fBon' => $fBon,
+                        ) );
             break;
             case 'uFigure':
+                switch ($cardChoiceT) {
+                    case "Aztec":
+                        $this->moveTemple('A','U',true);
+                    break;
+                    case "Catholic":
+                        $this->moveTemple('C', 'U', true);
+                    break;
+                }
             break;
             case 'dFigure':
+                switch ($cardChoiceT) {
+                    case "Aztec":
+                        $this->moveTemple('A', 'D', true);
+                    break;
+                    case "Catholic":
+                        $this->moveTemple('C', 'D', true);
+                    break;
+                }
             break;
             case 'iBlock':
+                //placeholder
             break;
             case 'rBlock':
+                //placeholder
             break;
             case 'nQuad':
+                $cQuad = $this->resourceQuery($pID,'Q');
+                $cQuad++;
+                $this->updateResources($pID,'Q',$cQuad);
             break;
             case 'aSpace':
+                //placeholder
             break;
             case 'rTime':
             break;

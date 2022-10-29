@@ -101,8 +101,8 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argsCardState",
         "action" => "stCardHandler",
-        "possibleactions" => array( "resourceLoop" ),
-        "transitions" => array( "resourceLoop" => 10 )
+        "possibleactions" => array( "resourceLoop", "winState" ),
+        "transitions" => array( "resourceLoop" => 10, "winState" => 80 )
     ),
 
     10 => array(
@@ -112,8 +112,8 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argPlayerState",
         "action" => "stResourceLoop",
-        "possibleactions" => array( "moveToken" ),
-        "transitions" => array( "moveToken" => 2 )
+        "possibleactions" => array( "moveToken", "endTurn", "winState" ),
+        "transitions" => array( "moveToken" => 2, "endTurn" =>50, "winState" => 80)
     ),
     
 /*

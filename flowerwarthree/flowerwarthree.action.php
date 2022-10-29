@@ -69,7 +69,14 @@
     public function faithCardChoice() {
       self::setAjaxMode();
       $faithChoice = self::getArg("faithCardChoice", AT_alphanum, true);
-      $this->game->cardChoice($faithChoice);
+      $this->game->cardChoice($faithChoice, "F");
+      self::ajaxResponse( );
+    }
+
+    public function templeCardChoice() {
+      self::setAjaxMode();
+      $templeChoice = self::getArg("templeCardChoice", AT_alphanum, true);
+      $this->game->cardChoice($templeChoice, "T");
       self::ajaxResponse( );
     }
     
