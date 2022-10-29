@@ -73,22 +73,45 @@ $machinestates = array(
 ),
 */
     2 => array(
-    		"name" => "moveToken",
-    		"description" => clienttranslate('${actplayer} is deciding where to move'),
-    		"descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
-    		"type" => "activeplayer",
-            "args" => "argsBoardState",
-            "action" => "stMoveToken",
-    		"possibleactions" => array( "nextQuadA", "nextQuadC", "resetTime", "updateBoard" ),
-    		"transitions" => array( "nextQuadA" => 2, "nextQuadC" => 2,"resetTime" => 2, "updateBoard" => 5 )
+        "name" => "moveToken",
+        "description" => clienttranslate('${actplayer} is deciding where to move'),
+        "descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
+        "type" => "activeplayer",
+        "args" => "argsBoardState",
+        "action" => "stMoveToken",
+        "possibleactions" => array( "nextQuadA", "nextQuadC", "resetTime", "boardUpdate" ),
+        "transitions" => array( "nextQuadA" => 2, "nextQuadC" => 2,"resetTime" => 2, "boardUpdate" => 4 )
+),
+
+    4 => array(
+        "name" => "boardUpdate",
+        "description" => clienttranslate('Updating the board'),
+        "descriptionmyturn" => clienttranslate('Updating the board'),
+        "type" => "game",
+        "args" => "argsBoardState",
+        "action" => "stBoardUpdate",
+        "possibleactions" => array( "cardHandler" ),
+        "transitions" => array( "cardHandler" => 5 )
     ),
 
     5 => array(
-        "name" => "updateBoard",
+        "name" => "cardHandler",
+        "description" => clienttranslate('${actplayer} is encountering an event'),
+        "descriptionmyturn" => clienttranslate('${you} are encountering an event'),
+        "type" => "activeplayer",
+        "args" => "argsCardState",
+        "action" => "stCardHandler",
+        "possibleactions" => array( "resourceLoop" ),
+        "transitions" => array( "resourceLoop" => 10 )
+    ),
+
+    10 => array(
+        "name" => "resourceLoop",
         "description" => clienttranslate('${actplayer} is moving to the next quadrant'),
         "descriptionmyturn" => clienttranslate('${you} are moving to the next quadrant'),
-        "type" => "game",
-        "action" => "stNextQuad",
+        "type" => "activeplayer",
+        "args" => "argPlayerState",
+        "action" => "stResourceLoop",
         "possibleactions" => array( "moveToken" ),
         "transitions" => array( "moveToken" => 2 )
     ),

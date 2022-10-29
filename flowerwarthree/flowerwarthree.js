@@ -59,28 +59,31 @@ function (dojo, declare) {
                 // TODO: Setting up players boards if needed
             }
             
-            console.log( "Starting game setup" );
-
           this.azFaithCounter = {};
           this.cathFaithCounter = {};
           this.peopleCounter = {};
           this.timeCounter = {};
           
           // Setting up player boards
+          i=0;
           for( var player_id in gamedatas.players )
-          {
+          {            
             var player = gamedatas.players[player_id];
             var player_board_div = $('player_board_'+player_id);
             dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
             this.azFaithCounter[player_id] = new ebg.counter();
             this.azFaithCounter[player_id].create('azFaithCounter'+player_id);
+            this.azFaithCounter[player_id].setValue(gamedatas.resources[i][0]);
             this.cathFaithCounter[player_id] = new ebg.counter();
             this.cathFaithCounter[player_id].create('cathFaithCounter'+player_id);
+            this.cathFaithCounter[player_id].setValue(gamedatas.resources[i][1]);
             this.peopleCounter[player_id] = new ebg.counter();
             this.peopleCounter[player_id].create('peopleCounter'+player_id);
+            this.peopleCounter[player_id].setValue(gamedatas.resources[i][2]);
             this.timeCounter[player_id] = new ebg.counter();
             this.timeCounter[player_id].create('timeCounter'+player_id);
-            
+            this.timeCounter[player_id].setValue(1);
+            i++;         
           }
 
         for(i=0;i<5;i++) {
@@ -302,29 +305,28 @@ function (dojo, declare) {
                 break
                 case 'moveToken':
                     // handle action buttons
-                    this.updatePageTitle(); 
-                   
-                    aFlag = args.args.boardState.aFlag;
-                    cFlag = args.args.boardState.cFlag;
-                    pFlag = args.args.boardState.pFlag;
-                    cQuad = args.args.boardState.Quad;
+                    this.updatePageTitle();
+
+                    pID = args.args.boardState.playerID;
+                    aButtonFlag = args.args.boardState.aButtonFlag;
+                    cButtonFlag = args.args.boardState.cButtonFlag;
+                    pButtonFlag = args.args.boardState.pButtonFlag;
                     cTime = args.args.boardState.Time;
                     cQuad = args.args.boardState.Quad;
                     cBoardID = args.args.boardState.boardID;
                     bQuad = Math.ceil(((cBoardID+1)/5));
-                    cTime = args.args.boardState.Time;
                     availableMoves = args.args.boardState.possibleMoves;
 
                     if (this.isCurrentPlayerActive() == true) {
-                        if(aFlag == false) {
+                        if(aButtonFlag == false) {
                             aButton = document.getElementById("updateQuadA");
                             aButton.classList.add("hidden");
                         }
-                        if(cFlag == false) {
+                        if(cButtonFlag == false) {
                             cButton = document.getElementById("updateQuadC");
                             cButton.classList.add("hidden");
                         }
-                        if(pFlag == false) {
+                        if(pButtonFlag == false) {
                             pButton = document.getElementById("resetTime");
                             pButton.classList.add("hidden");
                         }
@@ -368,7 +370,7 @@ function (dojo, declare) {
                             }
                         }
                         
-                        if (cTime = 1) {
+                        if (cTime == 1) {
                             pButton = document.getElementById("resetTime");
                             pButton.classList.add("hidden");
                         }
@@ -377,7 +379,12 @@ function (dojo, declare) {
                         // get active spaces 
                         let blockedQuad = (((cQuad-1)*5)+(blockerSpace-1));
                         let openSpace =[];
-                        openSpace = this.possibleMoves(availableMoves, cBoardID, cQuad, cTime);
+                        if(cTime <4) {
+                            openSpace = this.possibleMoves(availableMoves, cQuad);
+                        } else if(cTime == 4) {
+                            cQuad++;
+                            openSpace = this.possibleMoves(availableMoves, cQuad);
+                        }
 
                         for(let p=0; p<openSpace.length; p++) {
                             highlightSpace = document.getElementById("space_"+openSpace[p]);
@@ -389,10 +396,78 @@ function (dojo, declare) {
                         }
     
                         clickableSpace = document.getElementsByClassName("possibleMove");
-                        clickableSpace = document.getElementsByClassName("possibleMove");
                         Array.from(clickableSpace).forEach(
-                        (elem) => elem.addEventListener("click", this.callUpdateSpace));
+                            (elem) => elem.addEventListener("click", () => this.onClickedSpace(elem.id))
+                        );
                     }
+                break;
+
+                case 'boardUpdate':
+                    this.updatePageTitle();
+                    pID = args.args.boardState.playerID;
+                    cQuad = args.args.boardState.Quad;
+                    cBoardID = args.args.boardState.boardID;
+                    tokenID = args.args.boardState.tokenID;
+                    color = args.args.boardState.pColor;
+                    cAz = args.args.boardState.Az;
+                    cCath = args.args.boardState.Cath;
+                    cPeople = args.args.boardState.People;
+                    cTime = args.args.boardState.Time
+
+                    this.azFaithCounter[pID].toValue(cAz);
+                    this.cathFaithCounter[pID].toValue(cCath);
+                    this.peopleCounter[pID].toValue(cPeople);
+                    this.timeCounter[pID].toValue(cTime);
+                    
+                    color = "filter_" +color;
+                    tokenID = "token_"+tokenID;
+                    
+                    currentBoard = document.getElementById(tokenID);
+                    currentBoard.remove();
+                    //currentBoard.parentNode.removeChild(currentBoard);
+
+                    let token = document.createElement("div");        
+                    token.classList.add("token");
+                    token.id=tokenID
+                    playerContainer = document.getElementById(boardID);
+                    token.classList.add(color);                                       
+                    playerContainer.appendChild(token);
+                    for(let i=0;i<20; i++) {
+                        removeTags = document.getElementById("space_"+i);
+                        removeTags.classList.remove("possibleMove");
+                        removeTags.classList.remove("blockedMove");
+                    }
+                    
+                break;
+
+                case 'cardHandler':
+                    cardType = args.args.cardState.cardType;
+                    cardFlag = args.args.cardState.faithChoiceFlag;
+                    const faiths = ["Aztec", "Catholic"];
+
+                    switch(cardType) {
+                        case 'gPenalty':
+                        case 'gCheck':
+                            if(cardFlag == true) {
+                                this.multipleChoiceDialog(_("Which Faith would you like to spend to pay the penalty?"), faiths, (choice) => {
+                                    var faithChoice = faiths[choice];
+                                    this.ajaxcallwrapper("faithCardChoice", { string: faithChoice });
+                                  });
+                                  return;
+                            }
+                        break;
+                        case 'catchUp':
+                        case 'gBonus':
+                            if(cardFlag == true) {
+                                this.multipleChoiceDialog(_("Which Faith would you like to gain?"), faiths, (choice) => {
+                                    var faithChoice = faiths[choice];
+                                    this.ajaxcallwrapper("faithCardChoice", { string: faithChoice });
+                                  });
+                                  return;
+                            }
+                        break;
+                    }
+
                 break;
            
            
@@ -489,35 +564,28 @@ function (dojo, declare) {
             },
 
 
-            possibleMoves: function (availableMoves, boardID, Quad, Time) {
+            possibleMoves: function (availableMoves, Quad) {
                 let Moves = availableMoves;
-                let cboard = boardID;
-                let sQuad = Math.ceil((cboard +1)/5);
                 let aQuad = Quad;
-                let time = Time;
                 let testSpace = 0;
                 let lastSpace = 0;
                 let openSpaces = [];
                 let blocker = 0;
-
                 
-                    testSpace = ((aQuad-1)*5);
-                    lastSpace = ((aQuad*5)-1);
-                    blocker = (((aQuad-1)*5)+(blockerSpace-1));
-                    for (i=testSpace;i<=lastSpace;i++) {
-                        if(Moves.includes(i) == true) {
-                            if (i != blocker){
-                                openSpaces.push(i);  
-                            }
+                testSpace = ((aQuad-1)*5);
+                lastSpace = ((aQuad*5)-1);
+                blocker = (((aQuad-1)*5)+(blockerSpace-1));
+                for (i=testSpace;i<=lastSpace;i++) {
+                    if(Moves.includes(i) == true) {
+                        if (i != blocker){
+                            openSpaces.push(i);  
                         }
                     }
+                }
                 return openSpaces;
             },
 
-            callUpdateSpace: function () {
-                boardID = this.id;
-                
-            },
+           
         ///////////////////////////////////////////////////
         //// Player's action
         
@@ -533,6 +601,8 @@ function (dojo, declare) {
         */
         
             onUpdateQuadA: function (evt) {
+                pID = this.getActivePlayerId();
+                this.azFaithCounter[pID].incValue(-1);
                 for(let i=0;i<20; i++) {
                     removeTags = document.getElementById("space_"+i);
                     removeTags.classList.remove("possibleMove");
@@ -543,17 +613,19 @@ function (dojo, declare) {
             },
 
             onUpdateQuadC: function (evt) {
+                this.cathFaithCounter[pID].incValue(-1);
                 for(let i=0;i<20; i++) {
                     removeTags = document.getElementById("space_"+i);
-                    
                     removeTags.classList.remove("possibleMove");
                     removeTags.classList.remove("blockedMove");
                 }
                 dojo.stopEvent( evt );
-                this.ajaxCallWrapper("updateQuadC",);    
+                this.ajaxCallWrapper("updateQuadC",);
                 this.updatePageTitle();         
             },
             onResetTime: function (evt) {
+                this.peopleCounter[pID].incValue(-1);
+                this.timeCounter[pID].toValue(1);
                 for(let i=0;i<20; i++) {
                     removeTags = document.getElementById("space_"+i);
                     removeTags.classList.remove("possibleMove");
@@ -562,6 +634,11 @@ function (dojo, declare) {
                 dojo.stopEvent( evt );
                 this.ajaxCallWrapper("resetTime",);
                 this.updatePageTitle(); 
+            },
+
+            onClickedSpace: function (bID) {
+                boardID = bID;
+                this.ajaxCallWrapper("clickedSpace",{boardID});
             },
         
         /* Example:
@@ -626,10 +703,13 @@ function (dojo, declare) {
             // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
             // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
             // 
+
+            
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
         
+
         /*
         Example:
         

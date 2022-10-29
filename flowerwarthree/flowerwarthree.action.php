@@ -54,7 +54,23 @@
     }
 
     public function resetTime () {
-      
+      self::setAjaxMode();
+      $this->game->updateTime();
+      self::ajaxResponse( );    
+    }
+
+    public function clickedSpace () {
+      self::setAjaxMode();
+      $boardID =self::getArg("boardID", AT_alphanum, true);
+      $this->game->clickedSpace($boardID);
+      self::ajaxResponse( );
+    }
+
+    public function faithCardChoice() {
+      self::setAjaxMode();
+      $faithChoice = self::getArg("faithCardChoice", AT_alphanum, true);
+      $this->game->cardChoice($faithChoice);
+      self::ajaxResponse( );
     }
     
     /*
