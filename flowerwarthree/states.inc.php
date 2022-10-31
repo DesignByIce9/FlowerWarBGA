@@ -72,7 +72,7 @@ $machinestates = array(
         "transitions" => array( "moveToken" => 3 )
 ),
 */
-    2 => array(
+    3 => array(
         "name" => "moveToken",
         "description" => clienttranslate('${actplayer} is deciding where to move'),
         "descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
@@ -114,6 +114,16 @@ $machinestates = array(
         "action" => "stResourceLoop",
         "possibleactions" => array( "moveToken", "endTurn", "winState" ),
         "transitions" => array( "moveToken" => 2, "endTurn" =>50, "winState" => 80)
+    ),
+
+    2 => array(
+        "name" => "alwaysFirst",
+        "description" => clienttranslate('Updating the board'),
+        "descriptionmyturn" => clienttranslate('Updating the board'),
+        "type" => "game",
+        "action" => "alwaysFirst",
+        "possibleactions" => array( "moveToken" ),
+        "transitions" => array( "moveToken" => 3 )
     ),
     
 /*
