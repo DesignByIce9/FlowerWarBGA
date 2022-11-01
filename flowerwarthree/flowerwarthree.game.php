@@ -1075,36 +1075,56 @@ class FlowerWarThree extends Table
         
     }
 
+    function stCardTest() {
+        $pID = $this->getActivePlayerId();
+        $this->updateResources($pID, 'A',10);
+        $this->updateResources($pID, 'C',10);
+        $this->updateResources($pID, 'P',10);
+
+        // card test routine
+        for($i=0;$i<69;$i++) {
+            $testCard = $this->cards->getCard($i);
+            if($testCard["location"]=="deck") {
+                $this->cards->moveCard($i, "held", $pID);
+            }
+
+            break;
+        }
+
+        $this->gamestate->nextState("cardHandler");
+    }
+
     function stBoardUpdate() {
         $pID = $this->getActivePlayerId();
-        $this->cards->pickCardForLocation("deck", "held", $pID );
+
+        // draw card (random)
+        //$this->cards->pickCardForLocation("deck", "held", $pID );
+
+        // get card info
         $currentCard = $this->cards->getCardOnTop('held', $pID);
         $currentCardType = $currentCard["type"];
+
+        // notification
         self::notifyAllPlayers( "message", clienttranslate( '${player_name} has drawn the ${currentCard} event' ),
-                        ['player_name' => self::getActivePlayerName(),
-                        'currentCard' => $currentCardType,]
-                    );
-        $this->gamestate->nextState("cardHandler");
+            ['player_name' => self::getActivePlayerName(), 'currentCard' => $currentCardType,]
+        );
+        
+        
+        // next state
+        $this->gamestate->nextState("cardTest");
     }
 
     function stCardHandler() {
         $pID = $this->getActivePlayerId();
-        $cardState = array();
         $cAz = $this->resourceQuery($pID, 'A');
         $cCath = $this->resourceQuery($pID, 'C');
         $cPeople = $this->resourceQuery($pID, 'P');
-        $aLevel = $this ->getGameStateValue("azLevel");
-        $cLevel = $this ->getGameStateValue("cathLevel");
-        $apocflag = $this ->getGameStateValue("apocFlag");
-        $aflag = $this ->getGameStateValue("azFlag");
-        $cflag = $this ->getGameStateValue("cathFlag");
         $fThresh = $this ->getGameStateValue("faithThreshold");
         $pThresh = $this ->getGameStateValue("peopleThreshold");
         $fPen = $this ->getGameStateValue("faithPenalty");
         $pPen = $this ->getGameStateValue("PeoplePenalty");
         $fBon = $this ->getGameStateValue("faithBonus");
         $pBon = $this ->getGameStateValue("peopleBonus");
-        $fRate = $this ->getGameStateValue("faithConversionRate");
         $pRate = $this ->getGameStateValue("peopleConversionRate");
 
         $currentCard = array();
@@ -1492,7 +1512,7 @@ class FlowerWarThree extends Table
             break;
         }
         $this->cards->moveAllCardsInLocation('held','discard');
-        $this->gamestate->nextState("resourceLoop");
+        $this->gamestate->nextState("cardTest");
     }
 
     function stResourceLoop() {

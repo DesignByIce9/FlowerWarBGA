@@ -90,8 +90,8 @@ $machinestates = array(
         "type" => "game",
         "args" => "argsBoardState",
         "action" => "stBoardUpdate",
-        "possibleactions" => array( "cardHandler" ),
-        "transitions" => array( "cardHandler" => 5 )
+        "possibleactions" => array( "cardTest" ),
+        "transitions" => array( "cardTest" => 205 )
     ),
 
     5 => array(
@@ -101,8 +101,8 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argsCardState",
         "action" => "stCardHandler",
-        "possibleactions" => array( "resourceLoop", "winState" ),
-        "transitions" => array( "resourceLoop" => 10, "winState" => 80 )
+        "possibleactions" => array( "cardTest" ),
+        "transitions" => array( "cardTest" => 205)
     ),
 
     10 => array(
@@ -147,7 +147,17 @@ $machinestates = array(
         "transitions" => array( "playCard" => 2, "pass" => 2 )
     ), 
 
-*/    
+*/  
+
+205 => array(
+    "name" => "cardTest",
+    "description" => clienttranslate('${actplayer} is encountering an event'),
+    "descriptionmyturn" => clienttranslate('${you} are encountering an event'),
+    "type" => "game",
+    "args" => "argsCardState",
+    "action" => "stCardTest",
+    "possibleactions" => array( "cardHandler" ),
+    "transitions" => array( "cardHandler" => 5)
    
     // Final state.
     // Please do not modify (and do not overload action/args methods).
