@@ -190,6 +190,7 @@ class FlowerWarThree extends Table
             $terrain[] = array( 'type' => $tName, 'type_arg' => $tValue, 'nbr' => 4);
         }
         $this->cards->createCards( $terrain, 'board' );
+        $this->cards->shuffle( 'board' );
 
         // Event Cards
         $events = array();
@@ -210,6 +211,7 @@ class FlowerWarThree extends Table
 
 
         // Activate first player (which is in general a good idea :) )
+
         $this->activeNextPlayer();
 
         /************ End of the game initialization *****/
@@ -321,6 +323,12 @@ class FlowerWarThree extends Table
 //////////// Utility functions
 ////////////
 
+    function alwaysFirst() {
+        $this->createNextPlayerTable([2373342, 2373343], true);
+        $this->gamestate->changeActivePlayer(2373342);
+        $this->gamestate->nextState("moveToken");
+    }
+
     function cardChoice($cardChoice, $type) {
         $pID = $this->getActivePlayerId();
         $cChoice = $cardChoice;
@@ -354,8 +362,8 @@ class FlowerWarThree extends Table
         $bCath = $this->board[$boardID]["Cath"];
         $bPeople = $this->board[$boardID]["People"];
 
-        $terrainArray = $this->cards->getCardOnTop('board', $boardID);
-        $bTerrain = $terrainArray["type"];
+        $terrainArray = $this->cards->getCardsInLocation('board', $boardID);
+        $bTerrain = array_values($terrainArray)[0]['type'];
 
         $boardArray = array ($bAz, $bCath, $bPeople, $bTerrain);
 
@@ -968,8 +976,9 @@ class FlowerWarThree extends Table
 
         // get event card type
         $currentCard = array();
-        $currentCard = $this->cards->getCardOnTop('hand', $pID);
-        $cardState['cardType'] = $currentCard["type"];
+        $currentCard = $this->cards->getCardsInLocation('held', $pID);
+        $currentCardType = array_values($currentCard)[0]["type"];
+        $cardState['cardType'] = $currentCardType;
 
         $cardChoiceFaith = array("gPenalty","gCheck","catchUp","gBonus");
         $cardChoiceTemple = array("uFigure","dFigure");
@@ -994,7 +1003,9 @@ class FlowerWarThree extends Table
             $cardState['moveCU'] = true;
         }
 
-        return $cardState;
+        return array(
+            'cardState' => $cardState
+        );
 
     }
 
@@ -1068,30 +1079,9 @@ class FlowerWarThree extends Table
 
     }
 
-    function stCardTest() {
-        $pID = $this->getActivePlayerId();
-        $this->updateResources($pID, 'A',10);
-        $this->updateResources($pID, 'C',10);
-        $this->updateResources($pID, 'P',10);
-
-        // card test routine
-        for($i=0;$i<69;$i++) {
-            $testCard = $this->cards->getCard($i);
-            if($testCard["location"]=="deck") {
-                $this->cards->moveCard($i, "held", $pID);
-            }
-
-            break;
-        }
-
-        $this->gamestate->nextState("cardHandler");
-    }
-
     function stBoardUpdate() {
-        $pTable = $this->getNextPlayerTable();
-        $pID = $pTable[0];
-        $this->cards->pickCards( 1, "held", $pID );
-
+        $pID = $this->getActivePlayerId();
+        $this->cards->pickCardForLocation( "deck", "held", $pID );
         $this->gamestate->nextState("cardHandler");
     }
 
@@ -1110,8 +1100,8 @@ class FlowerWarThree extends Table
 
         $currentCard = array();
         $currentCardType = "";
-        $currentCard = $this->cards->getCardOnTop('held', $pID);
-        $currentCardType = $currentCard["type"];
+        $currentCard = $this->cards->getCardsInLocation('held', $pID);
+        $currentCardType = array_values($currentCard)[0]["type"];
         $highest = 0;
         $highestValue = 0;
         $cardChoiceF = $this->getGameStateValue("cardChoiceFaith");
@@ -1148,7 +1138,7 @@ class FlowerWarThree extends Table
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
-                $this->cards->moveAllCardsInLocation('held','discard');
+                
             break;
             case 'cPenalty':
                 if($cCath >=$fPen)
@@ -1169,7 +1159,6 @@ class FlowerWarThree extends Table
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
-                $this->cards->moveAllCardsInLocation('held','discard');
             break;
             case 'gPenalty':
                 if (($highest == 1) || ($cardChoiceF == "Aztec")){
@@ -1191,8 +1180,6 @@ class FlowerWarThree extends Table
                             'player_name' => self::getActivePlayerName(),
                             'fPen' => $fPen,
                         ) );
-                    $this->cards->moveAllCardsInLocation('held','discard');
-
                 } else if(($highest == 2) || ($cardChoiceF == "Catholic")) {
                     if($cCath >=$fPen)
                     {
@@ -1212,7 +1199,6 @@ class FlowerWarThree extends Table
                             'player_name' => self::getActivePlayerName(),
                             'fPen' => $fPen,
                         ) );
-                    $this->cards->moveAllCardsInLocation('held','discard');
                 }
             break;
             case 'pPenalty':
@@ -1224,7 +1210,6 @@ class FlowerWarThree extends Table
                         'player_name' => self::getActivePlayerName(),
                         'pPen' => $pPen,
                     ) );
-                $this->cards->moveAllCardsInLocation('held','discard');
                 $this-> loseCheck($pID);
             break;
             case 'aCheck':
@@ -1247,7 +1232,6 @@ class FlowerWarThree extends Table
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
-                    $this->cards->moveAllCardsInLocation('held','discard');
                 } else {
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s Aztec faith is higher than their Catholic faith and so retains their Aztec believers' ),
                             array(
@@ -1277,7 +1261,6 @@ class FlowerWarThree extends Table
                         'player_name' => self::getActivePlayerName(),
                         'fPen' => $fPen,
                     ) );
-                    $this->cards->moveAllCardsInLocation('held','discard');
                 } else {
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name}\'s Catholic faith is higher than their Aztec faith and so retains their Catholic believers' ),
                             array(
@@ -1309,8 +1292,6 @@ class FlowerWarThree extends Table
                                 'fThresh' => $fThresh,
                                 'fPen' => $fPen,
                             ) );
-                        $this->cards->moveAllCardsInLocation('held','discard');
-
                     } else if(($highest == 2) || ($cardChoiceF == "Catholic")) {
                         if($cCath >=$fPen)
                         {
@@ -1331,7 +1312,6 @@ class FlowerWarThree extends Table
                             'fThresh' => $fThresh,
                             'fPen' => $fPen,
                         ) );
-                        $this->cards->moveAllCardsInLocation('held','discard');
                     }
                 } else {
                     self::notifyAllPlayers( "message", clienttranslate( '${player_name} has both faiths above ${fThresh} faith and so retains all of their believers' ),
@@ -1353,7 +1333,6 @@ class FlowerWarThree extends Table
                             'pPen' => $pPen,
                             'pThresh' => $pThresh
                         ) );
-                    $this->cards->moveAllCardsInLocation('held','discard');
                     $this-> loseCheck($pID);
                 }
             break;
@@ -1544,7 +1523,7 @@ class FlowerWarThree extends Table
             case 'rTime':
             break;
         }
-
+        //$this->cards->moveAllCardsInLocation('held','discard');
         //$this->gamestate->nextState("resourceLoop");
     }
 

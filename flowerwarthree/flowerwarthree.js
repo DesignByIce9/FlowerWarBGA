@@ -440,6 +440,7 @@ function (dojo, declare) {
                 break;
 
                 case 'cardHandler':
+                    console.dir(args.args.cardState);
                     cardType = args.args.cardState.cardType;
                     cardFaithFlag = args.args.cardState.faithChoiceFlag;
                     cardTempleFlag = args.args.cardState.faithChoiceFlag;

@@ -58,7 +58,7 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
+        "transitions" => array( "" => 201 )
     ),
     
     // Note: ID=2 => your first state
@@ -90,8 +90,8 @@ $machinestates = array(
         "type" => "game",
         "args" => "argsBoardState",
         "action" => "stBoardUpdate",
-        "possibleactions" => array( "cardTest" ),
-        "transitions" => array( "cardTest" => 205 )
+        "possibleactions" => array( "cardHandler" ),
+        "transitions" => array( "cardHandler" => 5 )
     ),
 
     5 => array(
@@ -101,8 +101,8 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argsCardState",
         "action" => "stCardHandler",
-        "possibleactions" => array( "cardTest" ),
-        "transitions" => array( "cardTest" => 205)
+        "possibleactions" => array( "resourceLoop" ),
+        "transitions" => array( "resourceLoop" => 10)
     ),
 
     10 => array(
@@ -114,6 +114,16 @@ $machinestates = array(
         "action" => "stResourceLoop",
         "possibleactions" => array( "moveToken", "endTurn", "winState" ),
         "transitions" => array( "moveToken" => 2, "endTurn" =>50, "winState" => 80)
+    ),
+
+    201 => array(
+        "name" => "alwaysFirst",
+        "description" => clienttranslate('${actplayer} is moving to the next quadrant'),
+        "descriptionmyturn" => clienttranslate('${you} are moving to the next quadrant'),
+        "type" => "game",
+        "action" => "alwaysFirst",
+        "possibleactions" => array( "moveToken", ),
+        "transitions" => array( "moveToken" => 2 )
     ),
     
 /*
@@ -138,16 +148,6 @@ $machinestates = array(
     ), 
 
 */  
-
-205 => array(
-    "name" => "cardTest",
-    "description" => clienttranslate('${actplayer} is encountering an event'),
-    "descriptionmyturn" => clienttranslate('${you} are encountering an event'),
-    "type" => "game",
-    "args" => "argsCardState",
-    "action" => "stCardTest",
-    "possibleactions" => array( "cardHandler" ),
-    "transitions" => array( "cardHandler" => 5)
    
     // Final state.
     // Please do not modify (and do not overload action/args methods).
