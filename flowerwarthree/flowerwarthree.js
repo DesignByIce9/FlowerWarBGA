@@ -17,6 +17,7 @@
 
 
 let blockerSpace = 0; 
+let boardArray = [];
 
 define([
     "dojo","dojo/_base/declare",
@@ -50,171 +51,116 @@ function (dojo, declare) {
         setup: function( gamedatas )
         {
             console.log( "Starting game setup" );
+
+            this.azFaithCounter = {};
+            this.cathFaithCounter = {};
+            this.peopleCounter = {};
+            this.timeCounter = {};
             
             // Setting up player boards
+            i=0;
             for( var player_id in gamedatas.players )
             {
-                var player = gamedatas.players[player_id];
-                         
-                // TODO: Setting up players boards if needed
+                var player = gamedatas.players[player_id];                        
+                var player_board_div = $('player_board_'+player_id);
+                dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
+                this.azFaithCounter[player_id] = new ebg.counter();
+                this.azFaithCounter[player_id].create('azFaithCounter'+player_id);
+                this.azFaithCounter[player_id].setValue(gamedatas.resources[i][0]);
+                this.cathFaithCounter[player_id] = new ebg.counter();
+                this.cathFaithCounter[player_id].create('cathFaithCounter'+player_id);
+                this.cathFaithCounter[player_id].setValue(gamedatas.resources[i][1]);
+                this.peopleCounter[player_id] = new ebg.counter();
+                this.peopleCounter[player_id].create('peopleCounter'+player_id);
+                this.peopleCounter[player_id].setValue(gamedatas.resources[i][2]);
+                this.timeCounter[player_id] = new ebg.counter();
+                this.timeCounter[player_id].create('timeCounter'+player_id);
+                this.timeCounter[player_id].setValue(1);
+                i++;         
             }
-            
-          this.azFaithCounter = {};
-          this.cathFaithCounter = {};
-          this.peopleCounter = {};
-          this.timeCounter = {};
-          
-          // Setting up player boards
-          i=0;
-          for( var player_id in gamedatas.players )
-          {            
-            var player = gamedatas.players[player_id];
-            var player_board_div = $('player_board_'+player_id);
-            dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
-            this.azFaithCounter[player_id] = new ebg.counter();
-            this.azFaithCounter[player_id].create('azFaithCounter'+player_id);
-            this.azFaithCounter[player_id].setValue(gamedatas.resources[i][0]);
-            this.cathFaithCounter[player_id] = new ebg.counter();
-            this.cathFaithCounter[player_id].create('cathFaithCounter'+player_id);
-            this.cathFaithCounter[player_id].setValue(gamedatas.resources[i][1]);
-            this.peopleCounter[player_id] = new ebg.counter();
-            this.peopleCounter[player_id].create('peopleCounter'+player_id);
-            this.peopleCounter[player_id].setValue(gamedatas.resources[i][2]);
-            this.timeCounter[player_id] = new ebg.counter();
-            this.timeCounter[player_id].create('timeCounter'+player_id);
-            this.timeCounter[player_id].setValue(1);
-            i++;         
-          }
+            boardArray = gamedatas.board;
+            console.log('board');
+            console.dir(boardArray);
 
-        for(i=0;i<5;i++) {
-            let space = document.createElement("div");
-            let spaceP = document.createElement("p");
-            spaceP.classList.add("spaceText");
-            space.classList.add('space');
-            let topRow = document.getElementById("topRow");
-            let spaceName = "space_"+i;
-            let spaceText = "Space "+(i+1);
-            space.id=spaceName;
-            let spacePtext = document.createTextNode(spaceText);
-            spaceP.appendChild(spacePtext);
-            space.appendChild(spaceP);
-            topRow.appendChild(space);
-        }
-        for(i=5;i<10;i++) {
-            let space = document.createElement("div");
-            let spaceP = document.createElement("p");
-            spaceP.classList.add("spaceText");
-            space.classList.add('space');
-            let rightColumn = document.getElementById("rightColumn");
-            let spaceName = "space_"+i;
-            let spaceText = "Space "+(i+1);
-            space.id=spaceName;
-            let spacePtext = document.createTextNode(spaceText);
-            spaceP.appendChild(spacePtext);
-            space.appendChild(spaceP);
-            rightColumn.appendChild(space);
-        }
-        for(i=14;i>9;i--) {
-            let space = document.createElement("div");
-            let spaceP = document.createElement("p");
-            spaceP.classList.add("spaceText");
-            space.classList.add('space');
-            let bottomRow = document.getElementById("bottomRow");
-            let spaceName = "space_"+i;
-            let spaceText = "Space "+(i+1);
-            space.id=spaceName;
-            let spacePtext = document.createTextNode(spaceText);
-            spaceP.appendChild(spacePtext);
-            space.appendChild(spaceP);
-            bottomRow.appendChild(space);
-        }
-        for(i=19;i>14;i--) {
-            let space = document.createElement("div");
-            let spaceP = document.createElement("p");
-            spaceP.classList.add("spaceText");
-            space.classList.add('space');
-            let leftColumn = document.getElementById("leftColumn");
-            let spaceName = "space_"+i;
-            let spaceText = "Space "+(i+1);
-            space.id=spaceName;
-            let spacePtext = document.createTextNode(spaceText);
-            spaceP.appendChild(spacePtext);
-            space.appendChild(spaceP);
-            leftColumn.appendChild(space);
-        }   
-            player1= gamedatas.tokens[0][0];
-            player2= gamedatas.tokens[1][0];
-            if (gamedatas.tokens.length>=3) {
-                player3= gamedatas.tokens[2][0];
-            }
-            if (gamedatas.tokens.length>=4) {
-                player4= gamedatas.tokens[3][0];
-            }
-          // TODO: Set up your game interface here, according to "gamedatas"
-        for(b=0;b<20;b++) {
-            for(p=0;p<gamedatas.tokens.length;p++) {
-                if(gamedatas.tokens.at(p).at(1) == b) { 
-                    let token = document.createElement("div");        
-                    token.classList.add("token");
-                    token.id="token_"+p;
-                    boardID = "space_"+b;
-                    playerContainer = document.getElementById(boardID);
-                    switch (p) {
-                        case 0:
-                            color = gamedatas.players[player1].color;
-                            break;
-                        case 1:
-                            color = gamedatas.players[player2].color
-                            break;
-                        case 2:
-                            color = gamedatas.players[player3].color
-                            break;
-                        case 3:
-                            color = gamedatas.players[player4].color
-                            break;
+            for(i=0;i<19;i++) {
+                let boardContainer = document.getElementById("boardContainer");
+                boardSpace = this.createSpace(i);
+                boardContainer.appendChild(boardSpace);
+            }   
+                player1= gamedatas.tokens[0][0];
+                player2= gamedatas.tokens[1][0];
+                if (gamedatas.tokens.length>=3) {
+                    player3= gamedatas.tokens[2][0];
+                }
+                if (gamedatas.tokens.length>=4) {
+                    player4= gamedatas.tokens[3][0];
+                }
+            // TODO: Set up your game interface here, according to "gamedatas"
+            for(b=0;b<20;b++) {
+                for(p=0;p<gamedatas.tokens.length;p++) {
+                    if(gamedatas.tokens.at(p).at(1) == b) { 
+                        let token = document.createElement("div");        
+                        token.classList.add("token");
+                        token.id="token_"+p;
+                        boardID = "tokenHolder_"+b;
+                        playerContainer = document.getElementById(boardID);
+                        switch (p) {
+                            case 0:
+                                color = gamedatas.players[player1].color;
+                                break;
+                            case 1:
+                                color = gamedatas.players[player2].color
+                                break;
+                            case 2:
+                                color = gamedatas.players[player3].color
+                                break;
+                            case 3:
+                                color = gamedatas.players[player4].color
+                                break;
+                        }
+                        color = "filter_" +color;
+                        token.classList.add(color);                                       
+                        playerContainer = document.getElementById(boardID);
+                        playerContainer.appendChild(token);
                     }
-                    color = "filter_" +color;
-                    token.classList.add(color);                                       
-                    playerContainer = document.getElementById(boardID);
-                    playerContainer.appendChild(token);
                 }
             }
-        }
         
-        blockerSpace = gamedatas.blocker;
-        let q1Block = (gamedatas.blocker-1);
-        let q2Block = q1Block+5;
-        let q3Block = q1Block+10;
-        let q4Block = q1Block+15;
-        switch(blockerSpace) {
-            case "0":
-            break;
-            default:
-                for(let i=0;i<4;i++) {
-                    let blocker = document.createElement("div");        
-                    blocker.classList.add("blocker");
-                    if(i==0) {
-                        blockerID = "blocker_"+5;
-                        boardID = "space_"+q1Block;
-                        blocker.id=blockerID;
-                    }else if(i==1){
-                        blockerID = "blocker_"+6;
-                        boardID = "space_"+q2Block;
-                        blocker.id=blockerID;
-                    }else if(i==2){
-                        blockerID = "blocker_"+7;
-                        boardID = "space_"+q3Block;
-                        blocker.id=blockerID;
-                    }else if(i==3){
-                        blockerID = "blocker_"+8;
-                        boardID = "space_"+q4Block;
-                        blocker.id=blockerID;
-                        
+            blockerSpace = gamedatas.blocker;
+            let q1Block = (gamedatas.blocker-1);
+            let q2Block = q1Block+5;
+            let q3Block = q1Block+10;
+            let q4Block = q1Block+15;
+            switch(blockerSpace) {
+                case "0":
+                break;
+                default:
+                    for(let i=0;i<4;i++) {
+                        let blocker = document.createElement("div");        
+                        blocker.classList.add("blocker");
+                        blocker.classList.add("filter_000000");
+                        if(i==0) {
+                            blockerID = "blocker_"+5;
+                            boardID = "space_"+q1Block;
+                            blocker.id=blockerID;
+                        }else if(i==1){
+                            blockerID = "blocker_"+6;
+                            boardID = "space_"+q2Block;
+                            blocker.id=blockerID;
+                        }else if(i==2){
+                            blockerID = "blocker_"+7;
+                            boardID = "space_"+q3Block;
+                            blocker.id=blockerID;
+                        }else if(i==3){
+                            blockerID = "blocker_"+8;
+                            boardID = "space_"+q4Block;
+                            blocker.id=blockerID;
+                            
+                        }
+                        playerContainer = document.getElementById(boardID);
+                        playerContainer.appendChild(blocker);
                     }
-                    playerContainer = document.getElementById(boardID);
-                    playerContainer.appendChild(blocker);
-                }
-                break;             
+                    break;             
             }
 
             for(let i=0; i<7; i++) {
@@ -296,6 +242,8 @@ function (dojo, declare) {
         onEnteringState: function( stateName, args )
         {
             console.log( 'Entering state: '+stateName );
+            messagecontainer = document.getElementById("messageContainer");
+            messagecontainer.classList.add("hidden");   
         
             switch( stateName )
             {
@@ -440,7 +388,6 @@ function (dojo, declare) {
                 break;
 
                 case 'cardHandler':
-                    console.dir(args.args.cardState);
                     cardType = args.args.cardState.cardType;
                     cardFaithFlag = args.args.cardState.faithChoiceFlag;
                     cardTempleFlag = args.args.cardState.faithChoiceFlag;
@@ -597,6 +544,76 @@ function (dojo, declare) {
         
         */
 
+            createSpace: function (boardID) {
+                let space = document.createElement("div");
+                space.id="space_"+boardID;
+                let spaceResource = document.createElement("div");
+                spaceResource.id = "resourceContainer_space_"+boardID;
+                spaceResource.classList.add("resourceContainer");
+                let resourceA = document.createElement("div");
+                resourceA.id = "resources_a_space_"+boardID;
+                resourceA.classList.add("resource");
+                let resourceC = document.createElement("div");
+                resourceC.id = "resources_c_space_"+boardID;
+                resourceC.classList.add("resource");
+                let resourceP = document.createElement("div");
+                resourceP.id = "resources_p_space_"+boardID;
+                resourceP.classList.add("resource");
+                let iconA = document.createElement("div");
+                iconA.id = "resources_a_icon_space_"+boardID;
+                iconA.classList.add("resourceIconA");
+                let iconC = document.createElement("div");
+                iconC.id = "resources_c_icon_space_"+boardID;
+                iconC.classList.add("resourceIconC");
+                let iconP = document.createElement("div");
+                iconP.id = "resources_p_icon_space_"+boardID;
+                iconP.classList.add("resourceIconP");
+                let resourceAText = document.createElement("p");
+                resourceAText.id = "resources_a_text_space_"+boardID;
+                resourceAText.classList.add("resourceText");
+                let resourceCText = document.createElement("p");
+                resourceCText.id = "resources_c_text_space_"+boardID;
+                resourceCText.classList.add("resourceText");
+                let resourcePText = document.createElement("p");
+                resourcePText.id = "resources_p_text_space_"+boardID;
+                resourcePText.classList.add("resourceText");
+                let tokenHolder = document.createElement("div");
+                tokenHolder.id = "tokenHolder_"+boardID;
+                tokenHolder.classList.add("tokenHolder");
+                let spaceP = document.createElement("p");
+                spaceP.id = "text_space_"+boardID;
+
+                let Atext = document.createTextNode(boardArray[boardID]['Az']);
+                let Ctext = document.createTextNode(boardArray[boardID]['Cath']);
+                let Ptext = document.createTextNode(boardArray[boardID]['People']);
+
+                resourceAText.appendChild(Atext);
+                resourceCText.appendChild(Ctext);
+                resourcePText.appendChild(Ptext);
+                
+                resourceA.appendChild(resourceAText);
+                resourceA.appendChild(iconA);
+                resourceC.appendChild(resourceCText);
+                resourceC.appendChild(iconC);
+                resourceP.appendChild(resourcePText);
+                resourceP.appendChild(iconP);
+                
+                spaceResource.appendChild(resourceA);
+                spaceResource.appendChild(resourceC);
+                spaceResource.appendChild(resourceP);
+                
+                spaceP.classList.add("spaceText");
+                space.classList.add('space');
+
+                let spacePtext = document.createTextNode("Space "+(boardID+1));
+                spaceP.appendChild(spacePtext);
+                space.appendChild(spaceP);
+                space.appendChild(spaceResource);
+                space.appendChild(tokenHolder);
+                
+		        return space
+            },
+
             ajaxCallWrapper: function (action, args) {
                 if (!args) {
                     args = {};
@@ -747,11 +764,27 @@ function (dojo, declare) {
             // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
             // 
 
+            dojo.subscribe( 'otherDrawnCard', this, "notif_otherDrawnCard" );
+            dojo.subscribe( 'selfDrawnCard', this, "notif_selfDrawnCard" );
+            this.notifqueue.setIgnoreNotificationCheck( 'otherDrawnCard', (notif) => (notif.args.player_id == this.player_id) );
             
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
         
+        notif_otherDrawnCard: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_selfDrawnCard: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        }
 
         /*
         Example:

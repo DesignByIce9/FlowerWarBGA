@@ -27,33 +27,32 @@
 
 
 <div id="fw-container">
-<div class="spaceRow" id="topRow"></div>
-<div class="spaceColumn" id="rightColumn"></div>
-<div id="temple">
-    <div id="apocFlag"></div>
-        <div id="templeTracks">
-            <div class="templeTrack" id="azTemple"><p class = "trackHeader" id="azTitle">Aztec track direction: </p>
-                <div class="trackSpace" id="az_6"></div>
-                <div class="trackSpace" id="az_5"></div>
-                <div class="trackSpace" id="az_4"></div>
-                <div class="trackSpace" id="az_3"></div>
-                <div class="trackSpace" id="az_2"></div>
-                <div class="trackSpace" id="az_1"></div>
-                <div class="trackSpace" id="az_0"></div>
-            </div>
-            <div class="templeTrack" id="cathTemple"><p class = "trackHeader" id="cathTitle">Catholic track direction: </p>
-                <div class="trackSpace" id="cath_6"></div>
-                <div class="trackSpace" id="cath_5"></div>
-                <div class="trackSpace" id="cath_4"></div>
-                <div class="trackSpace" id="cath_3"></div>
-                <div class="trackSpace" id="cath_2"></div>
-                <div class="trackSpace" id="cath_1"></div>
-                <div class="trackSpace" id="cath_0"></div>
-            </div>
+    <div id="messageContainer"><p id="message-text"></p></div>
+    <div id="boardContainer">
+        <div id="temple">
+            <div id="apocFlag"></div>
+                <div id="templeTracks">
+                    <div class="templeTrack" id="azTemple"><p class = "trackHeader" id="azTitle">Aztec track direction: </p>
+                        <div class="trackSpace" id="az_6"></div>
+                        <div class="trackSpace" id="az_5"></div>
+                        <div class="trackSpace" id="az_4"></div>
+                        <div class="trackSpace" id="az_3"></div>
+                        <div class="trackSpace" id="az_2"></div>
+                        <div class="trackSpace" id="az_1"></div>
+                        <div class="trackSpace" id="az_0"></div>
+                    </div>
+                    <div class="templeTrack" id="cathTemple"><p class = "trackHeader" id="cathTitle">Catholic track direction: </p>
+                        <div class="trackSpace" id="cath_6"></div>
+                        <div class="trackSpace" id="cath_5"></div>
+                        <div class="trackSpace" id="cath_4"></div>
+                        <div class="trackSpace" id="cath_3"></div>
+                        <div class="trackSpace" id="cath_2"></div>
+                        <div class="trackSpace" id="cath_1"></div>
+                        <div class="trackSpace" id="cath_0"></div>
+                    </div>
+                </div>
         </div>
-</div>
-<div class="spaceColumn" id="leftColumn"></div>
-<div class="spaceRow" id="bottomRow"></div>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -61,13 +60,13 @@
 // Javascript HTML templates
 
 var jstpl_player_board = '<div class="cpboard">\
-    <div id="aFaithCounter${id}" class="aFaithCounter"></div>Aztec Faith: <span id="azFaithCounter${id}">0</span>\
-    <div id="cFaithCounter${id}" class="cFaithCounter"></div>Catholic Faith: <span id="cathFaithCounter${id}">0</span>\
-    <div id="pCounter${id}" class="pCounter"></div>People: <span id="peopleCounter${id}">0</span>\
-    <div id="tCounter${id}" class="tCounter"></div>Time: <span id="timeCounter${id}">0</span>\
+    <div id="aContainer" class="counterContainer"><div id="aFaithCounter${id}" class="aFaithCounter"></div><div id="panel_icon_a" class="resourceIconA"></div><p class="counter-text">Aztec Faith: <span id="azFaithCounter${id}">0</span></p></div>\
+    <div id="cContainer" class="counterContainer"><div id="cFaithCounter${id}" class="cFaithCounter"></div><div id="panel_icon_c" class="resourceIconC"></div><p class="counter-text">Catholic Faith: <span id="cathFaithCounter${id}">0</span></p></div>\
+    <div id="pContainer" class="counterContainer"><div id="pCounter${id}" class="pCounter"></div><div id="panel_icon_p" class="resourceIconP"></div><p class="counter-text">People: <span id="peopleCounter${id}">0</span></p></div>\
+    <div id="tContainer" class="counterContainer"><div id="tCounter${id}" class="tCounter"></div><div id="panel_icon_t" class="resourceIconT"></div><p class="counter-text">Time: <span id="timeCounter${id}">0</span></p></div>\
 </div>';
 
-var jstpl_boardSpace = '<div class="space" id="space_${boardID}"><p> class="spaceText">Space ${boardID}</p></div>';
+/* var jstpl_boardSpace = '<div class="space" id="space_${boardID}"><p> class="spaceText">Space ${boardID}</p><div class="space-resource" id="space_${boardID}_resources"><div id="az_resource_icon"><img alt="Aztec Resource Icon" src="img/Aztec.svg"><p id="az_resource_text_space_${boardID}"></p></div><div id="cath_resource_icon"><img alt="Catholic Resource Icon" src="img/Catholic.svg"><p id="cath_resource_text_space_${boardID}"></p></div><div id="people_resource_icon"><img alt="People Resource Icon" src="img/People.svg"><p id="people_resource_text_space_${boardID}"></p></div></div></div>'; */
 
 </script>  
 

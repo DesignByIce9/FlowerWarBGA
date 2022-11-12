@@ -55,6 +55,7 @@ class FlowerWarThree extends Table
             "cardChoiceFaith" => 29,
             "cardChoiceTemple" => 30,
             "blockerSpace" => 31,
+            "cardTestProgress" => 32,
     ) );
 
     // setting up Deck
@@ -170,6 +171,7 @@ class FlowerWarThree extends Table
         self::setGameStateInitialValue( 'numPlayers', count($players) );
         self::setGameStateInitialValue( 'cardChoiceFaith', "" );
         self::setGameStateInitialValue( 'cardChoiceTemple', "" );
+        self::setGameStateInitialValue( 'cardTestProgress', 0 );
 
         // setting up state tables
 
@@ -275,6 +277,8 @@ class FlowerWarThree extends Table
         $result['apocFlag'] = $apocflag;
         $result['azFlag'] = $aflag;
         $result['cathFlag'] = $cflag;
+        $result['board'] = $this->board;
+
 
         return $result;
     }
@@ -1080,9 +1084,11 @@ class FlowerWarThree extends Table
     }
 
     function stBoardUpdate() {
-        $pID = $this->getActivePlayerId();
-        $this->cards->pickCardForLocation( "deck", "held", $pID );
-        $this->gamestate->nextState("cardHandler");
+        //$pID = $this->getActivePlayerId();
+        //$this->cards->pickCardForLocation( "deck", "held", $pID );
+        //$this->gamestate->nextState("cardHandler");
+        
+        $this->gamestate->nextState("cardTestStart");
     }
 
     function stCardHandler() {
@@ -1102,6 +1108,18 @@ class FlowerWarThree extends Table
         $currentCardType = "";
         $currentCard = $this->cards->getCardsInLocation('held', $pID);
         $currentCardType = array_values($currentCard)[0]["type"];
+        self::notifyAllPlayers( "otherDrawnCard", clienttranslate( '${player_name} has drawn the ${currentCardType} card' ),
+        array(
+            'player_id' => $pID,
+            'player_name' => self::getActivePlayerName(),
+            'currentCardType' => $currentCardType,
+        ) );
+        self::notifyPlayer($pID,"selfDrawnCard", clienttranslate( 'You have drawn the ${currentCardType} card' ),
+        array(
+            'player_id' => $pID,
+            'currentCardType' => $currentCardType,
+        ) );
+
         $highest = 0;
         $highestValue = 0;
         $cardChoiceF = $this->getGameStateValue("cardChoiceFaith");
@@ -1350,12 +1368,14 @@ class FlowerWarThree extends Table
                     $this->updateResources($pID, 'A', $cAz);
                 }
                 $cCath += (2*$fPen);
+                $gain = ($fPen*2);
                 $this->updateResources($pID, 'C', $cCath);
-                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${fPen} Aztec faith to ${(fPen*2)} Catholic faith' ),
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${fPen} Aztec faith to ${gain} Catholic faith' ),
                             array(
                                 'player_id' => $pID,
                                 'player_name' => self::getActivePlayerName(),
                                 'fPen' => $fPen,
+                                'gain' => $gain
                             ) );
             break;
             case 'cConvert':
@@ -1372,12 +1392,14 @@ class FlowerWarThree extends Table
                     $this->updateResources($pID, 'C', $cCath);
                 }
                 $cAz += (2*$fPen);
+                $gain = ($fPen*2);
                 $this->updateResources($pID, 'A', $cAz);
-                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${fPen} Catholic faith to ${(fPen*2)} Aztec faith' ),
+                self::notifyAllPlayers( "message", clienttranslate( '${player_name} is forced to convert ${fPen} Catholic faith to ${gain} Aztec faith' ),
                             array(
                                 'player_id' => $pID,
                                 'player_name' => self::getActivePlayerName(),
                                 'fPen' => $fPen,
+                                'gain' => $gain
                             ) );
             break;
             case 'aCull':
@@ -1523,14 +1545,42 @@ class FlowerWarThree extends Table
             case 'rTime':
             break;
         }
-        //$this->cards->moveAllCardsInLocation('held','discard');
+        $this->cards->moveAllCardsInLocation('held','discard');
         //$this->gamestate->nextState("resourceLoop");
+        $this->gamestate->nextState("cardTestEnd");
     }
 
     function stResourceLoop() {
-
+        $pID = $this->getActivePlayerId();
 
         $this->gamestate->nextState("moveToken");
+    }
+
+    function stCardTestStart() {
+        $pID = $this->getActivePlayerId();
+        $cardID = $this ->getGameStateValue("cardTestProgress");
+        $cardTestType = $this->events[$cardID]["cardTest"];
+        $cardArray = array();
+        
+        $cardArray = $this->cards->getCardsofType($cardTestType);
+        $cardTypeID = array_values($cardArray)[0]["id"];
+        $this->cards->moveCard($cardTypeID, "held", $pID);
+        $cardTypeID = array_values($cardArray)[1]["id"];
+        $this->cards->moveCard($cardTypeID, "discard");
+
+        $this->gamestate->nextState("cardHandler");
+    }
+
+    function stCardTestEnd() {
+        $cardID = $this ->getGameStateValue("cardTestProgress");
+        $this->gamestate->nextState("resourceLoop");
+        /*if ($cardID<24) {
+            $cardID++;
+            $this->setGameStateValue("cardTestProgress", $cardID);
+            $this->gamestate->nextState("cardTestStart");
+        } else {
+            $this->gamestate->nextState("resourceLoop");
+        }*/
     }
 
 

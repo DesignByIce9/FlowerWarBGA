@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -12,246 +13,402 @@
  * FlowerWarThree stylesheet
  *
  */
+#space_0 {
+  transform: rotate(0deg) translateX(350px);
+}
 
+#space_1 {
+  transform: rotate(19deg) translateX(350px);
+}
 
- #fw-container {
-    position: relative;
-    background: rgb(218, 209, 209);
-    border:3pt solid rgb(0, 0, 0);
-    width: 800px;
-    height: 960px;
-    padding: 10px;
-    margin: 10px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(6, 1fr);
-    grid-column-gap: 5px;
-    grid-row-gap: 5px;
-    align-items: center;
+#space_2 {
+  transform: rotate(38deg) translateX(350px);
+}
+
+#space_3 {
+  transform: rotate(57deg) translateX(350px);
+}
+
+#space_4 {
+  transform: rotate(76deg) translateX(350px);
+}
+
+#space_5 {
+  transform: rotate(95deg) translateX(350px);
+}
+
+#space_6 {
+  transform: rotate(114deg) translateX(350px);
+}
+
+#space_7 {
+  transform: rotate(133deg) translateX(350px);
+}
+
+#space_8 {
+  transform: rotate(152deg) translateX(350px);
+}
+
+#space_9 {
+  transform: rotate(171deg) translateX(350px);
+}
+
+#space_10 {
+  transform: rotate(190deg) translateX(350px);
+}
+
+#space_11 {
+  transform: rotate(209deg) translateX(350px);
+}
+
+#space_12 {
+  transform: rotate(228deg) translateX(350px);
+}
+
+#space_13 {
+  transform: rotate(247deg) translateX(350px);
+}
+
+#space_14 {
+  transform: rotate(266deg) translateX(350px);
+}
+
+#space_15 {
+  transform: rotate(285deg) translateX(350px);
+}
+
+#space_16 {
+  transform: rotate(304deg) translateX(350px);
+}
+
+#space_17 {
+  transform: rotate(323deg) translateX(350px);
+}
+
+#space_18 {
+  transform: rotate(342deg) translateX(350px);
+}
+
+#space_19 {
+  transform: rotate(361deg) translateX(350px);
+}
+
+#fw-container {
+  /* position: relative; */
+  /*background: rgb(218, 209, 209); */
+  /* border:3pt solid rgb(0, 0, 0); */
+  width: 800px;
+  height: 900px;
+  padding: 10px;
+  margin: 10px;
+}
+
+#boardContainer {
+  border: 3pt solid rgb(0, 0, 0);
+  background: rgb(218, 209, 209);
+  position: relative;
+  padding: 5px;
+  margin: 5px;
+  height: 90%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  grid-column-gap: 5px;
+  grid-row-gap: 5px;
+  align-items: center;
+  justify-items: center;
 }
 
 .spaceRow {
-    background: rgb(116, 114, 114);
-    padding: 3px;
-    border:3pt solid blue;
-    height: 100px;
-    width:625px;
-    margin-left:auto;
-    margin-right:auto;
-    display:flex;
-    flex-direction: row;
-    justify-content:space-evenly;
+  /*background: rgb(116, 114, 114); 
+  border:3pt solid blue; */
+  padding: 3px;
+  height: 100px;
+  width: 80%;
+  margin: 5px auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
 }
 
 .spaceColumn {
-    background: rgb(116, 114, 114);
-    padding: 3px;
-    border:3pt solid blue;
-    height: 95%;
-    width:100px;
-    margin: auto 5px;
-    display:flex;
-    flex-direction: column;
-    justify-content:space-evenly;
-}
-
-#topRow {
-    grid-area: 1 / 1 / 2 / 6;
-}
-
-#bottomRow {
-    grid-area: 6 / 1 / 7 / 6;
-}
-
-#leftColumn {
-    grid-area: 2 / 1 / 6 / 2;
-}
-
-#rightColumn {
-    grid-area: 2 / 5 / 6 / 6;
+  /* background: rgb(116, 114, 114);
+  border: 3pt solid blue; */
+  padding: 3px;
+  height: 80%;
+  width: 100px;
+  margin: auto 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
 }
 
 .space {
-    border:2px solid green;
-    width:80%;
-    height:80%;
-    margin:3px;
-    padding:5px;
-    background: lightgray;
+  position: absolute;
+  border: 2px solid green;
+  width: 100px;
+  height: 100px;
+  margin: 3px;
+  padding: 5px;
+  background: lightgray;
+  display: flex;
+  flex-direction: column;
 }
 
 .spaceText {
-    text-align: center;
-    vertical-align: center;
-    font-size: 15px;
-    font-weight: bold;
-    font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  vertical-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .token {
-    height:25px;
-    width:25px;
-    padding:2px;
-    margin:2px;
-    background-image: url("img/meeple-white.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.filter_008000 {
-    background-blend-mode: multiply;
-    background-color: #008000;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.filter_0000ff {
-    background-blend-mode: multiply;
-    background-color: #0000ff;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.filter_ff0000 {
-    background-blend-mode: multiply;
-    background-color: #ff0000;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.filter_ffa500 {
-    background-blend-mode: multiply;
-    background-color: #ffa500;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
+  height: 25px;
+  width: 25px;
+  padding: 2px;
+  margin: 2px;
+  background-image: url("img/meeple-white.png");
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .blocker {
-    height:25px;
-    width:25px;
-    padding:2px;
-    margin:2px;
-    background-image: url("img/meeple-white.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-blend-mode: multiply;
-    background-color: #000000;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
+  height: 27px;
+  width: 27px;
+  padding: 0px;
+  margin: 2px;
+  background-image: url("img/meeple-white.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.filter_008000 {
+  background-blend-mode: multiply;
+  background-color: #008000;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.filter_0000ff {
+  background-blend-mode: multiply;
+  background-color: #0000ff;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.filter_ff0000 {
+  background-blend-mode: multiply;
+  background-color: #ff0000;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.filter_ffa500 {
+  background-blend-mode: multiply;
+  background-color: #ffa500;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.filter_000000 {
+  background-blend-mode: multiply;
+  background-color: #000000;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 #temple {
-    width: 95%;
-    height: 95%;
-    background: green;
-    border: 2px solid black;
-    padding: 5px;
-    margin: auto;
-    display:flex;
-    flex-direction: column;
-    justify-content: space-between;
-    grid-area: 2 / 2 / 6 / 5;
-
+  width: 80%;
+  height: 80%;
+  background: green;
+  border: 2px solid black;
+  padding: 5px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  grid-area: 2/2/6/5;
 }
 
 #templeTracks {
-    display:flex;
-    flex-direction: row;
-    justify-content:space-around;
-    align-content: center;
-    align-items: center;
-    height: 100%;
-    width:100;
-
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100;
 }
 
 .templeTrack {
-    width: 45%;
-    height: 95%;
-    border: 2px solid black;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
+  width: 45%;
+  height: 95%;
+  border: 2px solid black;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
 .trackSpace {
-    border: 1px solid lightblue;
-    width:75%;
-    height:12%;
-    margin:3px;
-    padding:5px;
-    vertical-align: center;
-    display: flex;
-    align-items: center;
+  border: 1px solid lightblue;
+  width: 75%;
+  height: 12%;
+  margin: 3px;
+  padding: 5px;
+  vertical-align: center;
+  display: flex;
+  align-items: center;
 }
 
 .trackHeader {
-    text-align:center;
-    width: auto;
-    padding: 2px;
-    margin:2px auto;
+  text-align: center;
+  width: auto;
+  padding: 2px;
+  margin: 2px auto;
 }
 
 .templeToken {
-    height:30px;
-    width:30px;
-    margin:auto;
-    padding: auto;
-    background-image: url("img/meeple-white.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    vertical-align: center;
+  height: 30px;
+  width: 30px;
+  margin: auto;
+  padding: auto;
+  background-image: url("img/meeple-white.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
 }
 
 #apocFlag {
-    display: flex;
-    flex-direction: row;
-    width:100%;
-    height: 20px;
-    padding:2px;
-    margin:1px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 20px;
+  padding: 2px;
+  margin: 1px;
 }
 
 .upArrow {
-    background-image: url("img/aiga_up_arrow.svg");
-    background-size: contain;
-    background-repeat: no-repeat;
-    vertical-align: center;
-    height:30px;
-    width:30px;
+  background-image: url("img/aiga_up_arrow.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+  height: 30px;
+  width: 30px;
 }
 
 .downArrow {
-    background-image: url("img/aiga_down_arrow.svg");
-    background-size: contain;
-    background-repeat: no-repeat;
-    vertical-align: center;
-    height:30px;
-    width:30px;
+  background-image: url("img/aiga_down_arrow.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+  height: 30px;
+  width: 30px;
 }
 
 .hidden {
-    display:none;
-    visibility: hidden;
+  display: none !important;
+  visibility: hidden;
 }
 
 .possibleMove {
-    background-color: #7d7dec !important;
-    cursor: pointer;
+  background-color: #7d7dec !important;
+  cursor: pointer;
 }
 
 .blockedMove {
-    background-color: #ff8080 !important;
-    cursor: pointer;
+  background-color: #ff8080 !important;
+  cursor: pointer;
 }
+
+#messageContainer {
+  height: 25px;
+  width: 95%;
+  padding: 2px;
+  margin: auto;
+  border: 1px solid red;
+}
+
+#message-text {
+  text-align: center;
+  font-size: 16px;
+  padding: auto;
+  margin: 2px;
+}
+
+.resourceIconA {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/Aztec.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceIconC {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/Catholic.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceIconP {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/People.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceIconT {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/Time.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceContainer {
+  display: flex;
+  flex-direction: row;
+  justify-items: auto;
+  justify-content: center;
+}
+
+.resourceText {
+  text-align: center;
+  margin: auto;
+  padding: 1px;
+}
+
+.counterContainer {
+  display: flex;
+  flex-direction: row;
+  row-gap: 10px;
+}
+
+.counter-text {
+  vertical-align: center;
+  padding: 2px;
+  margin: 2px;
+}/*# sourceMappingURL=flowerwarthree.css.map */

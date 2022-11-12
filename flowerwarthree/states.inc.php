@@ -58,6 +58,7 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
+        //"transitions" => array( "" => 2 )
         "transitions" => array( "" => 201 )
     ),
     
@@ -82,7 +83,7 @@ $machinestates = array(
         "possibleactions" => array( "nextQuadA", "nextQuadC", "resetTime", "boardUpdate" ),
         "transitions" => array( "nextQuadA" => 2, "nextQuadC" => 2,"resetTime" => 2, "boardUpdate" => 4 )
 ),
-
+    
     4 => array(
         "name" => "boardUpdate",
         "description" => clienttranslate('Updating the board'),
@@ -90,8 +91,10 @@ $machinestates = array(
         "type" => "game",
         "args" => "argsBoardState",
         "action" => "stBoardUpdate",
-        "possibleactions" => array( "cardHandler" ),
-        "transitions" => array( "cardHandler" => 5 )
+        //"possibleactions" => array( "cardHandler" ),
+        //"transitions" => array( "cardHandler" => 5 )
+        "possibleactions" => array( "cardTestStart" ),
+        "transitions" => array( "cardTestStart" => 202 )
     ),
 
     5 => array(
@@ -101,8 +104,10 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argsCardState",
         "action" => "stCardHandler",
-        "possibleactions" => array( "resourceLoop" ),
-        "transitions" => array( "resourceLoop" => 10)
+        //"possibleactions" => array( "resourceLoop" ),
+        //"transitions" => array( "resourceLoop" => 10)
+        "possibleactions" => array( "cardTestEnd" ),
+        "transitions" => array( "cardTestEnd" => 203)
     ),
 
     10 => array(
@@ -125,29 +130,26 @@ $machinestates = array(
         "possibleactions" => array( "moveToken", ),
         "transitions" => array( "moveToken" => 2 )
     ),
-    
-/*
-    Examples:
-    
-    2 => array(
-        "name" => "nextPlayer",
-        "description" => '',
+    // /////////////////////////////////////////////////////////
+    202 => array(
+        "name" => "cardTestStart",
+        "description" => clienttranslate('Starting Test'),
+        "descriptionmyturn" => clienttranslate('Starting Test'),
         "type" => "game",
-        "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
+        "action" => "stCardTestStart",
+        "possibleactions" => array( "cardHandler", ),
+        "transitions" => array( "cardHandler" => 5 )
     ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
 
-*/  
+    203 => array(
+        "name" => "cardTestEnd",
+        "description" => clienttranslate('Ending Test'),
+        "descriptionmyturn" => clienttranslate('Ending Test'),
+        "type" => "game",
+        "action" => "stCardTestEnd",
+        "possibleactions" => array( "cardTestStart", "resourceLoop" ),
+        "transitions" => array( "cardTestStart" => 202, "resourceLoop" => 10 )
+    ),
    
     // Final state.
     // Please do not modify (and do not overload action/args methods).

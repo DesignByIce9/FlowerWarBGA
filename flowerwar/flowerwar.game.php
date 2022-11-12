@@ -1125,7 +1125,7 @@ class flowerwar extends Table
                     'player_name' => self::getActivePlayerName(),
                     'pPen' => $pPen,
                     'pRate' => $pRate,
-                ) );   
+                ) );
                 st_loseCheck();
             break;
             case 'cCull':
@@ -1150,7 +1150,7 @@ class flowerwar extends Table
                         array(
                             'player_id' => $player_id,
                             'player_name' => self::getActivePlayerName(),
-                        ) );  
+                        ) );
                 } else if ($highest == 1) {
                     $cCath = $cCath +2;
                     updateResources($pID, 'C', $cCath); 
@@ -1158,7 +1158,7 @@ class flowerwar extends Table
                         array(
                             'player_id' => $player_id,
                             'player_name' => self::getActivePlayerName(),
-                        ) );    
+                        ) );
                 } else if ($highest == 2) {
                     $cAz = $cAz +2;
                     updateResources($pID, 'A', $cAz); 
@@ -1180,23 +1180,23 @@ class flowerwar extends Table
             break;
             case 'aBonus':
                 $cAz += $fBon;
-                    updateResources($pID, 'A', $cAz); 
-                    self::notifyAllPlayers( "aBonus", clienttranslate( '${player_name} has gained ${fBon} Aztec Faith' ),
-                        array(
-                            'player_id' => $player_id,
-                            'player_name' => self::getActivePlayerName(),
-                            'fBon' => $fBon,
-                        ) ); 
+                updateResources($pID, 'A', $cAz); 
+                self::notifyAllPlayers( "aBonus", clienttranslate( '${player_name} has gained ${fBon} Aztec Faith' ),
+                    array(
+                        'player_id' => $player_id,
+                        'player_name' => self::getActivePlayerName(),
+                        'fBon' => $fBon,
+                    ) ); 
             break;
             case 'cBonus':
                 $cCath += $fBon;
-                    updateResources($pID, 'C', $cCath); 
-                    self::notifyAllPlayers( "cBonus", clienttranslate( '${player_name} has gained ${fBon} Aztec Faith' ),
-                        array(
-                            'player_id' => $player_id,
-                            'player_name' => self::getActivePlayerName(),
-                            'fBon' => $fBon,
-                        ) ); 
+                updateResources($pID, 'C', $cCath); 
+                self::notifyAllPlayers( "cBonus", clienttranslate( '${player_name} has gained ${fBon} Aztec Faith' ),
+                    array(
+                        'player_id' => $player_id,
+                        'player_name' => self::getActivePlayerName(),
+                        'fBon' => $fBon,
+                    ) ); 
             break;
             case 'gBonus':
                 if ($highest == 1) {
