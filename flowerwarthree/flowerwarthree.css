@@ -105,7 +105,6 @@
 
 #boardContainer {
   border: 3pt solid rgb(0, 0, 0);
-  background: rgb(218, 209, 209);
   position: relative;
   padding: 5px;
   margin: 5px;
@@ -118,30 +117,6 @@
   grid-row-gap: 5px;
   align-items: center;
   justify-items: center;
-}
-
-.spaceRow {
-  /*background: rgb(116, 114, 114); 
-  border:3pt solid blue; */
-  padding: 3px;
-  height: 100px;
-  width: 80%;
-  margin: 5px auto;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-}
-
-.spaceColumn {
-  /* background: rgb(116, 114, 114);
-  border: 3pt solid blue; */
-  padding: 3px;
-  height: 80%;
-  width: 100px;
-  margin: auto 5px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
 }
 
 .space {
@@ -159,9 +134,11 @@
 .spaceText {
   text-align: center;
   vertical-align: center;
-  font-size: 15px;
+  font-size: 20px;
   font-weight: bold;
   font-family: Arial, Helvetica, sans-serif;
+  color: #ffffff;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 .token {
@@ -343,7 +320,7 @@
 
 #message-text {
   text-align: center;
-  font-size: 16px;
+  font-size: 24px;
   padding: auto;
   margin: 2px;
 }
@@ -399,6 +376,9 @@
   text-align: center;
   margin: auto;
   padding: 1px;
+  color: #ffffff;
+  font-size: 20px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 .counterContainer {
@@ -411,4 +391,39 @@
   vertical-align: center;
   padding: 2px;
   margin: 2px;
+}
+
+.Hills {
+  background: url(img/Hills.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.Plains {
+  background: url(img/Plains.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.River {
+  background: url(img/River.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.Road {
+  background: url(img/Road.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.Jungle {
+  background: url(img/Jungle.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
 }/*# sourceMappingURL=flowerwarthree.css.map */

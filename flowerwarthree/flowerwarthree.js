@@ -18,6 +18,7 @@
 
 let blockerSpace = 0; 
 let boardArray = [];
+let terrainArray = [];
 
 define([
     "dojo","dojo/_base/declare",
@@ -78,9 +79,8 @@ function (dojo, declare) {
                 this.timeCounter[player_id].setValue(1);
                 i++;         
             }
+            terrainArray = gamedatas.terrain;
             boardArray = gamedatas.board;
-            console.log('board');
-            console.dir(boardArray);
 
             for(i=0;i<19;i++) {
                 let boardContainer = document.getElementById("boardContainer");
@@ -262,7 +262,7 @@ function (dojo, declare) {
                     cTime = args.args.boardState.Time;
                     cQuad = args.args.boardState.Quad;
                     cBoardID = args.args.boardState.boardID;
-                    bQuad = Math.ceil(((cBoardID+1)/5));
+                    aCount = args.args.boardState.aCount;
                     availableMoves = args.args.boardState.possibleMoves;
 
                     if (this.isCurrentPlayerActive() == true) {
@@ -279,43 +279,11 @@ function (dojo, declare) {
                             pButton.classList.add("hidden");
                         }
 
-                        if(bQuad != cQuad) {
-                            switch(bQuad) {
-                                case 1:
-                                    if(cQuad == 4) {
-                                        aButton = document.getElementById("updateQuadA");
-                                        aButton.classList.add("hidden");
-                                        cButton = document.getElementById("updateQuadC");
-                                        cButton.classList.add("hidden");
-                                        pButton = document.getElementById("resetTime");
-                                        pButton.classList.add("hidden");
-                                    }
-                                break;
-                                case 2:
-                                    if(cQuad == 1) {
-                                        aButton = document.getElementById("updateQuadA");
-                                        aButton.classList.add("hidden");
-                                        cButton = document.getElementById("updateQuadC");
-                                        cButton.classList.add("hidden");
-                                    }
-                                break;
-                                case 3:
-                                    if(cQuad == 2) {
-                                        aButton = document.getElementById("updateQuadA");
-                                        aButton.classList.add("hidden");
-                                        cButton = document.getElementById("updateQuadC");
-                                        cButton.classList.add("hidden");
-                                    }
-                                break;
-                                case 4:
-                                    if(cQuad == 3) {
-                                        aButton = document.getElementById("updateQuadA");
-                                        aButton.classList.add("hidden");
-                                        cButton = document.getElementById("updateQuadC");
-                                        cButton.classList.add("hidden");
-                                    }
-                                break;
-                            }
+                        if(aCount==3) {
+                            aButton = document.getElementById("updateQuadA");
+                            aButton.classList.add("hidden");
+                            cButton = document.getElementById("updateQuadC");
+                            cButton.classList.add("hidden");
                         }
                         
                         if (cTime == 1) {
@@ -604,6 +572,7 @@ function (dojo, declare) {
                 
                 spaceP.classList.add("spaceText");
                 space.classList.add('space');
+                space.classList.add(terrainArray[boardID]);
 
                 let spacePtext = document.createTextNode("Space "+(boardID+1));
                 spaceP.appendChild(spacePtext);
@@ -669,7 +638,7 @@ function (dojo, declare) {
                     removeTags.classList.remove("blockedMove");
                 }
                 this.ajaxCallWrapper("updateQuadA",);
-                this.updatePageTitle(); 
+                //this.updatePageTitle(); 
             },
 
             onUpdateQuadC: function (evt) {
@@ -681,7 +650,7 @@ function (dojo, declare) {
                 }
                 dojo.stopEvent( evt );
                 this.ajaxCallWrapper("updateQuadC",);
-                this.updatePageTitle();         
+                //this.updatePageTitle();         
             },
             onResetTime: function (evt) {
                 this.peopleCounter[pID].incValue(-1);
@@ -693,12 +662,12 @@ function (dojo, declare) {
                 }
                 dojo.stopEvent( evt );
                 this.ajaxCallWrapper("resetTime",);
-                this.updatePageTitle(); 
+                //this.updatePageTitle(); 
             },
 
             onClickedSpace: function (bID) {
                 boardID = bID;
-                this.ajaxCallWrapper("clickedSpace",{boardID});
+                this.ajaxCallWrapper("clickedSpace", {boardID});
             },
         
         /* Example:
@@ -766,7 +735,16 @@ function (dojo, declare) {
 
             dojo.subscribe( 'otherDrawnCard', this, "notif_otherDrawnCard" );
             dojo.subscribe( 'selfDrawnCard', this, "notif_selfDrawnCard" );
-            this.notifqueue.setIgnoreNotificationCheck( 'otherDrawnCard', (notif) => (notif.args.player_id == this.player_id) );
+
+            dojo.subscribe( 'otherUpdateQuadA', this, "notif_otherUpdateQuadA" );
+            dojo.subscribe( 'selfUpdateQuadA', this, "notif_selfUpdateQuadA" );
+            this.notifqueue.setIgnoreNotificationCheck( 'otherUpdateQuadA', (notif) => (notif.args.player_id == this.player_id) );
+            dojo.subscribe( 'otherUpdateQuadC', this, "notif_otherUpdateQuadC" );
+            dojo.subscribe( 'selfUpdateQuadC', this, "notif_selfUpdateQuadC" );
+            this.notifqueue.setIgnoreNotificationCheck( 'otherUpdateQuadC', (notif) => (notif.args.player_id == this.player_id) );
+            dojo.subscribe( 'otherResetTime', this, "notif_otherResetTime" );
+            dojo.subscribe( 'selfResetTime', this, "notif_selfResetTime" );
+            this.notifqueue.setIgnoreNotificationCheck( 'otherResetTime', (notif) => (notif.args.player_id == this.player_id) );
             
         },  
         
@@ -780,6 +758,48 @@ function (dojo, declare) {
         },
 
         notif_selfDrawnCard: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_otherUpdateQuadA: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_otherUpdateQuadC: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_selfUpdateQuadA: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_selfUpdateQuadC: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_otherResetTime: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_selfResetTime: function (notif) {
             messageContainer = document.getElementById("messageContainer");
             messageContainer.classList.remove("hidden");
             logText = this.format_string_recursive(notif.log, notif.args);

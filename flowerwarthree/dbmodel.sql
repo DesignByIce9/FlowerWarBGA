@@ -40,5 +40,6 @@ CREATE TABLE IF NOT EXISTS `resources` (
     `People` int(4) NOT NULL,
     `Time` int(2) NOT NULL,
     `charID` int(2) NOT NULL,
+    `turn` int NOT NULL,
     PRIMARY KEY (`recordID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;

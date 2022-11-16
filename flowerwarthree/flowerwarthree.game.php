@@ -56,6 +56,7 @@ class FlowerWarThree extends Table
             "cardChoiceTemple" => 30,
             "blockerSpace" => 31,
             "cardTestProgress" => 32,
+            "advanceCount" => 33,
     ) );
 
     // setting up Deck
@@ -79,6 +80,7 @@ class FlowerWarThree extends Table
     */
     protected function setupNewGame( $players, $options = array() )
     {
+        self::setGameStateInitialValue( 'turnCount', 0 );
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
@@ -104,14 +106,15 @@ class FlowerWarThree extends Table
 
         // DB Setup
 
-        $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+        $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`, `turn`) VALUES ";
         $tID = 0;
         $startQuad = 0;
         $startBoard = 0;
+        $turn = $this -> getGameStateValue("turnCount");
         foreach( $players as $player_id => $player ) {
             $startQuad = ($tID+1);
             $startBoard = (($startQuad-1)*5);
-            $playerValues[] = "('".$player_id."','".$tID."','".$startBoard."','".$startQuad."',1,2,2,8,1,0)";
+            $playerValues[] = "('".$player_id."','".$tID."','".$startBoard."','".$startQuad."',1,2,2,8,1,0, '".$turn."')";
             $tID++;
         }
         $sql .= implode( $playerValues, ',' );
@@ -123,25 +126,26 @@ class FlowerWarThree extends Table
         // adding blockers
         $blockerRoll = bga_rand(1,6);
         $bBoard = 0;
+        $turn = $this -> getGameStateValue("turnCount");
         switch ($blockerRoll) {
             case 6:
                 $this->setGameStateValue("blockerSpace", 0);
-				$sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+				$sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`, `turn`) VALUES ";
                 for($i=1;$i<5;$i++){
                     $blockerID = (4+$i);
                     $bBoard = (0);
-                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."',0,0,0,0,0,0)";
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."',0,0,0,0,0,0,'".$turn."')";
                 }
                 $sql .= implode( $values, ',' );
                 self::DbQuery( $sql );
             break;
             default:
             $this->setGameStateValue("blockerSpace", $blockerRoll);
-                $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+                $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`, `turn`) VALUES ";
                 for($i=1;$i<5;$i++){
                     $blockerID = (4+$i);
                     $bBoard = (((($i)-1)*5)+(($blockerRoll)-1));
-                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."','".$blockerRoll."',0,0,0,0,0)";
+                    $values[] = "(5,'".$blockerID."','".$bBoard."','".$i."','".$blockerRoll."',0,0,0,0,0,'".$turn."')";
                 }
                 $sql .= implode( $values, ',' );
                 self::DbQuery( $sql );
@@ -166,12 +170,12 @@ class FlowerWarThree extends Table
         self::setGameStateInitialValue( 'cathLevel', 0 );
         self::setGameStateInitialValue( 'quadUpdateFlag', false );
         self::setGameStateInitialValue( 'timeUpdateFlag', false );
-        self::setGameStateInitialValue( 'turnCount', 0 );
         self::setGameStateInitialValue( 'roundCount', 0 );
         self::setGameStateInitialValue( 'numPlayers', count($players) );
         self::setGameStateInitialValue( 'cardChoiceFaith', "" );
         self::setGameStateInitialValue( 'cardChoiceTemple', "" );
         self::setGameStateInitialValue( 'cardTestProgress', 0 );
+        self::setGameStateInitialValue( 'advanceCount', 0 );
 
         // setting up state tables
 
@@ -201,12 +205,6 @@ class FlowerWarThree extends Table
         }
         $this->cards->createCards( $events, 'deck' );
         $this->cards->shuffle( 'deck' );
-
-        /*
-        for($x=0;$x<20;$x++) {
-            $this->cards->pickCardForLocation("terrain", "board", $x);
-        }
-        */
 
 
         // TODO: setup the initial game situation here
@@ -278,6 +276,13 @@ class FlowerWarThree extends Table
         $result['azFlag'] = $aflag;
         $result['cathFlag'] = $cflag;
         $result['board'] = $this->board;
+
+        for($i=0;$i<20;$i++) {
+            $bTerrain = $this->cards->getCardsInLocation('board', $i);
+            $terrainArray[$i] = array_values($bTerrain)[0]['type'];
+        }
+
+        $result['terrain'] = $terrainArray;
 
 
         return $result;
@@ -484,43 +489,44 @@ class FlowerWarThree extends Table
         $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $ccharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`) VALUES ";
+        $turn = $this ->getGameStateValue("turnCount");
+        $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`, `turn`) VALUES ";
 
         switch($rID) {
             case 'A':
                 $cAz = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             case 'C':
                 $cCath = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             case 'P':
                 $cPeople = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             case 'T':
                 $cTime = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             case 'H':
                 $ccharID = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             case 'Q':
                 $cQuad = $rValue;
                 $cSpace = 1;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             case 'B':
                 $cBoard = $rValue;
                 $cQuad = ceil(($cBoard+1)/5);
                 $cSpace = (($cBoard+1)-(($cQuad-1)*5));
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             case 'H':
                 $ccharID = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."' )");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
             break;
             }
         $sql .= implode( $values, ',' );
@@ -704,6 +710,11 @@ class FlowerWarThree extends Table
 
     function quadUpdate($type) {
         $pID = $this->getActivePlayerId();
+        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $aCount = $this->getGameStateValue("advanceCount");
+        if($aCount > 3) {
+            throw new BgaUserException ( self::_("You can't advance more than 3 quadrants"));
+        }
         switch ($type) {
             case 'A':
                 $resource = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
@@ -714,7 +725,6 @@ class FlowerWarThree extends Table
         if ($resource==0) {
             throw new BgaUserException ( self::_("You don't have enough Faith to do that"));
         }
-        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         if( $cQuad < 4 ) {
         $cQuad++;
         } else if ($cQuad < 4) {
@@ -724,9 +734,23 @@ class FlowerWarThree extends Table
         switch ($type) {
             case 'A':
                 $this->updateResources($pID, 'A', $resource);
+                $this->notifyAllPlayers("otherUpdateQuadA", clienttranslate('${player_name} has spent 1 Aztec Faith to move to the next quadrant'), [
+                    'player_id' => $playerId,
+                    'player_name' => $this->getActivePlayerName()
+                ]);
+        
+                $this->notifyPlayer($playerId, "selfUpdateQuadA", clienttranslate('You have spent 1 Aztec Faith to move to the next quadrant'), [
+                ]);
             break;
             case 'C':
                 $this->updateResources($pID, 'C', $resource);
+                $this->notifyAllPlayers("otherUpdateQuadC", clienttranslate('${player_name} has spent 1 Catholic Faith to move to the next quadrant'), [
+                    'player_id' => $playerId,
+                    'player_name' => $this->getActivePlayerName()
+                ]);
+        
+                $this->notifyPlayer($playerId, "selfUpdateQuadC", clienttranslate('You have spent 1 Catholic Faith to move to the next quadrant'), [
+                ]);
             break;
         }
         $this->updateResources($pID, 'Q', $cQuad);
@@ -738,6 +762,9 @@ class FlowerWarThree extends Table
                 $this->gamestate->nextState("nextQuadC");
             break;
         }
+        $aCount++;
+        $this->setGameStateValue("advanceCount", $aCount);
+        
     }
 
     function updateTime() {
@@ -749,6 +776,13 @@ class FlowerWarThree extends Table
         $Time = 1;
         $this->updateResources($pID, 'P', $cPeople);
         $this->updateResources($pID, 'T', $Time);
+        $this->notifyAllPlayers("otherResetTime", clienttranslate('${player_name} has spent 1 People to reset their Time'), [
+            'player_id' => $playerId,
+            'player_name' => $this->getActivePlayerName()
+        ]);
+
+        $this->notifyPlayer($playerId, "selfResetTime", clienttranslate('You have spent 1 People to reset your Time'), [
+        ]);
         $this->gamestate->nextState("resetTime");
     }
 
@@ -907,6 +941,8 @@ class FlowerWarThree extends Table
         $boardState['cButtonFlag'] = $cButtonFlag;
         $boardState['pButtonFlag'] = $pButtonFlag;
         $boardState['pColor'] = $color;
+        $boardState['turn'] = $this ->getGameStateValue("turnCount");
+        $boardState['aCount'] = $this ->getGameStateValue("advanceCount");
 
         $testSpace = $boardState['boardID'];
         switch($boardState['Quad']) {
@@ -977,6 +1013,7 @@ class FlowerWarThree extends Table
         $cardState['moveAD'] = false;
         $cardState['moveCU'] = false;
         $cardState['moveCD'] = false;
+        $cardState['turn'] = $this ->getGameStateValue("turnCount");
 
         // get event card type
         $currentCard = array();
@@ -1021,7 +1058,6 @@ class FlowerWarThree extends Table
         $cButtonFlag = false;
         $pButtonFlag = false;
 
-
         $boardState['playerID'] = $pID;
         $boardState['tokenID'] = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $boardState['boardID'] = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
@@ -1049,6 +1085,7 @@ class FlowerWarThree extends Table
         $boardState['cButtonFlag'] = $cButtonFlag;
         $boardState['pButtonFlag'] = $pButtonFlag;
         $boardState['pColor'] = $color;
+        $boardState['turn'] = $this ->getGameStateValue("turnCount");
 
         return $boardState;
     }
@@ -1080,15 +1117,16 @@ class FlowerWarThree extends Table
     */
 
     function stMoveToken() {
-
+        $count = $this -> getGameStateValue("turnCount");
+        $count++;
+        $this -> setGameStateValue("turnCount", $count);
     }
 
     function stBoardUpdate() {
-        //$pID = $this->getActivePlayerId();
-        //$this->cards->pickCardForLocation( "deck", "held", $pID );
-        //$this->gamestate->nextState("cardHandler");
-        
-        $this->gamestate->nextState("cardTestStart");
+        $pID = $this->getActivePlayerId();
+        $this -> setGameStateValue("advanceCount", 0);
+        $this->cards->pickCardForLocation( "deck", "held", $pID );
+        $this->gamestate->nextState("cardHandler");
     }
 
     function stCardHandler() {
@@ -1546,8 +1584,8 @@ class FlowerWarThree extends Table
             break;
         }
         $this->cards->moveAllCardsInLocation('held','discard');
-        //$this->gamestate->nextState("resourceLoop");
-        $this->gamestate->nextState("cardTestEnd");
+        $this->gamestate->nextState("resourceLoop");
+        //$this->gamestate->nextState("cardTestEnd");
     }
 
     function stResourceLoop() {
@@ -1556,6 +1594,7 @@ class FlowerWarThree extends Table
         $this->gamestate->nextState("moveToken");
     }
 
+    /* 
     function stCardTestStart() {
         $pID = $this->getActivePlayerId();
         $cardID = $this ->getGameStateValue("cardTestProgress");
@@ -1580,8 +1619,9 @@ class FlowerWarThree extends Table
             $this->gamestate->nextState("cardTestStart");
         } else {
             $this->gamestate->nextState("resourceLoop");
-        }*/
+        }
     }
+    */
 
 
     /*
