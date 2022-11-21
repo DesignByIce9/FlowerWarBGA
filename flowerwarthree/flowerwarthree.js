@@ -82,7 +82,7 @@ function (dojo, declare) {
             terrainArray = gamedatas.terrain;
             boardArray = gamedatas.board;
 
-            for(i=0;i<19;i++) {
+            for(i=0;i<20;i++) {
                 let boardContainer = document.getElementById("boardContainer");
                 boardSpace = this.createSpace(i);
                 boardContainer.appendChild(boardSpace);
@@ -103,7 +103,7 @@ function (dojo, declare) {
                         token.classList.add("token");
                         token.id="token_"+p;
                         boardID = "tokenHolder_"+b;
-                        playerContainer = document.getElementById(boardID);
+                        let playerContainer = document.getElementById(boardID);
                         switch (p) {
                             case 0:
                                 color = gamedatas.players[player1].color;
@@ -120,7 +120,6 @@ function (dojo, declare) {
                         }
                         color = "filter_" +color;
                         token.classList.add(color);                                       
-                        playerContainer = document.getElementById(boardID);
                         playerContainer.appendChild(token);
                     }
                 }
@@ -155,9 +154,10 @@ function (dojo, declare) {
                             blockerID = "blocker_"+8;
                             boardID = "space_"+q4Block;
                             blocker.id=blockerID;
-                            
                         }
-                        playerContainer = document.getElementById(boardID);
+                        let playerContainer = document.getElementById(boardID);
+                        console.log('playerContainer');
+                        console.dir(playerContainer);
                         playerContainer.appendChild(blocker);
                     }
                     break;             
@@ -243,7 +243,7 @@ function (dojo, declare) {
         {
             console.log( 'Entering state: '+stateName );
             messagecontainer = document.getElementById("messageContainer");
-            messagecontainer.classList.add("hidden");   
+            //messagecontainer.classList.add("hidden");   
         
             switch( stateName )
             {
@@ -253,6 +253,7 @@ function (dojo, declare) {
                 break
                 case 'moveToken':
                     // handle action buttons
+
                     this.updatePageTitle();
 
                     pID = args.args.boardState.playerID;
@@ -278,8 +279,8 @@ function (dojo, declare) {
                             pButton = document.getElementById("resetTime");
                             pButton.classList.add("hidden");
                         }
-
-                        if(aCount==3) {
+                        console.dir(aCount);
+                        if(aCount>=2) {
                             aButton = document.getElementById("updateQuadA");
                             aButton.classList.add("hidden");
                             cButton = document.getElementById("updateQuadC");
@@ -315,11 +316,18 @@ function (dojo, declare) {
                         Array.from(clickableSpace).forEach(
                             (elem) => elem.addEventListener("click", () => this.onClickedSpace(elem.id))
                         );
+                        errorSpace = document.getElementsByClassName("blockedMove");
+                        Array.from(errorSpace).forEach(
+                            (elem) => elem.addEventListener("click", () => this.onClickedSpace(elem.id))
+                        );
                     }
+                    //this.updatePageTitle();
                 break;
 
                 case 'boardUpdate':
+                    
                     this.updatePageTitle();
+
                     pID = args.args.boardState.playerID;
                     cQuad = args.args.boardState.Quad;
                     cBoardID = args.args.boardState.boardID;
@@ -344,15 +352,15 @@ function (dojo, declare) {
                     let token = document.createElement("div");        
                     token.classList.add("token");
                     token.id=tokenID
-                    playerContainer = document.getElementById(boardID);
-                    token.classList.add(color);                                       
+                    let playerContainer = document.getElementById('space_'+cBoardID);
+                    token.classList.add(color);                                     
                     playerContainer.appendChild(token);
                     for(let i=0;i<20; i++) {
-                        removeTags = document.getElementById("space_"+i);
-                        removeTags.classList.remove("possibleMove");
-                        removeTags.classList.remove("blockedMove");
+                        dojo.removeClass('space_'+i, 'possibleMove');
+                        dojo.removeClass('space_'+i, 'blockedMove');
                     }
                     
+                    //this.updatePageTitle();
                 break;
 
                 case 'cardHandler':
@@ -633,36 +641,48 @@ function (dojo, declare) {
                 pID = this.getActivePlayerId();
                 this.azFaithCounter[pID].incValue(-1);
                 for(let i=0;i<20; i++) {
-                    removeTags = document.getElementById("space_"+i);
-                    removeTags.classList.remove("possibleMove");
-                    removeTags.classList.remove("blockedMove");
+                    let removeTags = document.getElementById("space_"+i);
+                    if(removeTags.classList.contains("possibleMove")) {
+                        removeTags.classList.remove("possibleMove");
+                    }
+                    if(removeTags.classList.contains("blockedMove")) {
+                        removeTags.classList.remove("blockedMove");
+                    }
                 }
                 this.ajaxCallWrapper("updateQuadA",);
-                //this.updatePageTitle(); 
+                this.updatePageTitle(); 
             },
 
             onUpdateQuadC: function (evt) {
                 this.cathFaithCounter[pID].incValue(-1);
                 for(let i=0;i<20; i++) {
                     removeTags = document.getElementById("space_"+i);
-                    removeTags.classList.remove("possibleMove");
-                    removeTags.classList.remove("blockedMove");
+                    if(removeTags.classList.contains("possibleMove")) {
+                        removeTags.classList.remove("possibleMove");
+                    }
+                    if(removeTags.classList.contains("blockedMove")) {
+                        removeTags.classList.remove("blockedMove");
+                    }
                 }
                 dojo.stopEvent( evt );
                 this.ajaxCallWrapper("updateQuadC",);
-                //this.updatePageTitle();         
+                this.updatePageTitle();         
             },
             onResetTime: function (evt) {
                 this.peopleCounter[pID].incValue(-1);
                 this.timeCounter[pID].toValue(1);
                 for(let i=0;i<20; i++) {
                     removeTags = document.getElementById("space_"+i);
-                    removeTags.classList.remove("possibleMove");
-                    removeTags.classList.remove("blockedMove");
+                    if(removeTags.classList.contains("possibleMove")) {
+                        removeTags.classList.remove("possibleMove");
+                    }
+                    if(removeTags.classList.contains("blockedMove")) {
+                        removeTags.classList.remove("blockedMove");
+                    }
                 }
                 dojo.stopEvent( evt );
                 this.ajaxCallWrapper("resetTime",);
-                //this.updatePageTitle(); 
+                this.updatePageTitle(); 
             },
 
             onClickedSpace: function (bID) {
@@ -745,7 +765,7 @@ function (dojo, declare) {
             dojo.subscribe( 'otherResetTime', this, "notif_otherResetTime" );
             dojo.subscribe( 'selfResetTime', this, "notif_selfResetTime" );
             this.notifqueue.setIgnoreNotificationCheck( 'otherResetTime', (notif) => (notif.args.player_id == this.player_id) );
-            
+            dojo.subscribe( 'BlockedSpace', this, "notif_BlockedSpace" );       
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
@@ -804,7 +824,14 @@ function (dojo, declare) {
             messageContainer.classList.remove("hidden");
             logText = this.format_string_recursive(notif.log, notif.args);
             document.getElementById("message-text").innerText = logText;
-        }
+        },
+        
+        notif_BlockedSpace: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
 
         /*
         Example:

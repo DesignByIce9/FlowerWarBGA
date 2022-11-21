@@ -14,8 +14,8 @@
  */
 
 @mixin rotateSpace($boardID) {
-    $rotAmount: (($boardID)*19);
-    transform: rotate(#{$rotAmount}deg) translateX(350px);
+    $rotAmount: (($boardID)*18);
+    transform: rotate(#{$rotAmount}deg) translateX(420px);
 }
 
 @for $i from 0 to 20 {
@@ -28,10 +28,11 @@
     /* position: relative; */
     /*background: rgb(218, 209, 209); */
     /* border:3pt solid rgb(0, 0, 0); */
-    width: 800px;
-    height: 900px;
+    width: 975px;
+    height: 1075px;
     padding: 10px;
     margin: 10px;
+    //transform: translateX(25px);
 }
 
 #boardContainer {
@@ -55,7 +56,7 @@
     position: absolute;
     border:2px solid green;
     width:100px;
-    height:100px;
+    height:110px;
     margin:3px;
     padding:5px;
     background: lightgray;

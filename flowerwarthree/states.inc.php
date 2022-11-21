@@ -91,10 +91,10 @@ $machinestates = array(
         "type" => "game",
         "args" => "argsBoardState",
         "action" => "stBoardUpdate",
-        //"possibleactions" => array( "cardHandler" ),
-        //"transitions" => array( "cardHandler" => 5 )
-        "possibleactions" => array( "cardTestStart" ),
-        "transitions" => array( "cardTestStart" => 202 )
+        "possibleactions" => array( "cardHandler" ),
+        "transitions" => array( "cardHandler" => 5 )
+        //"possibleactions" => array( "cardTestStart" ),
+        //"transitions" => array( "cardTestStart" => 202 )
     ),
 
     5 => array(
@@ -104,10 +104,10 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argsCardState",
         "action" => "stCardHandler",
-        //"possibleactions" => array( "resourceLoop" ),
-        //"transitions" => array( "resourceLoop" => 10)
-        "possibleactions" => array( "cardTestEnd" ),
-        "transitions" => array( "cardTestEnd" => 203)
+        "possibleactions" => array( "resourceLoop" ),
+        "transitions" => array( "resourceLoop" => 10)
+        //"possibleactions" => array( "cardTestEnd" ),
+        //"transitions" => array( "cardTestEnd" => 203)
     ),
 
     10 => array(
