@@ -3,7 +3,7 @@
 <!-- 
 --------
 -- BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
--- Flower War. Original game by Ice 9 Games. Designed and developed by Tug Brice. Designsbyice9@gmail.com
+-- flowerwar implementation : © <Your name here> <Your email address here>
 -- 
 -- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -26,23 +26,20 @@
 -->
 
 <div id="fw-container">
-<div class="spaceRow" id="topRow"></div>
-<div class="spaceColumn" id="rightColumn"></div>
-<div class="spaceColumn" id="leftColumn"></div>
-<div class="spaceRow" id="bottomRow"></div>
+    <div id="messageContainer"><p id="message-text"></p></div>
+    <div id="boardContainer">
+        <div id="temple"></div>
+    </div>
 </div>
 
 <script type="text/javascript">
 
-// Javascript HTML templates
-
 var jstpl_player_board = '<div class="cpboard">\
-    <div id="aFaithCounter${id}" class="aFaithCounter"></div>Aztec Faith: <span id="azFaithCounter${id}">0</span>\
-    <div id="cFaithCounter${id}" class="cFaithCounter"></div>Catholic Faith: <span id="cathFaithCounter${id}">0</span>\
-    <div id="pCounter${id}" class="pCounter"></div>People: <span id="peopleCounter${id}">0</span>\
+    <div id="aContainer" class="counterContainer"><div id="aFaithCounter${id}" class="aFaithCounter"></div><div id="panel_icon_a" class="resourceIconA"></div><p class="counter-text">Aztec Faith: <span id="azFaithCounter${id}">0</span></p></div>\
+    <div id="cContainer" class="counterContainer"><div id="cFaithCounter${id}" class="cFaithCounter"></div><div id="panel_icon_c" class="resourceIconC"></div><p class="counter-text">Catholic Faith: <span id="cathFaithCounter${id}">0</span></p></div>\
+    <div id="pContainer" class="counterContainer"><div id="pCounter${id}" class="pCounter"></div><div id="panel_icon_p" class="resourceIconP"></div><p class="counter-text">People: <span id="peopleCounter${id}">0</span></p></div>\
+    <div id="tContainer" class="counterContainer"><div id="tCounter${id}" class="tCounter"></div><div id="panel_icon_t" class="resourceIconT"></div><p class="counter-text">Time: <span id="timeCounter${id}">0</span></p></div>\
 </div>';
-
-var jstpl_boardSpace = '<div class="space" id="space_${boardID}"><p> class="spaceText">Space ${boardID}</p></div>';
 
 </script>  
 

@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * Flower War. Original game by Ice 9 Games. Designed and developed by Tug Brice. Designsbyice9@gmail.com
+ * flowerwar implementation : © Tug
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -57,127 +57,98 @@ $machinestates = array(
         "name" => "gameSetup",
         "description" => "",
         "type" => "manager",
-        "action" => "st_stGameSetup",
-        "transitions" => array( "" => 3 )
+        "action" => "stGameSetup",
+        "transitions" => array( "" => 2 )
+        //"transitions" => array( "" => 201 )
     ),
     
     // Note: ID=2 => your first state
-
-
-    3 => array(
-        "name" => "queryBoard",
-        "description" => clienttranslate('Generating possible moves for ${actplayer}'),
-        "descriptionmyturn" => clienttranslate('Generating possible moves for ${you}'),
+/*
+    2 => array(
+        "name" => "startTurn",
+        "description" => clienttranslate('Doing turn start stuff'),
+        "descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
         "type" => "game",
-        "action" => "st_queryBoard",
-        "possibleactions" => array( "pickSpace"),
-        "transitions" => array( "pickSpace" => 5 )
+        "action" => "stStartTurn",
+        "transitions" => array( "moveToken" => 3 )
+),
+*/
+    2 => array(
+        "name" => "moveToken",
+        "description" => clienttranslate('${actplayer} is deciding where to move'),
+        "descriptionmyturn" => clienttranslate('${you}, move your token to an available square or choose an option'),
+        "type" => "activeplayer",
+        "args" => "argsBoardState",
+        "action" => "stMoveToken",
+        "possibleactions" => array( "nextQuadA", "nextQuadC", "resetTime", "boardUpdate" ),
+        "transitions" => array( "nextQuadA" => 2, "nextQuadC" => 2,"resetTime" => 2, "boardUpdate" => 4 )
+),
+    
+    4 => array(
+        "name" => "boardUpdate",
+        "description" => clienttranslate('Updating the board'),
+        "descriptionmyturn" => clienttranslate('Updating the board'),
+        "type" => "game",
+        "args" => "argsBoardState",
+        "action" => "stBoardUpdate",
+        "possibleactions" => array( "cardHandler" ),
+        "transitions" => array( "cardHandler" => 5 )
+        //"possibleactions" => array( "cardTestStart" ),
+        //"transitions" => array( "cardTestStart" => 202 )
     ),
 
     5 => array(
-        "name" => "pickSpace",
-        "description" => clienttranslate('${actplayer}, pick an available space to move your token to'),
-        "descriptionmyturn" => clienttranslate('Pick an available space to move your token to, ${you}'),
+        "name" => "cardHandler",
+        "description" => clienttranslate('${actplayer} is encountering an event'),
+        "descriptionmyturn" => clienttranslate('${you} are encountering an event'),
         "type" => "activeplayer",
-        "action" => "st_displayPossibleMoves",
-        "args" => "argspickSpace",
-        "possibleactions" => array( "updateBoard"),
-        "transitions" => array( "updateBoard" => 9 )
+        "args" => "argsCardState",
+        "action" => "stCardHandler",
+        "possibleactions" => array( "resourceLoop" ),
+        "transitions" => array( "resourceLoop" => 10)
+        //"possibleactions" => array( "cardTestEnd" ),
+        //"transitions" => array( "cardTestEnd" => 203)
     ),
 
-    9 => array(
-        "name" => "updateSpace",
-        "description" => clienttranslate('${actplayer}, moving your token to space ${actualMove}'),
-    	"descriptionmyturn" => clienttranslate('Moving your token to space ${actualMove}, ${you}'),
+    10 => array(
+        "name" => "resourceLoop",
+        "description" => clienttranslate('${actplayer} is moving to the next quadrant'),
+        "descriptionmyturn" => clienttranslate('${you} are moving to the next quadrant'),
         "type" => "activeplayer",
-        "action" => "st_updateSpace",
-        "args" => "argsupdateSpace",
-        "possibleactions" => array( "playersInSpace", "drawCardState"),
-        "transitions" => array( "playersInSpace" => 11, "drawCardState" => 30 )  
+        "args" => "argPlayerState",
+        "action" => "stResourceLoop",
+        "possibleactions" => array( "moveToken", "endTurn", "winState" ),
+        "transitions" => array( "moveToken" => 2, "endTurn" =>50, "winState" => 80)
     ),
 
-    11 => array(
-        "name" => "playersInSpace",
-        "description" => clienttranslate('${actplayer} has encountered players ${encounteredPlayers}. Waiting for action'),
-    	"descriptionmyturn" => clienttranslate('${you} have encountered players ${encounteredPlayers}. Choose an action'),
-        "type" => "activeplayer",
-        "action" => "st_playersInSpace",
-        "args" => "argsplayersInSpace",
-        "possibleactions" => array( "drawCardState"),
-        "transitions" => array( "drawCardState" => 30)
-    ),
-
-    30 => array(
-        "name" => "drawCardState",
-        "description" => clienttranslate('${actplayer} is drawing a card'),
-    	"descriptionmyturn" => clienttranslate('${you} are drawing a card'),
-        "type" => "activeplayer",
-        "action" => "st_drawCardState",
-        "possibleactions" => array( "resolveCard"),
-        "transitions" => array( "resolveCard" => 35)
-    ),
-
-    35 => array(
-        "name" => "resolveCard",
-        "description" => clienttranslate('Resolving Card'),
-    	"descriptionmyturn" => clienttranslate('Resolving Card'),
+    201 => array(
+        "name" => "alwaysFirst",
+        "description" => clienttranslate('${actplayer} is moving to the next quadrant'),
+        "descriptionmyturn" => clienttranslate('${you} are moving to the next quadrant'),
         "type" => "game",
-        "action" => "st_resolveCard",
-        "args" => "argsresolveCard",
-        "possibleactions" => array( "resourceLoop", "loseCheck", "winCheck"),
-        "transitions" => array( "resourceLoop" => 40, "loseCheck" => 60, "winCheck" => 70)
+        "action" => "alwaysFirst",
+        "possibleactions" => array( "moveToken", ),
+        "transitions" => array( "moveToken" => 2 )
     ),
-
-    40 => array(
-        "name" => "ResourceLoop",
-        "description" => clienttranslate('${actplayer} is spending their resources'),
-    	"descriptionmyturn" => clienttranslate('${you}, you may now spend your resources. Choose an action'),
-        "type" => "activeplayer",
-        "action" => "ResourceLoop",
-        "possibleactions" => array( "endTurn"),
-        "transitions" => array( "endTurn" => 50)
-    ),
-
-    50 => array(
-        "name" => "endTurn",
-        "description" => clienttranslate('${actplayer} has ended their turn'),
-        "descriptionmyturn" => clienttranslate('${you} have ended your turn'),
-        "type" => "activeplayer",
-        "action" => "st_endTurn",
-        "possibleactions" => array( "queryBoard"),
-        "transitions" => array( "queryBoard" => 2)
-    ),
-
-    60 => array(
-        "name" => "loseCheck",
-        "description" => clienttranslate('Checking'),
-        "descriptionmyturn" => clienttranslate('Checking'),
+    // /////////////////////////////////////////////////////////
+    202 => array(
+        "name" => "cardTestStart",
+        "description" => clienttranslate('Starting Test'),
+        "descriptionmyturn" => clienttranslate('Starting Test'),
         "type" => "game",
-        "action" => "st_loseCheck",
-        "args" => "argsloseCheck",
-        "possibleactions" => array( "drawCardState", "ResourceLoop"),
-        "transitions" => array( "drawCardState"  => 30, "ResourceLoop" => 40)
+        "action" => "stCardTestStart",
+        "possibleactions" => array( "cardHandler", ),
+        "transitions" => array( "cardHandler" => 5 )
     ),
 
-    70 => array(
-        "name" => "winCheck",
-        "description" => clienttranslate('Checking'),
-        "descriptionmyturn" => clienttranslate('Checking'),
+    203 => array(
+        "name" => "cardTestEnd",
+        "description" => clienttranslate('Ending Test'),
+        "descriptionmyturn" => clienttranslate('Ending Test'),
         "type" => "game",
-        "action" => "st_winCheck",
-        "args" => "argswinCheck",
-        "possibleactions" => array( "ResourceLoop", "gameWon"),
-        "transitions" => array( "ResourceLoop" => 40, "gameWon"  => 75)
-    ),
-
-    75 => array(
-        "name" => "gameWon",
-        "description" => clienttranslate('${actplayer} has won the game!'),
-        "descriptionmyturn" => clienttranslate('${you} have won the game!'),
-        "type" => "game",
-        "action" => "st_gameWon",
-        "possibleactions" => array( "gameEnd"),
-        "transitions" => array( "gameWon" => 99)
+        "action" => "stCardTestEnd",
+        "possibleactions" => array( "cardTestStart", "resourceLoop" ),
+        "transitions" => array( "cardTestStart" => 202, "resourceLoop" => 10 )
     ),
    
     // Final state.
@@ -186,20 +157,8 @@ $machinestates = array(
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
-        "action" => "st_GameEnd",
+        "action" => "stGameEnd",
         "args" => "argGameEnd"
-    ),
+    )
 
-    101 => array(
-        "name" => "charSelect",
-        "description" => clienttranslate('${actplayer} is selecting a character'),
-        "descriptionmyturn" => clienttranslate('${you}, select a character'),
-        "type" => "activeplayer",
-        "action" => "st_charSelect",
-        "possibleactions" => array( "queryBoard"),
-        "transitions" => array( "queryBoard" => 3)
-    ),
 );
-
-
-

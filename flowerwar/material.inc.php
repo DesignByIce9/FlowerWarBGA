@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * Flower War. Original game by Ice 9 Games. Designed and developed by Tug Brice. Designsbyice9@gmail.com
+ * flowerwar implementation : © Alena Laskavaia <laskava@gmail.com>
  * 
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -17,13 +17,47 @@
  * This file is loaded in your game logic class constructor, ie these variables
  * are available everywhere in your game logic code.
  *
- */
+          */
+
+$this->token_types = array(
+        // --- gen php begin ---
+// #this used to generate part of matherial.inc.php using genmat.php
+'wcube' => array(
+  'type' => 'cube',
+  'name' => clienttranslate("Cube"),
+),
+'card_red' => array(
+  'type' => 'card',
+  'name' => clienttranslate("Red Spell"),
+  'tooltip' => clienttranslate("This is tooltip for red spell"),
+  't'=>1,'cn'=>'red','ipos'=>3,
+),
+'card_blue' => array(
+  'type' => 'card',
+  'name' => clienttranslate("Blue Spell"),
+  'tooltip' => clienttranslate("This is tooltip for blue spell"),
+  'tooltip_action' => clienttranslate("Click to cast it"),
+  't'=>2,'cn'=>'blue','ipos'=>4,
+),
+'card_green' => array(
+  'type' => 'card',
+  'name' => clienttranslate("Green Spell"),
+  't'=>3,'cn'=>'green','ipos'=>6,
+),
+        // --- gen php end ---
+);
 
 
+///////// board info
+// Array index = board ID #
+// 0 = Quad Number
+// 1 = Space Number
+// 2 = Az amount (Can be negative)
+// 3 = Cath amount (Can be negative)
+// 4 = People amount (Always positive)
 
 $this-> board = array (
   0=> array(
-    "boardID" => 0,
     "Quad" => 1,
     "Space" => 1,
     "Az" => 0,
@@ -32,7 +66,6 @@ $this-> board = array (
   ),
 
   1=> array(
-    "boardID" => 1,
     "Quad" => 1,
     "Space" => 2,
     "Az" => 0,
@@ -41,7 +74,6 @@ $this-> board = array (
   ),
   
   2=> array(
-    "boardID" => 2,
     "Quad" => 1,
     "Space" => 3,
     "Az" => 4,
@@ -50,7 +82,6 @@ $this-> board = array (
   ),
 
   3=> array(
-    "boardID" => 3,
     "Quad" => 1,
     "Space" => 4,
     "Az" => 1,
@@ -59,7 +90,6 @@ $this-> board = array (
   ),
 
   4=> array(
-    "boardID" => 4,
     "Quad" => 1,
     "Space" => 5,
     "Az" => 0,
@@ -68,7 +98,6 @@ $this-> board = array (
   ),
 
   5=> array(
-    "boardID" => 5,
     "Quad" => 2,
     "Space" => 1,
     "Az" => 0,
@@ -77,7 +106,6 @@ $this-> board = array (
   ),
 
   6=> array(
-    "boardID" => 6,
     "Quad" => 2,
     "Space" => 2,
     "Az" => 1,
@@ -86,7 +114,6 @@ $this-> board = array (
   ),
 
   7=> array(
-    "boardID" => 7,
     "Quad" => 2,
     "Space" => 3,
     "Az" => 0,
@@ -95,7 +122,6 @@ $this-> board = array (
   ),
 
   8=> array(
-    "boardID" => 8,
     "Quad" => 2,
     "Space" => 4,
     "Az" => 3,
@@ -104,7 +130,6 @@ $this-> board = array (
   ),
 
   9=> array(
-    "boardID" => 9,
     "Quad" => 2,
     "Space" => 5,
     "Az" => 1,
@@ -114,7 +139,6 @@ $this-> board = array (
 
 
   10=> array(
-    "boardID" => 10,
     "Quad" => 3,
     "Space" => 1,
     "Az" => 1,
@@ -123,7 +147,6 @@ $this-> board = array (
   ),
 
   11=> array(
-    "boardID" => 11,
     "Quad" => 3,
     "Space" => 2,
     "Az" => 0,
@@ -132,7 +155,6 @@ $this-> board = array (
   ),
 
   12=> array(
-    "boardID" => 12,
     "Quad" => 3,
     "Space" => 3,
     "Az" => 0,
@@ -141,7 +163,6 @@ $this-> board = array (
   ),
 
   13=> array(
-    "boardID" => 13,
     "Quad" => 3,
     "Space" => 4,
     "Az" => 0,
@@ -150,7 +171,6 @@ $this-> board = array (
   ),
 
   14=> array(
-    "boardID" => 14,
     "Quad" => 3,
     "Space" => 5,
     "Az" => 2,
@@ -159,7 +179,6 @@ $this-> board = array (
   ),
 
   15=> array(
-    "boardID" => 15,
     "Quad" => 4,
     "Space" => 1,
     "Az" => 3,
@@ -168,7 +187,6 @@ $this-> board = array (
   ),
 
   16=> array(
-    "boardID" => 16,
     "Quad" => 4,
     "Space" => 2,
     "Az" => 1,
@@ -177,7 +195,6 @@ $this-> board = array (
   ),
 
   17=> array(
-    "boardID" => 17,
     "Quad" => 4,
     "Space" => 3,
     "Az" => 0,
@@ -186,7 +203,6 @@ $this-> board = array (
   ),
 
   18=> array(
-    "boardID" => 18,
     "Quad" => 4,
     "Space" => 4,
     "Az" => 2,
@@ -195,7 +211,6 @@ $this-> board = array (
   ),
 
   19=> array(
-    "boardID" => 19,
     "Quad" => 4,
     "Space" => 5,
     "Az" => 1,
@@ -204,9 +219,16 @@ $this-> board = array (
   )
 );
 
+///////// Terrain info
+// Array index = Terrain ID #
+// 0 = terrainType - found as type_arg in card
+// 1 = terrainName - found as type in card
+// 2 = timeMod - modifies time needed to move through terrain (not implemented yet)
+// 3 = tradeMod - modifies amount of resources received in basic trade (not implemented yet)
+// 4 = battleMod - modifies roll for combat. Only applies to attacker (not implemented yet)
+
 $this-> terrain = array (
   0=> array( 
-    'terrainID' => 0,
     'terrainType' => 1,
     'terrainName' => 'Plains',
     'timeMod' => 0,
@@ -214,7 +236,6 @@ $this-> terrain = array (
     'battleMod' => -1
   ),
   1=> array( 
-    'terrainID' => 1,
     'terrainType' => 2,
     'terrainName' => 'Road',
     'timeMod' => 1,
@@ -222,7 +243,6 @@ $this-> terrain = array (
     'battleMod' => -1
   ),
   2=> array( 
-    'terrainID' => 2,
     'terrainType' => 3,
     'terrainName' => 'Hills',
     'timeMod' => 0,
@@ -230,7 +250,6 @@ $this-> terrain = array (
     'battleMod' => 1
   ),
   3=> array( 
-    'terrainID' => 3,
     'terrainType' => 4,
     'terrainName' => 'River',
     'timeMod' => -1,
@@ -238,7 +257,6 @@ $this-> terrain = array (
     'battleMod' => 0
   ),
   4=> array( 
-    'terrainID' => 4,
     'terrainType' => 5,
     'terrainName' => 'Jungle',
     'timeMod' => -1,
@@ -246,6 +264,11 @@ $this-> terrain = array (
     'battleMod' => 1
   )
 );
+
+///////// Event info
+// Array index = nothing
+// 0 = Event ID #
+// 1 = cardTest - found as type in card
 
 $this-> events = array (
   0=> array( 
@@ -346,6 +369,13 @@ $this-> events = array (
   )
 );
 
+///////// Character info
+// Array index = nothing
+// 0 = Character ID #
+// 1 = terrain Mod - gives bonus for type of terrain (not implemented yet)
+// 2 = encounter Mod - gives bonus for type of encounter (not implemented yet)
+// 3 = faith Mod - gives bonus for particular faith (not implemented yet)
+
 $this-> character = array (
   0=> array(
     'charID' => 1,
@@ -385,36 +415,113 @@ $this-> character = array (
   )
 );
 
+///////// Temple Cost - 
+///// Currently hardcoded to max of 7 (base+6).
+// Array index = overall number of moves
+// 1 = level - current temple level
+// 2 = cost - cost to move to that level
+// 3 = type - F for faith, P for people.
+
+$this -> templeCost = array(
+  0=> array(
+    'level' => 0,
+    'cost' => 0,
+    'type' => 'F'
+  ),
+  1=> array(
+    'level' => 1,
+    'cost' => 2,
+    'type' => 'F'
+  ),
+  2=> array(
+    'level' => 2,
+    'cost' => 3,
+    'type' => 'F'
+  ),
+  3=> array(
+    'level' => 3,
+    'cost' => 4,
+    'type' => 'F'
+  ),
+  4=> array(
+    'level' => 4,
+    'cost' => 5,
+    'type' => 'F'
+  ),
+  5=> array(
+    'level' => 5,
+    'cost' => 6,
+    'type' => 'F'
+  ),
+  6=> array(
+    'level' => 6,
+    'cost' => 7,
+    'type' => 'F'
+  ),
+  7=> array(
+    'level' => 5,
+    'cost' => 2,
+    'type' => 'P'
+  ),
+  8=> array(
+    'level' => 4,
+    'cost' => 3,
+    'type' => 'P'
+  ),
+  9=> array(
+    'level' => 3,
+    'cost' => 4,
+    'type' => 'P'
+  ),
+  10=> array(
+    'level' => 2,
+    'cost' => 5,
+    'type' => 'P'
+  ),
+  11=> array(
+    'level' => 1,
+    'cost' => 6,
+    'type' => 'P'
+  ),
+  12=> array(
+    'level' => 0,
+    'cost' => 7,
+    'type' => 'P'
+  )
+);
+
+// card initialization lists
+
 $this -> terrainName = array(
-    'Plains' => 1,
-    'River' => 2,
-    'Hills' => 3,
-    'Road' => 4,
-    'Jungle' => 5
+  'Plains' => 1,
+  'River' => 2,
+  'Hills' => 3,
+  'Road' => 4,
+  'Jungle' => 5
 );
 
 $this -> eventName = array(
-  'aPenalty' => 1,
-  'cPenalty' => 2,
-  'gPenalty' => 3,
-  'pPenalty' => 4,
-  'aCheck' => 5,
-  'gCheck' => 6,
-  'pCheck' => 7,
-  'aConvert' => 8,
-  'cConvert' => 9,
-  'aCull' => 10,
-  'cCull' => 11,
-  'catchUp' => 12,
-  'aBonus' => 13,
-  'cBonus' => 14,
-  'gBonus' => 15,
-  'pBonus' => 16,
-  'uFigure' => 17,
-  'dFigure' => 18,
-  'iBlock' => 19,
-  'rBlock' => 21,
-  'nQuad' => 22,
-  'aSpace' => 23,
-  'rTime' => 24
+'aPenalty' => 1,
+'cPenalty' => 2,
+'gPenalty' => 3,
+'pPenalty' => 4,
+'aCheck' => 5,
+'gCheck' => 6,
+'pCheck' => 7,
+'aConvert' => 8,
+'cConvert' => 9,
+'aCull' => 10,
+'cCull' => 11,
+'catchUp' => 12,
+'aBonus' => 13,
+'cBonus' => 14,
+'gBonus' => 15,
+'pBonus' => 16,
+'uFigure' => 17,
+'dFigure' => 18,
+'iBlock' => 19,
+'rBlock' => 21,
+'nQuad' => 22,
+'aSpace' => 23,
+'rTime' => 24
 );

@@ -58,8 +58,8 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        //"transitions" => array( "" => 2 )
-        "transitions" => array( "" => 201 )
+        "transitions" => array( "" => 2 )
+        //"transitions" => array( "" => 201 )
     ),
     
     // Note: ID=2 => your first state

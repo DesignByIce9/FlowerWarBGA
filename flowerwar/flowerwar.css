@@ -1,7 +1,8 @@
+@charset "UTF-8";
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * Flower War. Original game by Ice 9 Games. Designed and developed by Tug Brice. Designsbyice9@gmail.com
+ * flowerwar implementation : © <Your name here> <Your email address here>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -9,205 +10,416 @@
  *
  * flowerwar.css
  *
- * flowerwar stylesheet
+ * flowerwartoo stylesheet
  *
  */
-
 /*
     This is the CSS stylesheet of your game User Interface.
-    
+
     Styles defined on this file will be applied to the HTML elements you define in your
     HTML template (flowerwar_flowerwar.tpl), and to HTML elements you create dynamically
     (in flowerwar.js).
-    
-    Usually, you are using CSS to:
-    
-    1°) define the overall layout of your game
-        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
-
-    2°) create your CSS-sprites:
-        All images of your games should be gathered into a small number of image files. Then, using
-        background-image and background-position CSS properties, you create HTML blocks that can 
-        display these images correctly (see example below).
-    
-    3°) ... anything else:
-        It is really easy to add and remove CSS classes dynamically from your Javascript with
-        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
-        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
-        very often, using CSS classes for the logic of your user interface allow you to do complex
-        thing easily.
-        
-        
-     Note: on the production platform, this file will be compressed and comments will be removed.
-           Consequently, don't hesitate to put as many comments as necessary.
-*/
 
 /* Note: you must not use any @import directive */
-
-
 /********* You can start writing your CSS below this line: **********/
+#space_0 {
+  transform: rotate(0deg) translateX(420px);
+}
+
+#space_1 {
+  transform: rotate(18deg) translateX(420px);
+}
+
+#space_2 {
+  transform: rotate(36deg) translateX(420px);
+}
+
+#space_3 {
+  transform: rotate(54deg) translateX(420px);
+}
+
+#space_4 {
+  transform: rotate(72deg) translateX(420px);
+}
+
+#space_5 {
+  transform: rotate(90deg) translateX(420px);
+}
+
+#space_6 {
+  transform: rotate(108deg) translateX(420px);
+}
+
+#space_7 {
+  transform: rotate(126deg) translateX(420px);
+}
+
+#space_8 {
+  transform: rotate(144deg) translateX(420px);
+}
+
+#space_9 {
+  transform: rotate(162deg) translateX(420px);
+}
+
+#space_10 {
+  transform: rotate(180deg) translateX(420px);
+}
+
+#space_11 {
+  transform: rotate(198deg) translateX(420px);
+}
+
+#space_12 {
+  transform: rotate(216deg) translateX(420px);
+}
+
+#space_13 {
+  transform: rotate(234deg) translateX(420px);
+}
+
+#space_14 {
+  transform: rotate(252deg) translateX(420px);
+}
+
+#space_15 {
+  transform: rotate(270deg) translateX(420px);
+}
+
+#space_16 {
+  transform: rotate(288deg) translateX(420px);
+}
+
+#space_17 {
+  transform: rotate(306deg) translateX(420px);
+}
+
+#space_18 {
+  transform: rotate(324deg) translateX(420px);
+}
+
+#space_19 {
+  transform: rotate(342deg) translateX(420px);
+}
+
 #fw-container {
-    position: relative;
-    background: rgb(218, 209, 209);
-    border:3pt solid rgb(0, 0, 0);
-    width: 800px;
-    height: 800px;
-    padding: 10px;
-    margin: 10px;
+  width: 975px;
+  height: 1075px;
+  padding: 10px;
+  margin: 10px;
 }
 
-.spaceRow {
-    background: rgb(116, 114, 114);
-    padding: 3px;
-    border:3pt solid blue;
-    height: 100px;
-    width:625px;
-    margin-left:auto;
-    margin-right:auto;
-    display:flex;
-    flex-direction: row;
-    justify-content:space-evenly;
+#boardContainer {
+  border: 3pt solid rgb(0, 0, 0);
+  position: relative;
+  padding: 5px;
+  margin: 5px;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  grid-column-gap: 5px;
+  grid-row-gap: 5px;
+  align-items: center;
+  justify-items: center;
 }
 
-.spaceColumn {
-    background: rgb(116, 114, 114);
-    padding: 3px;
-    border:3pt solid blue;
-    height: 625px;
-    width:100px;
-    margin-top:auto;
-    margin-bottom:auto;
-    display:flex;
-    flex-direction: column;
-    justify-content:space-evenly;
+#messageContainer {
+  height: 25px;
+  width: 95%;
+  padding: 2px;
+  margin: auto;
+  border: 1px solid red;
 }
 
-#topRow {
-    position:absolute;
-    top: 40px;
-    left: 160px;
+#message-text {
+  text-align: center;
+  font-size: 24px;
+  padding: auto;
+  margin: 2px;
 }
 
-#bottomRow {
-    position:absolute;
-    bottom: 20px;
-    left: 40px
+.counterContainer {
+  display: flex;
+  flex-direction: row;
+  row-gap: 10px;
 }
 
-#leftColumn {
-    position:absolute;
-    top:40px;
-    left:40px;
-}
-
-#rightColumn {
-    position:absolute;
-    top:160px;
-    right:20px;
+.counter-text {
+  vertical-align: center;
+  padding: 2px;
+  margin: 2px;
 }
 
 .space {
-    border:2px solid green;
-    width:80%;
-    height:80%;
-    margin:3px;
-    padding:5px;
-    background: lightgray;
+  position: absolute;
+  border: 2px solid green;
+  width: 100px;
+  height: 110px;
+  margin: 3px;
+  padding: 5px;
+  background: lightgray;
+  display: flex;
+  flex-direction: column;
 }
 
 .spaceText {
-    text-align: center;
-    vertical-align: center;
-    font-size: 15px;
-    font-weight: bold;
-    font-family: Arial, Helvetica, sans-serif;
-    cursor: pointer;
+  text-align: center;
+  vertical-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #ffffff;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.resourceContainer {
+  display: flex;
+  flex-direction: row;
+  justify-items: auto;
+  justify-content: center;
+}
+
+.resourceIconA {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/Aztec.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceIconC {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/Catholic.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceIconP {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/People.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceIconT {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: url(img/Time.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.resourceText {
+  text-align: center;
+  margin: auto;
+  padding: 1px;
+  color: #ffffff;
+  font-size: 20px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.Hills {
+  background: url(img/Hills.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.Plains {
+  background: url(img/Plains.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.River {
+  background: url(img/River.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.Road {
+  background: url(img/Road.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.Jungle {
+  background: url(img/Jungle.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+.tokenContainer {
+  display: flex;
+  flex-direction: row;
 }
 
 .token {
-    height:25px;
-    width:25px;
-    padding:2px;
-    margin:2px;
-    background-image: url("img/meeple-white.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.filter_008000 {
-    background-blend-mode: multiply;
-    background-color: #008000;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.filter_0000ff {
-    background-blend-mode: multiply;
-    background-color: #0000ff;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.filter_ff0000 {
-    background-blend-mode: multiply;
-    background-color: #ff0000;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.filter_ffa500 {
-    background-blend-mode: multiply;
-    background-color: #ffa500;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-}
-
-.highlight {
-    filter:brightness(120%);
+  height: 25px;
+  width: 25px;
+  padding: 2px;
+  margin: 2px;
+  background-image: url("img/meeple-white.png");
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .blocker {
-    height:25px;
-    width:25px;
-    padding:2px;
-    margin:2px;
-    background-image: url("img/meeple-white.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-blend-mode: multiply;
-    background-color: #000000;
-    mask: url("img/meeple-white.png");
-    -webkit-mask: url("img/meeple-white.png");
-    -webkit-mask-size: contain;
-    mask-size: contain;
+  height: 27px;
+  width: 27px;
+  padding: 0px;
+  margin: 2px;
+  background-image: url("img/meeple-white.png");
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
-/*
-    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
+.filter_008000 {
+  background-blend-mode: multiply;
+  background-color: #008000;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
 
-    .white_token {
-        background-image: url('img/tokens.png');
-        background-position: 0px 0px;
-    }
-    .black_token {
-        background-image: url('img/tokens.png');
-        background-position: -20px 0px;
-    }
-    .token {
-        width: 20px;
-        height: 20px;
-        background-repeat: none;
-    }
-*/
+.filter_0000ff {
+  background-blend-mode: multiply;
+  background-color: #0000ff;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
 
+.filter_ff0000 {
+  background-blend-mode: multiply;
+  background-color: #ff0000;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
 
+.filter_ffa500 {
+  background-blend-mode: multiply;
+  background-color: #ffa500;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
 
+.filter_000000 {
+  background-blend-mode: multiply;
+  background-color: #000000;
+  mask: url("img/meeple-white.png");
+  -webkit-mask: url("img/meeple-white.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
 
+#temple {
+  width: 80%;
+  height: 80%;
+  background: green;
+  border: 2px solid black;
+  padding: 5px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  grid-area: 2/2/6/5;
+}
+
+#templeTracksContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100;
+}
+
+.templeTrack {
+  width: 45%;
+  height: 95%;
+  border: 2px solid black;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.trackSpace {
+  border: 1px solid lightblue;
+  width: 75%;
+  height: 12%;
+  margin: 3px;
+  padding: 5px;
+  vertical-align: center;
+  display: flex;
+  align-items: center;
+}
+
+.trackHeader {
+  text-align: center;
+  width: auto;
+  padding: 2px;
+  margin: 2px auto;
+}
+
+.templeToken {
+  height: 30px;
+  width: 30px;
+  margin: auto;
+  padding: auto;
+  background-image: url("img/meeple-white.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+}
+
+#apocFlagContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 20px;
+  padding: 2px;
+  margin: 1px;
+}
+
+.upArrow {
+  background-image: url("img/aiga_up_arrow.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+  height: 30px;
+  width: 30px;
+}
+
+.downArrow {
+  background-image: url("img/aiga_down_arrow.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: center;
+  height: 30px;
+  width: 30px;
+}/*# sourceMappingURL=flowerwar.css.map */

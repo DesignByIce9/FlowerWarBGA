@@ -257,7 +257,7 @@ class FlowerWarThree extends Table
             $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
             $cCharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
 
-            $resourceArray[] = array($cAz, $cCath, $cPeople, $cTime, $cCharID);
+            $resourceArray[] = array($player_id, $cAz, $cCath, $cPeople, $cTime, $cCharID);
         }
 
         $aLevel = $this ->getGameStateValue("azLevel");
@@ -332,11 +332,13 @@ class FlowerWarThree extends Table
 //////////// Utility functions
 ////////////
 
+    /*
     function alwaysFirst() {
         $this->createNextPlayerTable([2373342, 2373343], true);
         $this->gamestate->changeActivePlayer(2373342);
         $this->gamestate->nextState("moveToken");
     }
+    */
 
     function cardChoice($cardChoice, $type) {
         $pID = $this->getActivePlayerId();
@@ -356,6 +358,78 @@ class FlowerWarThree extends Table
             break;
         }
 
+    }
+
+    function possibleMoves($playerID, $currentBoard, $currentQuad, $currentTime) {
+        $pID = $playerID;
+        $bID = $currentBoard;
+        $bQuad = $this->board[$bID]['Quad'];
+        $cQuad = $currentQuad;
+        $testSpace = 0;
+        $time = $currentTime;
+        $blocker = $this->getGameStateValue('blockerSpace');
+        $aCount = $this->getGameStateValue('advanceCount');
+        $availableMoves = array();
+
+        $testBoard = $this->resourceQuery($pID, "B"); // test BoardID vs db
+        if ($bID != $testBoard) {
+            throw new BgaUserException ( self::_("Player BoardID does not match given BoardID"));
+        }
+        $testTime = $this->resourceQuery($pID, "T"); // test Time vs db
+        if ($time != $testTime) {
+            throw new BgaUserException ( self::_("Player Time does not match given Time"));
+        }
+        $testQuad = $this->resourceQuery($pID, "Q"); // test current Quad vs db
+        if ($cQuad != $testQuad) {
+            throw new BgaUserException ( self::_("Player Quad does not match given Quad"));
+        }
+
+        $testQuad = 0; // reset testQuad for advanced quad test
+
+        if ($bQuad != $cQuad) { // test for advanced Quad
+            $aTest = $aCount; 
+            $aQuad = $cQuad;
+            while ($aCount >0) {
+                $aQuad --;
+                if ($aQuad == 0) {
+                    $aQuad = 4;
+                }
+                $aTest--;
+            }
+            if ($aQuad != $bQuad) {
+                throw new BgaUserException ( self::_("Quad Test Error"));
+            }
+        } else if ($time >=4) { // if Time is >=4, move to the next Quad
+            $testQuad = $cQuad +1;
+            $testSpace = (($cQuad-1)*5); // start at the first Space
+        } else if ($time <4) { // if Time is <4, stay in the same quad
+            $testQuad = $cQuad;
+            $testSpace = $bID+1; // But move to the next space.
+        }
+        switch ($testQuad) { // test to see which space is blocked
+            case 1:
+                $blocker = $blocker-1;
+            break;
+            case 2:
+                $blocker = $blocker+4;
+            break;
+            case 3:
+                $blocker = $blocker+9;
+            break;
+            case 4:
+                $blocker = $blocker+14;
+            break;
+        }
+
+        $lastSpace = (($testQuad*5)-1); // Set the last available space in the quad
+
+        for ($i=$testSpace;$i<=$lastSpace;$i++) { // Increment through ever space
+            if ($i != $blocker) { // If the space isn't blocked
+                array_push($availableMoves, ($i)); // push it to the array
+            }
+        }
+        
+        return $availableMoves;
     }
 
     function boardQuery($bID) {
@@ -710,61 +784,47 @@ class FlowerWarThree extends Table
 
     function quadUpdate($type) {
         $pID = $this->getActivePlayerId();
-        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        $cQuad = $this->resourceQuery($pID, "Q");
+        $resource = $this->resourceQuery($pID, $type);
         $aCount = $this->getGameStateValue("advanceCount");
-        if($aCount >= 3) {
-            throw new BgaUserException ( self::_("You can't advance more than 3 quadrants"));
+        $rText = "";
+        // check if action is valid
+        if ($resource <1) {
+            throw new BgaUserException( self::_("You don't have enough Faith to perform this action") );
         }
-        switch ($type) {
-            case 'A':
-                $resource = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-            break;
-            case 'C':
-                $resource = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+        if ($aCount>=3) {
+            throw new BgaUserException( self::_("Can't advance more than three quadrants") );
+        } else if ($this->checkAction('nextQuadA', false) || $this->checkAction('nextQuadC', false)) {
+            // check and update quad value
+            if ($cQuad < 4) {
+                $cQuad++;
+            } else if ($cQuad >= 4) {
+                $cQuad = 1;
+            }
+            // update resource
+            $resource--;
+            $this->updateResources($pID, $type, $resource);
+            $this->updateResources($pID, "Q", $cQuad);
+            
+            // send notification
+            if ($type == 'A') {
+                $rText = "Aztec";
+            } else if ($type == 'C') {
+                $rText = "Catholic";
+            }
+
+            $this->notifyAllPlayers("otherUpdateQuad", clienttranslate('${player_name} has spent 1 ${rText} Faith to move to the next quadrant'), [
+                'player_id' => $pID,
+                'player_name' => $this->getActivePlayerName(),
+                'rText' => $rText,
+            ]);
+            $this->notifyPlayer($pID, "selfUpdateQuad", clienttranslate('You have spent 1 ${rText} Faith to move to the next quadrant'), [
+                'rText' => $rText,
+            ]);
         }
-        if ($resource==0) {
-            throw new BgaUserException ( self::_("You don't have enough Faith to do that"));
-        }
-        if( $cQuad < 4 ) {
-        $cQuad++;
-        } else if ($cQuad = 4) {
-        $cQuad = 1;
-        }
-        $resource--;
-        switch ($type) {
-            case 'A':
-                $this->updateResources($pID, 'A', $resource);
-                $this->notifyAllPlayers("otherUpdateQuadA", clienttranslate('${player_name} has spent 1 Aztec Faith to move to the next quadrant'), [
-                    'player_id' => $pID,
-                    'player_name' => $this->getActivePlayerName()
-                ]);
-        
-                $this->notifyPlayer($pID, "selfUpdateQuadA", clienttranslate('You have spent 1 Aztec Faith to move to the next quadrant'), [
-                ]);
-            break;
-            case 'C':
-                $this->updateResources($pID, 'C', $resource);
-                $this->notifyAllPlayers("otherUpdateQuadC", clienttranslate('${player_name} has spent 1 Catholic Faith to move to the next quadrant'), [
-                    'player_id' => $pID,
-                    'player_name' => $this->getActivePlayerName()
-                ]);
-        
-                $this->notifyPlayer($pID, "selfUpdateQuadC", clienttranslate('You have spent 1 Catholic Faith to move to the next quadrant'), [
-                ]);
-            break;
-        }
-        $this->updateResources($pID, 'Q', $cQuad);
-        switch ($type) {
-            case 'A':
-                $this->gamestate->nextState("nextQuadA");
-            break;
-            case 'C':
-                $this->gamestate->nextState("nextQuadC");
-            break;
-        }
+        // update advance count
         $aCount++;
         $this->setGameStateValue("advanceCount", $aCount);
-        
     }
 
     function updateTime() {
@@ -787,84 +847,48 @@ class FlowerWarThree extends Table
     }
 
     function clickedSpace($bID) {
-        $pID = $this->getActivePlayerId();
-        $boardstring = $bID;
-        $newBoardID = str_replace("space_", "", $boardstring);
-        $bArray = array();
-        $bAz = 0;
-        $bCath = 0;
-        $bPeople = 0;
-        $cValue = 0;
-        $newBoardQuad = ceil(($newBoardID+1)/5);
-        $currentQuad = $this->resourceQuery($pID, 'Q');
-        $blockerID = $this->getGameStateValue("blockerSpace");
-        $bIDSpace = $this->board[$newBoardID]["Space"];
-
-        //perform action check
-        //self::checkAction( 'moveToken' );
-
-        // Get board information
-        $bArray = $this->boardQuery($newBoardID);
-
-        // Extract from array
-        $bAz = $bArray[0];
-        $bCath = $bArray[1];
-        $bPeople = $bArray[2];
-
-        if ($bIDSpace == $blockerID) {
-            self::notifyPlayer($pID,"BlockedSpace", clienttranslate( 'That space is blocked, pick another space.' ),
-            array(
-                'player_id' => $pID,
-            ) );
-        } else {
-            // Update player information
-            // Az Update
-            $cValue = $this->resourceQuery($pID, 'A'); // Get Current Value
-            $cValue = $cValue + $bAz; // Add board Value
-            $this->updateResources($pID, 'A', $cValue); // Update current Value
-            $cValue = 0; // Reset variable
-
-            // Cath update
-            $cValue = $this->resourceQuery($pID, 'C');
-            $cValue = $cValue + $bCath;
-            $this->updateResources($pID, 'C', $cValue);
-            $cValue = 0;
-
-            // People Update
-            $cValue = $this->resourceQuery($pID, 'P');
-            $cValue = $cValue + $bPeople;
-            $this->updateResources($pID, 'P', $cValue);
-            $cValue = 0;
-
-            // update Time
-            $cValue = $this->resourceQuery($pID, 'T');
-            if($newBoardQuad != $currentQuad) {
-                $cValue = 1;
-            } else if($cValue < 4) {
-                $cValue++;
-            } else if ($cValue >= 4) {
-                throw new BgaUserException ( self::_("Time Error"));
+        $pID = $this->getActivePlayerId(); // set player
+        $boardstring = $bID; // get clicked space ID
+        $selectedSpace = str_replace("space_", "", $boardstring); // translate clicked ID to space #
+        $oldSpace = $this->resourceQuery($pID, 'B'); // get old boardID from DB
+        $oldQuad = $this->board[$oldSpace]['Quad']; // get old boardID Quad from Materials
+        $aCount = $this->getGameStateValue("advanceCount"); // get advanceCount
+        $advancedQuad = $this->resourceQuery($pID, 'Q'); // get current Quad from DB
+        $aTest = $aCount; // set up quad test
+        $testQuad = $advancedQuad; 
+        $selectedQuad = $this->board[$selectedSpace]['Quad']; // get clicked boardID Quad
+        
+        $this->checkAction("boardUpdate"); // check if action is valid
+        
+        while ($aTest>0) { // count backwards based on # of times advanceQuad buttons were clicked
+            $testQuad--; // decrement test quad
+            if($testQuad == 0) { // Wrap quad #
+                $testQuad = 4;
             }
-            $this->updateResources($pID, 'T', $cValue);
-            $cValue = 0;
+            $aTest--;
+        }
 
-            // Now move the player's token
-            $this->updateResources($pID, 'B', $newBoardID);
+        if ($testQuad != $oldQuad) { // Throw exception if test and old quad don't match
+            throw new BgaSystemException ( "Test and Old Quads are not the same");
+        } else if($advancedQuad != $selectedQuad) { // throw exception if current and clicked quad don't match
+            throw new BgaSystemException ( "Selected and Advanced Quads are not the same");
+        } else { // if everything is good
+            $this->updateResources($pID, "B", $selectedSpace); // update BoardID in DB
+        }
 
-            // Notify players
-
-            self::notifyAllPlayers("message", clienttranslate( '${player_name} has moved to space ${board_ID}' ),
+        self::notifyAllPlayers("moveTokenOther", clienttranslate( '${player_name} has moved to space ${board_ID}' ),
             array(
                 'player_name' => self::getActivePlayerName(),
-                'board_ID' => $newBoardID,
+                'board_ID' => $selectedSpace,
             ) );
+        self::notifyPlayer($pID,"moveTokenSelf", clienttranslate( 'You have moved to space ${board_ID}' ),
+        array(
+            'player_id' => $pID,
+            'board_ID' => $selectedSpace,
+        ) );
 
-            // Move to the next state
-            $this->gamestate->nextState("boardUpdate");
-        }
+        $this->gamestate->nextState("boardUpdate"); // move to next state 
     }
-
-
 
     /*
 
@@ -919,11 +943,7 @@ class FlowerWarThree extends Table
         $aButtonFlag = false;
         $cButtonFlag = false;
         $pButtonFlag = false;
-        $availableMoves = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19);
-        $removeSpace = array();
 
-
-        $boardState['playerID'] = $pID;
         $boardState['tokenID'] = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $boardState['boardID'] = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $boardState['Quad'] = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
@@ -934,6 +954,11 @@ class FlowerWarThree extends Table
         $boardState['Time'] = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $boardState['charID'] = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $color = $this->getActivePlayerColor();
+        $bID = $boardState['boardID'];
+        $cQuad = $boardState['Quad'];
+        $cTime = $boardState['Time'];
+
+        $boardState['availableMoves'] = $this->possibleMoves($pID, $bID, $cQuad, $cTime);
 
         if($boardState['Az'] >0) {
             $aButtonFlag = true;
@@ -952,49 +977,6 @@ class FlowerWarThree extends Table
         $boardState['pColor'] = $color;
         $boardState['turn'] = $this ->getGameStateValue("turnCount");
         $boardState['aCount'] = $this ->getGameStateValue("advanceCount");
-
-        $testSpace = $boardState['boardID'];
-        switch($boardState['Quad']) {
-            case 1:
-                if($boardState['Time'] != 4) {
-                    for($i=$testSpace;$i>=0;$i--) {
-                        array_push($removeSpace, $testSpace);
-                    }
-                    $availableMoves = array_diff($availableMoves, $removeSpace);
-                    $availableMoves = array_values($availableMoves);
-                }
-            break;
-            case 2:
-                if($boardState['Time'] != 4) {
-                    for($i=$testSpace;$i>=5;$i--) {
-                        array_push($removeSpace, $testSpace);
-                    }
-                    $availableMoves = array_diff($availableMoves, $removeSpace);
-                    $availableMoves = array_values($availableMoves);
-                }
-            break;
-            case 3:
-                if($boardState['Time'] != 4) {
-                    for($i=$testSpace;$i>=10;$i--) {
-                        array_push($removeSpace, $testSpace);
-                    }
-                    $availableMoves = array_diff($availableMoves, $removeSpace);
-                    $availableMoves = array_values($availableMoves);
-                }
-            break;
-            case 4:
-                if($boardState['Time'] != 4) {
-                    for($i=$testSpace;$i>=15;$i--) {
-                        array_push($removeSpace, $testSpace);
-                    }
-                    $availableMoves = array_diff($availableMoves, $removeSpace);
-                    $availableMoves = array_values($availableMoves);
-                }
-            break;
-        }
-
-
-        $boardState['possibleMoves'] = $availableMoves;
 
         return array(
             'boardState' => $boardState
@@ -1132,10 +1114,93 @@ class FlowerWarThree extends Table
     }
 
     function stBoardUpdate() {
-        $pID = $this->getActivePlayerId();
-        $this -> setGameStateValue("advanceCount", 0);
-        $this->cards->pickCardForLocation( "deck", "held", $pID );
-        $this->gamestate->nextState("cardHandler");
+        $pID = $this->getActivePlayerId(); // get player ID
+        $bID = $this->resourceQuery($pID, "B"); // get current player board location
+        $pA = $this->resourceQuery($pID, "A"); // get current player resources
+        $pC = $this->resourceQuery($pID, "C");
+        $pP = $this->resourceQuery($pID, "P");
+        $time = $this->resourceQuery($pID, "T");
+        $bA = $this->board[$bID]['Az']; // get board resources
+        $bC = $this->board[$bID]['Cath'];
+        $bP = $this->board[$bID]['People'];
+        $rText = "";
+
+        $pA += $bA; // update player resources
+        $pC += $bC;
+        $pP += $bP;
+        $time++;
+        $this->updateResources($pID, 'A', $pA);
+        $this->updateResources($pID, 'C', $pC);
+        $this->updateResources($pID, 'P', $pP);
+        $this->updateResources($pID, 'T', $time);        
+
+        // Notification for Catholic Faith
+        $rText = "Aztec";
+        if ($bA > 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has gained ${bA} ${rText} Faith' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bA' => $bA,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have gained ${bA} ${rText} Faith' ),
+            array(
+                'player_id' => $pID,
+                'bA' => $bA,
+                'rText' => $rText,
+            ) );
+        } 
+
+        // Notification for Catholic Faith
+        $rText = "Catholic";
+        if ($bC > 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has gained ${bC} ${rText} Faith' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bC' => $bC,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have gained ${bC} ${rText} Faith' ),
+            array(
+                'player_id' => $pID,
+                'bC' => $bC,
+                'rText' => $rText,
+            ) );
+        } 
+
+        // Notification for People
+        $rText = "People";
+        if ($bP > 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has gained ${bP} ${rText}' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have gained ${bP} ${rText}' ),
+            array(
+                'player_id' => $pID,
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+        } else if ($bP < 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has lost ${bP} ${rText}' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have lost ${bP} ${rText}' ),
+            array(
+                'player_id' => $pID,
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+        }
+
+        $this -> setGameStateValue("advanceCount", 0); // reset advanceCount
+        $this->cards->pickCardForLocation( "deck", "held", $pID ); // draw a card
+        $this->gamestate->nextState("cardHandler"); // move to next state
     }
 
     function stCardHandler() {

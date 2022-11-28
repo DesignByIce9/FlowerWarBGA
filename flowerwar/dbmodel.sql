@@ -1,7 +1,7 @@
 
 -- ------
 -- BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
--- Flower War. Original game © Ice 9 Designs. Designed and implemented by Tug Brice. Designsbyice9@gmail.com
+-- flowerwar implementation : © <Your name here> <Your email address here>
 -- 
 -- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -18,7 +18,6 @@
 -- Note: The database schema is created from this file when the game starts. If you modify this file,
 --       you have to restart a game to see your changes in database.
 
--- Example 1: create a standard "card" table to be used with the "Deck" tools (see example game "hearts"):
 
 CREATE TABLE IF NOT EXISTS `card` (
   `card_id` int(10) NOT NULL AUTO_INCREMENT,
@@ -26,25 +25,21 @@ CREATE TABLE IF NOT EXISTS `card` (
   `card_type_arg` int(11) NOT NULL,
   `card_location` varchar(16) NOT NULL,
   `card_location_arg` int(11) NOT NULL,
-  `turn` int(4) NOT NULL,
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 CREATE TABLE IF NOT EXISTS `resources` (
-    `player_id` int(3) NOT NULL,
+    `recordID` int NOT NULL AUTO_INCREMENT,
+    `player_id` int(10) NOT NULL,
+    `tokenID` int(2) NOT NULL,
+    `boardID` int(2) NOT NULL,
+    `Quad` int(2) NOT NULL,
+    `Space` int(2) NOT NULL,
     `Az` int(4) NOT NULL,
     `Cath` int(4) NOT NULL,
     `People` int(4) NOT NULL,
     `Time` int(2) NOT NULL,
-    `turn` int(4) NOT NULL,
-    `charID` int(2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
-
-CREATE TABLE IF NOT EXISTS `tokens` (
-    `player_id` int(2) NOT NULL,
-    `tokenID` int(3) NOT NULL,
-    `boardID` int(2) NOT NULL,
-    `Quad` int(2) NOT NULL,
-    `Space` int(2) NOT NULL,
-    `turn` int(4) NOT NULL
+    `charID` int(2) NOT NULL,
+    `turn` int NOT NULL,
+    PRIMARY KEY (`recordID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;

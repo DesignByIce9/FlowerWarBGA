@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svg3474"
+   sodipodi:docname="aiga_down_arrow.svg"
+   viewBox="0 0 360.61 431.32"
+   sodipodi:version="0.32"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   version="1.1"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs23" />
+  <sodipodi:namedview
+     id="base"
+     bordercolor="#666666"
+     inkscape:pageshadow="2"
+     inkscape:window-width="815"
+     pagecolor="#ffffff"
+     inkscape:zoom="0.43415836"
+     inkscape:window-x="-1915"
+     borderopacity="1.0"
+     inkscape:current-layer="svg3474"
+     inkscape:cx="304.03653"
+     inkscape:cy="419.20188"
+     inkscape:window-y="70"
+     inkscape:window-height="543"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:window-maximized="1" />
+  <g
+     id="g3484"
+     transform="matrix(1,0,0,-1,0,431.32)">
+    <path
+       id="path3486"
+       style="fill:#000000"
+       d="M 0.213,180.2 180.413,0 360.613,180.2 V 299.05 L 223.543,161.99 v 269.33 h -87.22 V 162.94 L 0.003,299.26 0.216,180.2 Z" />
+  </g>
+  <metadata
+     id="metadata20">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:date>2009-06-19T13:11:22</dc:date>
+        <dc:description>Set of international airport symbols. Source: http://www.aiga.org/content.cfm/symbol-signs Converted to SVG by Jean-Victor Balin.</dc:description>
+        <dc:source>https://openclipart.org/detail/26730/aiga-up-arrow-by-anonymous</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Anonymous</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>aiga</rdf:li>
+            <rdf:li>aiga no bg</rdf:li>
+            <rdf:li>arrow</rdf:li>
+            <rdf:li>externalsource</rdf:li>
+            <rdf:li>map symbol</rdf:li>
+            <rdf:li>sign</rdf:li>
+            <rdf:li>silhouette</rdf:li>
+            <rdf:li>symbol</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

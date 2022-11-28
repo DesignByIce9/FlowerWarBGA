@@ -81,19 +81,22 @@ function (dojo, declare) {
             }
             terrainArray = gamedatas.terrain;
             boardArray = gamedatas.board;
+            resources = gamedatas.resources;
+            tokens = gamedatas.tokens;
+            console.dir(tokens);
 
             for(i=0;i<20;i++) {
                 let boardContainer = document.getElementById("boardContainer");
                 boardSpace = this.createSpace(i);
                 boardContainer.appendChild(boardSpace);
-            }   
-                player1= gamedatas.tokens[0][0];
-                player2= gamedatas.tokens[1][0];
+            }
+                let player1= gamedatas.tokens[0][0];
+                let player2= gamedatas.tokens[1][0];
                 if (gamedatas.tokens.length>=3) {
-                    player3= gamedatas.tokens[2][0];
+                    let player3= gamedatas.tokens[2][0];
                 }
                 if (gamedatas.tokens.length>=4) {
-                    player4= gamedatas.tokens[3][0];
+                    let player4= gamedatas.tokens[3][0];
                 }
             // TODO: Set up your game interface here, according to "gamedatas"
             for(b=0;b<20;b++) {
@@ -102,8 +105,7 @@ function (dojo, declare) {
                         let token = document.createElement("div");        
                         token.classList.add("token");
                         token.id="token_"+p;
-                        boardID = "tokenHolder_"+b;
-                        let playerContainer = document.getElementById(boardID);
+                        let playerContainer = document.getElementById("tokenContainer_"+b);
                         switch (p) {
                             case 0:
                                 color = gamedatas.players[player1].color;
@@ -136,23 +138,24 @@ function (dojo, declare) {
                 default:
                     for(let i=0;i<4;i++) {
                         let blocker = document.createElement("div");        
+                        blocker.classList.add("token");
                         blocker.classList.add("blocker");
                         blocker.classList.add("filter_000000");
                         if(i==0) {
                             blockerID = "blocker_"+5;
-                            boardID = "space_"+q1Block;
+                            boardID = "tokenContainer_"+q1Block;
                             blocker.id=blockerID;
                         }else if(i==1){
                             blockerID = "blocker_"+6;
-                            boardID = "space_"+q2Block;
+                            boardID = "tokenContainer_"+q2Block;
                             blocker.id=blockerID;
                         }else if(i==2){
                             blockerID = "blocker_"+7;
-                            boardID = "space_"+q3Block;
+                            boardID = "tokenContainer_"+q3Block;
                             blocker.id=blockerID;
                         }else if(i==3){
                             blockerID = "blocker_"+8;
-                            boardID = "space_"+q4Block;
+                            boardID = "tokenContainer_"+q4Block;
                             blocker.id=blockerID;
                         }
                         let playerContainer = document.getElementById(boardID);
@@ -264,7 +267,8 @@ function (dojo, declare) {
                     cQuad = args.args.boardState.Quad;
                     cBoardID = args.args.boardState.boardID;
                     aCount = args.args.boardState.aCount;
-                    availableMoves = args.args.boardState.possibleMoves;
+                    availableMoves = args.args.boardState.availableMoves;
+                    console.dir(availableMoves);
 
                     if (this.isCurrentPlayerActive() == true) {
                         if(aButtonFlag == false) {
@@ -279,7 +283,6 @@ function (dojo, declare) {
                             pButton = document.getElementById("resetTime");
                             pButton.classList.add("hidden");
                         }
-                        console.dir(aCount);
                         if(aCount>=2) {
                             aButton = document.getElementById("updateQuadA");
                             aButton.classList.add("hidden");
@@ -295,14 +298,8 @@ function (dojo, declare) {
 
                         // get active spaces 
                         let blockedQuad = (((cQuad-1)*5)+(blockerSpace-1));
-                        let openSpace =[];
-                        if(cTime <4) {
-                            openSpace = this.possibleMoves(availableMoves, cQuad);
-                        } else if(cTime == 4) {
-                            cQuad++;
-                            openSpace = this.possibleMoves(availableMoves, cQuad);
-                        }
-
+                        let openSpace = availableMoves;
+                    
                         for(let p=0; p<openSpace.length; p++) {
                             highlightSpace = document.getElementById("space_"+openSpace[p]);
                             highlightSpace.classList.add("possibleMove");
@@ -336,25 +333,16 @@ function (dojo, declare) {
                     cAz = args.args.boardState.Az;
                     cCath = args.args.boardState.Cath;
                     cPeople = args.args.boardState.People;
-                    cTime = args.args.boardState.Time
+                    cTime = args.args.boardState.Time;
+
+                    console.dir(args.args.boardState);
+                    console.dir(cAz);
 
                     this.azFaithCounter[pID].toValue(cAz);
                     this.cathFaithCounter[pID].toValue(cCath);
                     this.peopleCounter[pID].toValue(cPeople);
                     this.timeCounter[pID].toValue(cTime);
                     
-                    color = "filter_" +color;
-                    tokenID = "token_"+tokenID;
-                    
-                    currentBoard = document.getElementById(tokenID);
-                    currentBoard.remove();
-
-                    let token = document.createElement("div");        
-                    token.classList.add("token");
-                    token.id=tokenID
-                    let playerContainer = document.getElementById('space_'+cBoardID);
-                    token.classList.add(color);                                     
-                    playerContainer.appendChild(token);
                     for(let i=0;i<20; i++) {
                         dojo.removeClass('space_'+i, 'possibleMove');
                         dojo.removeClass('space_'+i, 'blockedMove');
@@ -553,9 +541,9 @@ function (dojo, declare) {
                 let resourcePText = document.createElement("p");
                 resourcePText.id = "resources_p_text_space_"+boardID;
                 resourcePText.classList.add("resourceText");
-                let tokenHolder = document.createElement("div");
-                tokenHolder.id = "tokenHolder_"+boardID;
-                tokenHolder.classList.add("tokenHolder");
+                let tokenContainer = document.createElement("div");
+                tokenContainer.id = "tokenContainer_"+boardID;
+                tokenContainer.classList.add("tokenContainer");
                 let spaceP = document.createElement("p");
                 spaceP.id = "text_space_"+boardID;
 
@@ -586,7 +574,7 @@ function (dojo, declare) {
                 spaceP.appendChild(spacePtext);
                 space.appendChild(spaceP);
                 space.appendChild(spaceResource);
-                space.appendChild(tokenHolder);
+                space.appendChild(tokenContainer);
                 
 		        return space
             },
@@ -598,28 +586,6 @@ function (dojo, declare) {
                 args.lock = true;
                 this.ajaxcall('/' + this.game_name + '/' + this.game_name + '/' + action + '.html', args, this,
                     (result) => {}, (is_error) => {});
-            },
-
-
-            possibleMoves: function (availableMoves, Quad) {
-                let Moves = availableMoves;
-                let aQuad = Quad;
-                let testSpace = 0;
-                let lastSpace = 0;
-                let openSpaces = [];
-                let blocker = 0;
-                
-                testSpace = ((aQuad-1)*5);
-                lastSpace = ((aQuad*5)-1);
-                blocker = (((aQuad-1)*5)+(blockerSpace-1));
-                for (i=testSpace;i<=lastSpace;i++) {
-                    if(Moves.includes(i) == true) {
-                        if (i != blocker){
-                            openSpaces.push(i);  
-                        }
-                    }
-                }
-                return openSpaces;
             },
 
            
@@ -756,20 +722,23 @@ function (dojo, declare) {
             dojo.subscribe( 'otherDrawnCard', this, "notif_otherDrawnCard" );
             dojo.subscribe( 'selfDrawnCard', this, "notif_selfDrawnCard" );
 
-            dojo.subscribe( 'otherUpdateQuadA', this, "notif_otherUpdateQuadA" );
-            dojo.subscribe( 'selfUpdateQuadA', this, "notif_selfUpdateQuadA" );
-            this.notifqueue.setIgnoreNotificationCheck( 'otherUpdateQuadA', (notif) => (notif.args.player_id == this.player_id) );
-            dojo.subscribe( 'otherUpdateQuadC', this, "notif_otherUpdateQuadC" );
-            dojo.subscribe( 'selfUpdateQuadC', this, "notif_selfUpdateQuadC" );
-            this.notifqueue.setIgnoreNotificationCheck( 'otherUpdateQuadC', (notif) => (notif.args.player_id == this.player_id) );
+            dojo.subscribe( 'otherUpdateQuad', this, "notif_otherUpdateQuad" );
+            dojo.subscribe( 'selfUpdateQuad', this, "notif_selfUpdateQuad" );
+            this.notifqueue.setIgnoreNotificationCheck( 'otherUpdateQuad', (notif) => (notif.args.player_id == this.player_id) );
             dojo.subscribe( 'otherResetTime', this, "notif_otherResetTime" );
             dojo.subscribe( 'selfResetTime', this, "notif_selfResetTime" );
             this.notifqueue.setIgnoreNotificationCheck( 'otherResetTime', (notif) => (notif.args.player_id == this.player_id) );
-            dojo.subscribe( 'BlockedSpace', this, "notif_BlockedSpace" );       
+            dojo.subscribe( 'BlockedSpace', this, "notif_BlockedSpace" );
+            dojo.subscribe( 'moveTokenOther', this, "notif_moveTokenOther" );
+            dojo.subscribe( 'moveTokenSelf', this, "notif_moveTokenSelf" );
+            this.notifqueue.setIgnoreNotificationCheck( 'moveTokenOther', (notif) => (notif.args.player_id == this.player_id) );
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
+
         
+
+
         notif_otherDrawnCard: function (notif) {
             messageContainer = document.getElementById("messageContainer");
             messageContainer.classList.remove("hidden");
@@ -784,28 +753,14 @@ function (dojo, declare) {
             document.getElementById("message-text").innerText = logText;
         },
 
-        notif_otherUpdateQuadA: function (notif) {
+        notif_otherUpdateQuad: function (notif) {
             messageContainer = document.getElementById("messageContainer");
             messageContainer.classList.remove("hidden");
             logText = this.format_string_recursive(notif.log, notif.args);
             document.getElementById("message-text").innerText = logText;
         },
 
-        notif_otherUpdateQuadC: function (notif) {
-            messageContainer = document.getElementById("messageContainer");
-            messageContainer.classList.remove("hidden");
-            logText = this.format_string_recursive(notif.log, notif.args);
-            document.getElementById("message-text").innerText = logText;
-        },
-
-        notif_selfUpdateQuadA: function (notif) {
-            messageContainer = document.getElementById("messageContainer");
-            messageContainer.classList.remove("hidden");
-            logText = this.format_string_recursive(notif.log, notif.args);
-            document.getElementById("message-text").innerText = logText;
-        },
-
-        notif_selfUpdateQuadC: function (notif) {
+        notif_selfUpdateQuad: function (notif) {
             messageContainer = document.getElementById("messageContainer");
             messageContainer.classList.remove("hidden");
             logText = this.format_string_recursive(notif.log, notif.args);
@@ -827,6 +782,20 @@ function (dojo, declare) {
         },
         
         notif_BlockedSpace: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_moveTokenOther: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_moveTokenSelf: function (notif) {
             messageContainer = document.getElementById("messageContainer");
             messageContainer.classList.remove("hidden");
             logText = this.format_string_recursive(notif.log, notif.args);

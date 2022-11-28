@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * Flower War. Original game by Ice 9 Games. Designed and developed by Tug Brice. Designsbyice9@gmail.com
+ * flowerwar implementation : © <Your name here> <Your email address here>
  *
  * This code has been produced on the BGA studio platform for use on https://boardgamearena.com.
  * See http://en.doc.boardgamearena.com/Studio for more information.
@@ -10,7 +10,7 @@
  * 
  * flowerwar.action.php
  *
- * flowerwar main action entry point
+ * flowerwartoo main action entry point
  *
  *
  * In this file, you are describing all the methods that can be called from your
@@ -41,7 +41,6 @@
   	
   	// TODO: defines your action entry points there
 
-    
 
     /*
     

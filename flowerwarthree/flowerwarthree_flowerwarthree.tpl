@@ -66,8 +66,6 @@ var jstpl_player_board = '<div class="cpboard">\
     <div id="tContainer" class="counterContainer"><div id="tCounter${id}" class="tCounter"></div><div id="panel_icon_t" class="resourceIconT"></div><p class="counter-text">Time: <span id="timeCounter${id}">0</span></p></div>\
 </div>';
 
-/* var jstpl_boardSpace = '<div class="space" id="space_${boardID}"><p> class="spaceText">Space ${boardID}</p><div class="space-resource" id="space_${boardID}_resources"><div id="az_resource_icon"><img alt="Aztec Resource Icon" src="img/Aztec.svg"><p id="az_resource_text_space_${boardID}"></p></div><div id="cath_resource_icon"><img alt="Catholic Resource Icon" src="img/Catholic.svg"><p id="cath_resource_text_space_${boardID}"></p></div><div id="people_resource_icon"><img alt="People Resource Icon" src="img/People.svg"><p id="people_resource_text_space_${boardID}"></p></div></div></div>'; */
-
 </script>  
 
 {OVERALL_GAME_FOOTER}
