@@ -59,7 +59,6 @@ $machinestates = array(
         "type" => "manager",
         "action" => "stGameSetup",
         "transitions" => array( "" => 2 )
-        //"transitions" => array( "" => 201 )
     ),
     
     // Note: ID=2 => your first state
@@ -81,7 +80,7 @@ $machinestates = array(
         "args" => "argsBoardState",
         "action" => "stMoveToken",
         "possibleactions" => array( "nextQuadA", "nextQuadC", "resetTime", "boardUpdate" ),
-        "transitions" => array( "nextQuadA" => 2, "nextQuadC" => 2,"resetTime" => 2, "boardUpdate" => 4 )
+        "transitions" => array( "moveToken" => 2, "boardUpdate" => 4 )
 ),
     
     4 => array(
@@ -92,9 +91,7 @@ $machinestates = array(
         "args" => "argsBoardState",
         "action" => "stBoardUpdate",
         "possibleactions" => array( "cardHandler" ),
-        "transitions" => array( "cardHandler" => 5 )
-        //"possibleactions" => array( "cardTestStart" ),
-        //"transitions" => array( "cardTestStart" => 202 )
+        "transitions" => array( "cardHandler" => 5, )
     ),
 
     5 => array(
@@ -105,7 +102,7 @@ $machinestates = array(
         "args" => "argsCardState",
         "action" => "stCardHandler",
         "possibleactions" => array( "resourceLoop" ),
-        "transitions" => array( "resourceLoop" => 10)
+        "transitions" => array( "resourceLoop" => 10, "moveToken" => 2 )
         //"possibleactions" => array( "cardTestEnd" ),
         //"transitions" => array( "cardTestEnd" => 203)
     ),

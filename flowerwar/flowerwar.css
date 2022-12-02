@@ -164,6 +164,21 @@
   flex-direction: column;
 }
 
+.hidden {
+  display: none !important;
+  visibility: hidden;
+}
+
+.possibleMove {
+  background-color: #7d7dec !important;
+  cursor: pointer;
+}
+
+.blockedMove {
+  background-color: #ff8080 !important;
+  cursor: pointer;
+}
+
 .spaceText {
   text-align: center;
   vertical-align: center;

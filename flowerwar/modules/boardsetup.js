@@ -3,28 +3,18 @@
 
 function createBoard (tokens, blocker, blockers, colorArray, terrainArray, boardArray) {
     const boardContainer = document.getElementById("boardContainer");
-    console.dir(blocker);
-    console.dir(blockers);
-    console.dir(tokens);
     for (let i=0;i<20; i++) { // increment through every boardID
         let space = createSpace(i, terrainArray[i], boardArray); // create the space
-        boardContainer.appendChild(space);
+        boardContainer.appendChild(space); // append the space
         for(let j=0;j<tokens.length; j++) { // increment through every player
             if (tokens[j][1] == i) { // if a player is on that space
                 appendToken(i, tokens[j][2], false, colorArray[j]) // append a token
             }
         }
-        switch(blocker) { // check for blocker
-            case 6: // if blocker is 6
-            break; // do nothing
-            default: // else 
-                for (let k=0;k<4;k++){ // increment through every quad
-                    console.dir(k);
-                    if (i == blockers[k][1]) { // if blocker space equals boardID
-                        appendToken(i, blockers[k][0], true, "000000"); // append blocker token
-                    }
-                }
-            break;
+    }
+    if (blocker != 6) {
+        for (let k=0;k<4;k++){ // increment through all 4 quads
+            appendToken(blockers[k][1], blockers[k][0], true, "000000"); // append blocker token
         }
     }
 }
@@ -230,7 +220,7 @@ function appendTemple (trackSpace, type) {
             trackSpace = document.getElementById("cath_"+trackSpace);
         break;
     }
-    templeToken.appendChild(trackSpace);
+    trackSpace.appendChild(templeToken);
 }
 
 function setFlags (type, flag) {
@@ -303,3 +293,16 @@ function setFlags (type, flag) {
         break;
     }
 }
+
+function removePossible() {
+    for(let i=0;i<20; i++) {
+        let removeTags = document.getElementById("space_"+i);
+        if(removeTags.classList.contains("possibleMove")) {
+            removeTags.classList.remove("possibleMove");
+        }
+        if(removeTags.classList.contains("blockedMove")) {
+            removeTags.classList.remove("blockedMove");
+        }
+    }
+}
+

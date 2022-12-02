@@ -62,7 +62,51 @@
     }
     
     */
+    
+    public function updateQuadA () {
+      self::setAjaxMode();
+      $this->game->updateQuad('A');
+      self::ajaxResponse();
+    }
+
+    public function updateQuadC () {
+      self::setAjaxMode();
+      $this->game->updateQuad('C');
+      self::ajaxResponse( );      
+    }
+
+    public function resetTime () {
+      self::setAjaxMode();
+      $this->game->updateTime();
+      self::ajaxResponse( );    
+    }
+
+    public function getPossible() {
+      self::setAjaxMode();
+      $this->game->updateTime();
+      self::ajaxResponse( );
+    }
+
+    public function clickedSpace () {
+      self::setAjaxMode();
+      $boardID =self::getArg("boardID", AT_alphanum, true);
+      $this->game->clickedSpace($boardID);
+      self::ajaxResponse( );
+    }
+
+    public function faithCardChoice() {
+      self::setAjaxMode();
+      $faithChoice = self::getArg("faithCardChoice", AT_alphanum, true);
+      $this->game->cardChoice($faithChoice, "F");
+      self::ajaxResponse( );
+    }
+
+    public function templeCardChoice() {
+      self::setAjaxMode();
+      $templeChoice = self::getArg("templeCardChoice", AT_alphanum, true);
+      $this->game->cardChoice($templeChoice, "T");
+      self::ajaxResponse( );
+    }
 
   }
   
-

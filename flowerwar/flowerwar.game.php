@@ -52,6 +52,7 @@ class flowerwar extends Table
             "cardChoiceTemple" => 26,
             "blockerSpace" => 27,
             "advanceCount" => 28,
+            "originalQuad" => 29,
     ) );
 
     // setting up Deck
@@ -166,6 +167,7 @@ class flowerwar extends Table
         self::setGameStateInitialValue( 'cardChoiceFaith', "" );
         self::setGameStateInitialValue( 'cardChoiceTemple', "" );
         self::setGameStateInitialValue( 'advanceCount', 0 );
+        self::setGameStateInitialValue( 'originalQuad', 0 );
 
         // Terrain Cards
         $terrain = array();
@@ -216,31 +218,35 @@ class flowerwar extends Table
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 
-        $blocker = self::getGameStateValue('blockerSpace');
+        (int)$blocker = self::getGameStateValue('blockerSpace');
+        $blockerTokens = array();
+
+        $blockerTokens = $this->getBlockerTokens($blocker);
+
         $cardsInHand = array();
         $tokenArray = array();
         $resourceArray = array();
 
         $players = $this->loadPlayersBasicInfos();
         foreach( $players as $player_id => $player ) {
-            $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
-            $cToken = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
+            $cBoard = $this->resourceQuery($player_id, "B");
+            $cToken = $this->resourceQuery($player_id, "K");
 
             $tokenArray[] = array($player_id, $cBoard, $cToken);
             $cardsInHand[] = $this->cards->getCardsInLocation("hand",$player_id);
 
-            $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
-            $cCath = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
-            $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
-            $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
-            $cCharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $player_id ORDER BY `recordID` DESC LIMIT 0,1" );
+            $cAz = $this->resourceQuery($player_id, "A");
+            $cCath = $this->resourceQuery($player_id, "C");
+            $cPeople = $this->resourceQuery($player_id, "P");
+            $cTime = $this->resourceQuery($player_id, "T");
+            $cCharID = $this->resourceQuery($player_id, "H");
 
             $resourceArray[] = array($player_id, $cAz, $cCath, $cPeople, $cTime, $cCharID);
         }
 
-        $aLevel = $this ->getGameStateValue("azLevel");
-        $cLevel = $this ->getGameStateValue("cathLevel");
-        $apocflag = $this ->getGameStateValue("apocFlag");
+        $aLevel = (int)$this ->getGameStateValue("azLevel");
+        $cLevel = (int)$this ->getGameStateValue("cathLevel");
+        $apocflag = (int)$this ->getGameStateValue("apocFlag");
         $aflag = $this ->getGameStateValue("azFlag");
         $cflag = $this ->getGameStateValue("cathFlag");
 
@@ -261,7 +267,7 @@ class flowerwar extends Table
         }
 
         $result['terrain'] = $terrainArray;
-
+        $result['blockerTokens'] = $blockerTokens;
 
         return $result;
     }
@@ -330,26 +336,23 @@ class flowerwar extends Table
 
     }
 
-    function boardQuery($bID) {
-        $boardID = $bID;
-        $bAz = 0;
-        $bCath = 0;
-        $bPeople = 0;
-        $terrainArray = array();
-        $bTerrain = "";
-        $boardArray = array();
+    function getBlockerTokens($blocker) {
+        switch($blocker) {
+            case 6:
+            break;
+            default:
+                (int)$b1 = $blocker -1;
+                (int)$b2 = $blocker +4;
+                (int)$b3 = $blocker +9;
+                (int)$b4 = $blocker +14;
+                $blockerTokens = [[5,$b1],[6,$b2],[7,$b3],[8,$b4]];
+        }
 
-        $bAz = $this->board[$boardID]["Az"];
-        $bCath = $this->board[$boardID]["Cath"];
-        $bPeople = $this->board[$boardID]["People"];
-
-        $terrainArray = $this->cards->getCardsInLocation('board', $boardID);
-        $bTerrain = array_values($terrainArray)[0]['type'];
-
-        $boardArray = array ($bAz, $bCath, $bPeople, $bTerrain);
-
-        return $boardArray;
+        return $blockerTokens;
     }
+
+//////////// Resource functions
+////////////
 
     function resourceQuery($player_id, $resource) {
         $pID = $player_id;
@@ -358,30 +361,32 @@ class flowerwar extends Table
 
         switch($rID) {
             case 'A':
-                $value = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+                (int)$value = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'C':
-                $value = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+                (int)$value = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'P':
-                $value = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+                (int)$value = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'T':
-                $value = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+                (int)$value = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'H':
                 $value = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'B':
-                $value = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+                (int)$value = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'Q':
-                $value = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+                (int)$value = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
             case 'S':
-                $value = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+                (int)$value = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
             break;
-
+            case 'K':
+                $value = (int)self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
+            break;
         }
         return $value;
     }
@@ -391,67 +396,134 @@ class flowerwar extends Table
         $rID = $resource;
         $rValue = $new_value;
         $values = array();
-        $cToken = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $cBoard = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $cQuad = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $cSpace = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $cAz = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $cCath= self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $cPeople = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $cTime = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $ccharID = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $turn = $this ->getGameStateValue("turnCount");
+        $cToken = $this->resourceQuery($pID, "K");
+        $cBoard = $this->resourceQuery($pID, "B");
+        $cQuad = $this->resourceQuery($pID, "Q");
+        $cSpace = $this->resourceQuery($pID, "S");
+        $cAz = $this->resourceQuery($pID, "A");
+        $cCath= $this->resourceQuery($pID, "C");
+        $cPeople = $this->resourceQuery($pID, "P");
+        $cTime = $this->resourceQuery($pID, "T");
+        $cCharID = $this->resourceQuery($pID, "H");
+        $turn = (int)$this->getGameStateValue("turnCount");
+
         $sql = "INSERT INTO `resources` (`player_id`, `tokenID`, `boardID`, `Quad`,`Space`, `Az`, `Cath`,`People`,`Time`,`charID`, `turn`) VALUES ";
 
         switch($rID) {
             case 'A':
                 $cAz = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$cCharID."', '".$turn."')");
             break;
             case 'C':
                 $cCath = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$cCharID."', '".$turn."')");
             break;
             case 'P':
                 $cPeople = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$cCharID."', '".$turn."')");
             break;
             case 'T':
                 $cTime = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$cCharID."', '".$turn."')");
             break;
             case 'H':
-                $ccharID = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
+                $cCharID = $rValue;
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$cCharID."', '".$turn."')");
             break;
             case 'Q':
                 $cQuad = $rValue;
                 $cSpace = 1;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$cCharID."', '".$turn."')");
             break;
             case 'B':
                 $cBoard = $rValue;
-                $cQuad = ceil(($cBoard+1)/5);
-                $cSpace = (($cBoard+1)-(($cQuad-1)*5));
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
-            break;
-            case 'H':
-                $ccharID = $rValue;
-                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$ccharID."', '".$turn."')");
+                $cQuad = $this->board[$cBoard]['Quad'];
+                $cSpace = $this->board[$cBoard]['Space'];
+                $values = array("( '".$pID."', '".$cToken."', '".$cBoard."', '".$cQuad."', '".$cSpace."', '".$cAz."', '".$cCath."', '".$cPeople."', '".$cTime."', '".$cCharID."', '".$turn."')");
             break;
             }
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
     }
 
+//////////// Board functions
+////////////
+    
+    function getPossible ($playerID, $currentBoard, $currentQuad, $currentTime) {
+        $pID = $playerID;
+        $bID = $currentBoard;
+        $cQuad = $currentQuad;
+        $time = $currentTime;
+        $blocker = (int)$this ->getGameStateValue("blockerSpace");
+        $aCount = (int)$this ->getGameStateValue("advanceCount");
+        (int)$testSpace = 0;
+        (int)$lastSpace = 0;
+        (int)$blockedSpace = 0;
+        $availableMoves = array();
+
+        if ($time < 4) {
+            $testSpace = ($bID+1);
+        } else if ($time >= 4) {
+            $cQuad++;
+        }
+        switch ($cQuad) {
+            case 1:
+                $lastSpace = 4;
+                if ($blocker<6) {
+                    $blockedSpace = $blocker -1;
+                }
+                if (($time >= 4) || ($aCount > 0)) {
+                    $testSpace = 0;
+                }
+            break;
+            case 2:
+                $lastSpace = 9;
+                if ($blocker<6) {
+                    $blockedSpace = $blocker +4;
+                }
+                if (($time >= 4) || ($aCount > 0)) {
+                    $testSpace = 5;
+                }
+            break;
+            case 3:
+                $lastSpace = 14;
+                if ($blocker<6) {
+                    $blockedSpace = $blocker +9;
+                }
+                if (($time >= 4) || ($aCount > 0)) {
+                    $testSpace = 10;
+                }
+            break;
+            case 4:
+                $lastSpace = 19;
+                if ($blocker<6) {
+                    $blockedSpace = $blocker +14;
+                }
+                if (($time >= 4) || ($aCount > 0)) {
+                    $testSpace = 15;
+                }
+            break;
+        }
+
+        for ($i=$testSpace;$i<=$lastSpace;$i++) { // Increment through ever space
+            if ($i != $blockedSpace) { // If the space isn't blocked
+                array_push($availableMoves, ($i)); // push it to the array
+            }
+        }
+        return $availableMoves; 
+    }
+
+//////////// Temple functions
+////////////
+
     function checkTemple($which) {
         $pID = $this->getActivePlayerId();
-        $aLevel = $this ->getGameStateValue("azLevel");
-        $cLevel = $this ->getGameStateValue("cathLevel");
-        $apocFlag = $this ->getGameStateValue("apocFlag");
+        $aLevel = (int)$this ->getGameStateValue("azLevel");
+        $cLevel = (int)$this ->getGameStateValue("cathLevel");
+        $apocFlag = (int)$this ->getGameStateValue("apocFlag");
         $aFlag = $this ->getGameStateValue("azFlag");
         $cFlag = $this ->getGameStateValue("cathFlag");
-        $maxHeight = $this ->getGameStateValue("templeMaxHeight");
+        $maxHeight = (int)$this ->getGameStateValue("templeMaxHeight");
 
         switch ($which) {
             case 'A':
@@ -485,7 +557,8 @@ class flowerwar extends Table
         }
     }
 
-    
+//////////// Win/Loss functions
+////////////
 
     function loseCheck($player_id) {
         $pID = $player_id;
@@ -497,11 +570,11 @@ class flowerwar extends Table
 
     function winCheck($player_id) {
         $pID = $player_id;
-        $aLevel = $this ->getGameStateValue("azLevel");
-        $cLevel = $this ->getGameStateValue("cathLevel");
+        $aLevel = (int)$this ->getGameStateValue("azLevel");
+        $cLevel = (int)$this ->getGameStateValue("cathLevel");
         $aFlag = $this ->getGameStateValue("azFlag");
         $cFlag = $this ->getGameStateValue("cathFlag");
-        $apocFlag = $this ->getGameStateValue("apocFlag");
+        $apocFlag = (int)$this ->getGameStateValue("apocFlag");
         $cPeople = 0;
 
         $levelCheck = false;
@@ -545,33 +618,133 @@ class flowerwar extends Table
         (note: each method below must match an input method in flowerwar.action.php)
     */
 
-    
+    function updateQuad($type) {
+        $pID = $this->getActivePlayerId();
+        $cQuad = $this->resourceQuery($pID, "Q");
+        $resource = $this->resourceQuery($pID, $type);
+        $aCount = (int)$this->getGameStateValue("advanceCount");
+        $cBoard = $this->resourceQuery($pID, "B");
+        $cTime = $this->resourceQuery($pID, "T");
+        $rText = "";
+        $pMoves = array();
+        $cTime = $this->resourceQuery($pID, "T");
 
-    /*
+        // check if action is valid
+        $this->checkAction(('updateQuadA')||('updateQuadC'));
 
-    Example:
+        // check for resources 
+        if ($resource < 1) {
+            throw new BgaUserException( self::_("You don't have enough Faith to perform this action") );
+        }
+        if ($aCount >= 3) { // check for aCount
+            throw new BgaUserException( self::_("Can't advance more than three quadrants") );
+        } else if ($this->checkAction('nextQuadA', false) || $this->checkAction('nextQuadC', false)) {
 
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' );
+            // update Quad
+            if ($cQuad >= 4) {
+                $cQuad = 1;
+            } else if ($cQuad < 4) {
+                $cQuad++;
+            }
 
-        $player_id = self::getActivePlayerId();
+            // update Resources
+            $resource--;
+            $this->updateResources($pID, $type, $resource);
+            $this->updateResources($pID, "Q", $cQuad);
 
-        // Add your game logic to play a card there
-        ...
+            // update advance count
+            $aCount++;
+            $this->setGameStateValue("advanceCount", $aCount);
+            
+            // call PossibleMoves            
+            $pMoves = $this->getPossible($pID, $cBoard, $cQuad, $cTime);
 
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-
+            // Notifications
+            $this->notifyAllPlayers("otherUpdateQuad", clienttranslate('${player_name} has spent 1 ${rText} Faith to move to the next quadrant'), [
+                'player_id' => $pID,
+                'player_name' => $this->getActivePlayerName(),
+                'rText' => $rText,
+            ]);
+            $this->notifyPlayer($pID, "selfUpdateQuad", clienttranslate('You have spent 1 ${rText} Faith to move to the next quadrant'), [
+                'rText' => $rText,
+                'possibleMoves' => $pMoves,
+                'cQuad' => $cQuad,
+                'blocker' => (int)$this->getGameStateValue("blockerSpace"),
+                'blockerTokens' => $this->getBlockerTokens((int)$this->getGameStateValue("blockerSpace")),
+            ]);
+        }
+        $this->gamestate->nextState("moveToken");
     }
 
-    */
+    function updateTime() {
+        $pID = $this->getActivePlayerId();
+        $cPeople = $this->resourceQuery($pID, "P");
+        $cQuad = $this->resourceQuery($pID, "Q");
+        $cBoard = $this->resourceQuery($pID, "B");
+        $cTime = $this->resourceQuery($pID, "T");
+
+        $this->checkAction('updateTime');
+
+        if ($cPeople<2) {
+            throw new BgaUserException ( self::_("You don't have enough People to do that"));
+        }
+        $Time = 1;
+        $this->updateResources($pID, 'P', $cPeople);
+        $this->updateResources($pID, 'T', $Time);
+
+        $possibleMoves = $this->getPossible($pID, $cBoard, $cQuad, $cTime);
+
+        $this->notifyAllPlayers("otherResetTime", clienttranslate('${player_name} has spent 1 People to reset their Time'), [
+            'player_id' => $pID,
+            'player_name' => $this->getActivePlayerName()
+        ]);
+
+        $this->notifyPlayer($pID, "selfResetTime", clienttranslate('You have spent 1 People to reset your Time'), [
+            'possibleMoves' => $possibleMoves,
+            'cQuad' => $cQuad,
+            'blocker' => (int)$this->getGameStateValue("blockerSpace"),
+            'blockerTokens' => $this->getBlockerTokens((int)$this->getGameStateValue("blockerSpace")),
+        ]);
+        $this->gamestate->nextState("moveToken");
+    }
+
+    function clickedSpace($boardString) {
+        $pID = $this->getActivePlayerId(); // set player
+        $bID = str_replace("space_", "", $boardString); // translate clicked ID to space #
+        $bQuad = $this->board[$bID]['Quad'];
+        $blocker = (int)$this->getGameStateValue("blockerSpace");
+        $blockerArray = $this->getBlockerTokens($blocker);
+
+        $this->checkAction("boardUpdate"); // check if action is valid
+
+        self::notifyAllPlayers("message", clienttranslate( 'bQuad: ${bQuad}, bID: ${bID}, blocker: ${blocker}, blockerArray: ${blockerArray}, ' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bID' => $bID,
+                'bQuad' => $bQuad,
+                'blocker' => $blocker,
+                'blockerArray' => $blockerArray,
+            ) );
+
+        if(($blocker != 6) && ($bID == $blockerArray[($bQuad -1)][1])) {
+            throw new BgaUserException ( self::_("That space is blocked, please choose another"));
+        }
+
+        $this->updateResources($pID, "B", $bID); // update BoardID in DB
+
+        self::notifyAllPlayers("moveTokenOther", clienttranslate( '${player_name} has moved to space ${board_ID}' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'board_ID' => $bID,
+            ) );
+        self::notifyPlayer($pID,"moveTokenSelf", clienttranslate( 'You have moved to space ${board_ID}' ),
+        array(
+            'player_id' => $pID,
+            'board_ID' => $bID,
+        ) );
+
+        $this->gamestate->nextState("boardUpdate"); // move to next state 
+    }
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -596,47 +769,126 @@ class flowerwar extends Table
     function argsBoardState() {
         $pID = $this->getActivePlayerId();
         $boardState = array();
-        $blocker = self::getGameStateValue('blockerSpace');
+        $blocker = (int)self::getGameStateValue('blockerSpace');
         $aButtonFlag = false;
         $cButtonFlag = false;
         $pButtonFlag = false;
-
-        $boardState['tokenID'] = self::getUniqueValueFromDB( "SELECT `tokenID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['boardID'] = self::getUniqueValueFromDB( "SELECT `boardID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['Quad'] = self::getUniqueValueFromDB( "SELECT `Quad` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['Space'] = self::getUniqueValueFromDB( "SELECT `Space` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['Az'] = self::getUniqueValueFromDB( "SELECT `Az` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['Cath'] = self::getUniqueValueFromDB( "SELECT `Cath` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['People'] = self::getUniqueValueFromDB( "SELECT `People` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['Time'] = self::getUniqueValueFromDB( "SELECT `Time` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
-        $boardState['charID'] = self::getUniqueValueFromDB( "SELECT `charID` FROM `resources` WHERE `player_id` = $pID ORDER BY `recordID` DESC LIMIT 0,1" );
         $color = $this->getActivePlayerColor();
-        $bID = $boardState['boardID'];
-        $cQuad = $boardState['Quad'];
-        $cTime = $boardState['Time'];
 
-        //$boardState['availableMoves'] = $this->possibleMoves($pID, $bID, $cQuad, $cTime);
+        $boardState['tokenID'] = $this->resourceQuery($pID, "K");
+        $boardState['boardID'] = $this->resourceQuery($pID, "B");
+        $boardState['Quad'] = $this->resourceQuery($pID, "Q");
+        $boardState['Space'] = $this->resourceQuery($pID, "S");
+        $boardState['Az'] = $this->resourceQuery($pID, "A");
+        $boardState['Cath'] = $this->resourceQuery($pID, "C");
+        $boardState['People'] = $this->resourceQuery($pID, "P");
+        $boardState['Time'] = $this->resourceQuery($pID, "T");
+        $boardState['charID'] = $this->resourceQuery($pID, "H");
+        $boardState['blocker'] = $blocker;
+        $boardState['blockerTokens'] = $this->getBlockerTokens($blocker);
+        $boardState['pColor'] = $color;
+        $boardState['turn'] = (int)$this ->getGameStateValue("turnCount");
+        $boardState['aCount'] = (int)$this ->getGameStateValue("advanceCount");
+        $boardState['oQuad'] = (int)$this->getGameStateValue("originalQuad");
+        
 
-        if($boardState['Az'] >0) {
+        if($boardState['Az'] > 0) {
             $aButtonFlag = true;
         }
-        if($boardState['Cath'] >0) {
+        if($boardState['Cath'] > 0) {
             $cButtonFlag = true;
         }
-        if($boardState['People'] >1) {
+        if($boardState['People'] > 1) {
             $pButtonFlag = true;
         }
+        if($boardState['Time'] == 1) {
+            $pButtonFlag = false;
+        }
+        if($boardState['aCount'] >= 3) {
+            $aButtonFlag = false;
+            $cButtonFlag = false;
+        }
 
-        $boardState['blocker'] = $blocker;
         $boardState['aButtonFlag'] = $aButtonFlag;
         $boardState['cButtonFlag'] = $cButtonFlag;
         $boardState['pButtonFlag'] = $pButtonFlag;
-        $boardState['pColor'] = $color;
-        $boardState['turn'] = $this ->getGameStateValue("turnCount");
-        $boardState['aCount'] = $this ->getGameStateValue("advanceCount");
+
+        $bID = $boardState['boardID'];
+        $cQuad = $boardState['Quad'];
+        $cTime = $boardState['Time'];
+        $oQuad = $boardState['oQuad'];
+        $availableMoves = array();
+
+        $availableMoves = $this->getPossible($pID, $bID, $cQuad, $cTime);
+    
+        $boardState['availableMoves'] = $availableMoves;
 
         return array(
             'boardState' => $boardState
+        );
+    }
+
+    function argPlayerState() {
+    }
+
+    function argsCardState() {
+        $pID = $this->getActivePlayerId();
+        $cardState = array();
+        $cardState['playerID'] = $pID;
+        $cardState['tokenID'] = $this->resourceQuery($pID, "K");
+        $cardState['boardID'] = $this->resourceQuery($pID, "B");
+        $cardState['Quad'] = $this->resourceQuery($pID, "Q");
+        $cardState['Space'] = $this->resourceQuery($pID, "S");
+        $cardState['Az'] = $this->resourceQuery($pID, "A");
+        $cardState['Cath'] = $this->resourceQuery($pID, "C");
+        $cardState['People'] = $this->resourceQuery($pID, "P");
+        $cardState['Time'] = $this->resourceQuery($pID, "T");
+        $cardState['charID'] = $this->resourceQuery($pID, "H");
+        $cardState['aLevel'] = (int)$this ->getGameStateValue("azLevel");
+        $cardState['cLevel'] = (int)$this ->getGameStateValue("cathLevel");
+        $cardState['apocFlag'] = (int)$this ->getGameStateValue("apocFlag");
+        $cardState['aflag'] = $this ->getGameStateValue("azFlag");
+        $cardState['cflag'] = $this ->getGameStateValue("cathFlag");
+        $cardState['maxHeight'] = (int)$this ->getGameStateValue("templeMaxHeight");
+        $cardState['faithChoiceFlag'] = false;
+        $cardState['templeChoiceFlag'] = false;
+        $cardState['moveAU'] = false;
+        $cardState['moveAD'] = false;
+        $cardState['moveCU'] = false;
+        $cardState['moveCD'] = false;
+        $cardState['turn'] = (int)$this ->getGameStateValue("turnCount");
+
+        // get event card type
+        $currentCard = array();
+        $currentCard = $this->cards->getCardsInLocation('held', $pID);
+        $currentCardType = array_values($currentCard)[0]["type"];
+        $cardState['cardType'] = $currentCardType;
+
+        $cardChoiceFaith = array("gPenalty","gCheck","catchUp","gBonus");
+        $cardChoiceTemple = array("uFigure","dFigure");
+
+        if((in_array($cardState['cardType'], $cardChoiceFaith)) && ($cardState['Az']==$cardState['Cath'])) {
+            $cardState['faithChoiceFlag'] = true;
+        }
+        if(in_array($cardState['cardType'], $cardChoiceTemple)) {
+            $cardState['templeChoiceFlag'] = true;
+        }
+
+        if ($cardState['aLevel'] > 0) {
+            $cardState['moveAD'] = true;
+        }
+        if ($cardState['aLevel'] < $cardState['maxHeight']) {
+            $cardState['moveAU'] = true;
+        }
+        if ($cardState['cLevel'] > 0) {
+            $cardState['moveCD'] = true;
+        }
+        if ($cardState['cLevel'] < $cardState['maxHeight']) {
+            $cardState['moveCU'] = true;
+        }
+
+        return array(
+            'cardState' => $cardState
         );
     }
 
@@ -672,6 +924,101 @@ class flowerwar extends Table
         $count++;
         $this -> setGameStateValue("turnCount", $count);
     }
+
+    function stBoardUpdate() {
+        $pID = $this->getActivePlayerId(); // get player ID
+        $bID = $this->resourceQuery($pID, "B"); // get current player board location
+        $pA = $this->resourceQuery($pID, "A"); // get current player resources
+        $pC = $this->resourceQuery($pID, "C");
+        $pP = $this->resourceQuery($pID, "P");
+        $time = $this->resourceQuery($pID, "T");
+        $bA = $this->board[$bID]['Az']; // get board resources
+        $bC = $this->board[$bID]['Cath'];
+        $bP = $this->board[$bID]['People'];
+        $rText = "";
+
+        $pA += $bA; // update player resources
+        $pC += $bC;
+        $pP += $bP;
+        $time++;
+        $this->updateResources($pID, 'A', $pA);
+        $this->updateResources($pID, 'C', $pC);
+        $this->updateResources($pID, 'P', $pP);
+        $this->updateResources($pID, 'T', $time);
+
+        // Notification for Catholic Faith
+        $rText = "Aztec";
+        if ($bA > 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has gained ${bA} ${rText} Faith' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bA' => $bA,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have gained ${bA} ${rText} Faith' ),
+            array(
+                'player_id' => $pID,
+                'bA' => $bA,
+                'rText' => $rText,
+            ) );
+        } 
+
+        // Notification for Catholic Faith
+        $rText = "Catholic";
+        if ($bC > 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has gained ${bC} ${rText} Faith' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bC' => $bC,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have gained ${bC} ${rText} Faith' ),
+            array(
+                'player_id' => $pID,
+                'bC' => $bC,
+                'rText' => $rText,
+            ) );
+        } 
+
+        // Notification for People
+        $rText = "People";
+        if ($bP > 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has gained ${bP} ${rText}' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have gained ${bP} ${rText}' ),
+            array(
+                'player_id' => $pID,
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+        } else if ($bP < 0) {
+            self::notifyAllPlayers("message", clienttranslate( '${player_name} has lost ${bP} ${rText}' ),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+            self::notifyPlayer($pID,"message", clienttranslate( 'You have lost ${bP} ${rText}' ),
+            array(
+                'player_id' => $pID,
+                'bP' => $bP,
+                'rText' => $rText,
+            ) );
+        }
+
+        $this -> setGameStateValue("advanceCount", 0); // reset advanceCount
+        $this->cards->pickCardForLocation( "deck", "held", $pID ); // draw a card
+        $this->gamestate->nextState("cardHandler"); // move to next state
+    }
+
+    function stCardHandler() {
+        $this->gamestate->nextState("moveToken");
+    }
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

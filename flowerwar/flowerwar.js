@@ -33,13 +33,15 @@ function (dojo, declare) {
             this.globalTerrain = [];
             this.globalBoard = [];
             this.globalResource = [];
+            this.colorArray=[];
+            this.cards = [];
+            this.blockerArray = [];
             this.blocker = 0;
             this.azTemple = -1;
             this.cathTemple = -1;
             this.apocFlag = 0;
             this.azFlag = false;
             this.cathFlag = false;
-            this.colorArray=[];
         },
         
         /*
@@ -81,17 +83,17 @@ function (dojo, declare) {
                 // Az Counter
                 this.azFaithCounter[player_id] = new ebg.counter();
                 this.azFaithCounter[player_id].create('azFaithCounter'+player_id);
-                this.azFaithCounter[player_id].setValue(gamedatas.resources[i][0]);
+                this.azFaithCounter[player_id].setValue(gamedatas.resources[i][1]);
 
                 // Cath Counter
                 this.cathFaithCounter[player_id] = new ebg.counter();
                 this.cathFaithCounter[player_id].create('cathFaithCounter'+player_id);
-                this.cathFaithCounter[player_id].setValue(gamedatas.resources[i][1]);
+                this.cathFaithCounter[player_id].setValue(gamedatas.resources[i][2]);
 
                 // People Counter
                 this.peopleCounter[player_id] = new ebg.counter();
                 this.peopleCounter[player_id].create('peopleCounter'+player_id);
-                this.peopleCounter[player_id].setValue(gamedatas.resources[i][2]);
+                this.peopleCounter[player_id].setValue(gamedatas.resources[i][3]);
 
                 // Time Counter
                 this.timeCounter[player_id] = new ebg.counter();
@@ -108,8 +110,8 @@ function (dojo, declare) {
             this.globalBoard = [];
             this.globalResources = [];
             this.globalTokens = [];
-            this.blocker = 0;
             this.blockerTokens = [];
+            this.cards = [];
             this.azTemple = -1;
             this.cathTemple = -1;
             this.apocFlag = 0;
@@ -126,25 +128,14 @@ function (dojo, declare) {
             this.cathTemple = gamedatas.cathTemple;
             this.apocFlag = gamedatas.apocFlag;
             this.azFlag = gamedatas.azFlag;
-            this.cathFlag = gamedatas.cathFlag;;
-
-            switch(this.blocker) {
-                case 6:
-                break;
-                default:
-                    let b1 = this.blocker -1;
-                    let b2 = this.blocker - (-4);
-                    let b3 = this.blocker - (-9);
-                    let b4 = this.blocker - (-14);
-                    this.blockerTokens = [[5,b1],[6,b2],[7,b3],[8,b4]];
-            }
+            this.cathFlag = gamedatas.cathFlag;
+            this.cards = gamedatas.cards;
+            this.blockerTokens = gamedatas.blockerTokens;
             
 
-            // set up board spaces
+            // set up playing field
             clearBoard();
             createBoard(this.globalTokens, this.blocker, this.blockerTokens, this.colorArray, this.globalTerrain, this.globalBoard);
-
-            // set up Temple
             createTemple(this.azTemple, this.cathTemple, this.apocFlag, this.azFlag, this.cathFlag);
             
             // Setup game notifications to handle (see "setupNotifications" method below)
@@ -166,20 +157,58 @@ function (dojo, declare) {
             
             switch( stateName )
             {
-            
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Show some HTML block at this game state
-                dojo.style( 'my_html_block_id', 'display', 'block' );
-                
+                case 'startTurn':
+                   
+
                 break;
-           */
-           
-           
-            case 'dummmy':
+                case 'moveToken':
+                    this.updatePageTitle();
+
+                    // button handling
+                    let cAz = args.args.boardState.Az;
+                    let aButtonFlag = args.args.boardState.aButtonFlag;
+                    let cCath = args.args.boardState.Cath;
+                    let cButtonFlag = args.args.boardState.cButtonFlag;
+                    let cPeople = args.args.boardState.People;
+                    let pButtonFlag = args.args.boardState.pButtonFlag;
+                    let aCount = args.args.boardState.aCount;
+                    
+                    // possibleMoves
+                    let pID = args.args.boardState.playerID;
+                    let cBoard = args.args.boardState.boardID;
+                    let cQuad = args.args.boardState.Quad;
+                    let oQuad = args.args.boardState.oQuad;
+                    let cTime = args.args.boardState.Time;
+                    let possibleMoves = args.args.boardState.availableMoves;
+                    let blocker = args.args.boardState.blocker;
+                    let blockerTokens = args.args.boardState.blockerTokens;
+
+
+                    
+                    if (this.isCurrentPlayerActive() == true) {
+                        // handle action buttons
+                        if(aButtonFlag == false) {
+                            aButton = document.getElementById("updateQuadA");
+                            aButton.classList.add("hidden");
+                        }
+                        if(cButtonFlag == false) {
+                            cButton = document.getElementById("updateQuadC");
+                            cButton.classList.add("hidden");
+                        }
+                        if(pButtonFlag == false) {
+                            pButton = document.getElementById("resetTime");
+                            pButton.classList.add("hidden");
+                        }
+                        
+                        // highlight spaces
+                        this.MakeSpacesClickable(possibleMoves, blocker, blockerTokens, cQuad);
+                    }
+
                 break;
+
+
+                case 'dummmy':
+                break;   
             }
         },
 
@@ -220,18 +249,12 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
-/*               
-                 Example:
- 
-                 case 'myGameState':
-                    
-                    // Add 3 action buttons in the action status bar:
-                    
-                    this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                    this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                    this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
+                    case 'moveToken':
+                        console.log( 'state: '+stateName );
+                            this.addActionButton( 'updateQuadA', _('1 Aztec Faith: Move to the next Quadrant'), 'onUpdateQuadA' ); 
+                            this.addActionButton( 'updateQuadC', _('1 Catholic Faith: Move to the next Quadrant'), 'onUpdateQuadC' ); 
+                            this.addActionButton( 'resetTime', _("1 People: Reset your Time"), 'onResetTime' );
                     break;
-*/
                 }
             }
         },        
@@ -248,6 +271,29 @@ function (dojo, declare) {
                     (result) => {}, (is_error) => {});
         },
 
+        createEl: (classList, id, parentEl, prepend = 0) => {
+            if (id && document.getElementById(id)) {
+              return document.getElementById(id);
+            }
+            const el = document.createElement('div');
+            el.classList.add(...classList.filter(n => n));
+            if (id) {
+              el.id = id;
+            }
+            if (typeof parentEl === 'string') {
+              parentEl = document.getElementById(parentEl);
+            }
+            if (parentEl) {
+              if (prepend) {
+                parentEl.prepend(el);
+              } else {
+                parentEl.append(el);
+              }
+            }
+            return el;
+          },
+
+        
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -262,40 +308,58 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+
+            MakeSpacesClickable: function (moves, blocker, blockerTokens, cQuad) {
+                removePossible();
+                console.dir(moves);
+                
+                for (let i = 0; i < moves.length; i++) {
+                    highlightSpace = document.getElementById("space_"+moves[i]);
+                    highlightSpace.classList.add("possibleMove");
+                }
+                if (blocker != 6) {
+                    for(let i=0;i<blockerTokens.length;i++) {
+                        blockedSpace = document.getElementById("space_"+blockerTokens[(cQuad-1)][1]);
+                        blockedSpace.classList.add("blockedMove");
+                    }
+                }
+                clickableSpace = document.getElementsByClassName("possibleMove");
+                Array.from(clickableSpace).forEach(
+                    (elem) => elem.addEventListener("click", () => this.onClickedSpace(elem.id))
+                );
+                errorSpace = document.getElementsByClassName("blockedMove");
+                Array.from(errorSpace).forEach(
+                    (elem) => elem.addEventListener("click", () => this.onClickedSpace(elem.id))
+                );
+            },
         
-        /* Example:
-        
-        onMyMethodToCall1: function( evt )
-        {
-            console.log( 'onMyMethodToCall1' );
-            
-            // Preventing default browser reaction
-            dojo.stopEvent( evt );
+            onUpdateQuadA: function (evt) {
+                pID = this.getActivePlayerId();
+                this.azFaithCounter[pID].incValue(-1);
+                this.ajaxCallWrapper("updateQuadA",);
+                this.updatePageTitle(); 
+            },
+    
+            onUpdateQuadC: function (evt) {
+                pID = this.getActivePlayerId();
+                this.cathFaithCounter[pID].incValue(-1);
+                dojo.stopEvent( evt );
+                this.ajaxCallWrapper("updateQuadC",);
+                this.updatePageTitle();         
+            },
 
-            // Check that this action is possible (see "possibleactions" in states.inc.php)
-            if( ! this.checkAction( 'myAction' ) )
-            {   return; }
-
-            this.ajaxcall( "/flowerwar/flowerwar/myAction.html", { 
-                                                                    lock: true, 
-                                                                    myArgument1: arg1, 
-                                                                    myArgument2: arg2,
-                                                                    ...
-                                                                 }, 
-                         this, function( result ) {
-                            
-                            // What to do after the server call if it succeeded
-                            // (most of the time: nothing)
-                            
-                         }, function( is_error) {
-
-                            // What to do after the server call in anyway (success or failure)
-                            // (most of the time: nothing)
-
-                         } );        
-        },        
-        
-        */
+            onResetTime: function (evt) {
+                this.peopleCounter[pID].incValue(-1);
+                this.timeCounter[pID].toValue(1);
+                dojo.stopEvent( evt );
+                this.ajaxCallWrapper("resetTime",);
+                this.updatePageTitle(); 
+            },
+    
+            onClickedSpace: function (bID) {
+                boardID = bID;
+                this.ajaxCallWrapper("clickedSpace", {boardID});
+            },
 
         
         ///////////////////////////////////////////////////
@@ -325,13 +389,87 @@ function (dojo, declare) {
             // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
             // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
             // 
+
+            dojo.subscribe( 'otherDrawnCard', this, "notif_otherDrawnCard" );
+            dojo.subscribe( 'selfDrawnCard', this, "notif_selfDrawnCard" );
+
+            dojo.subscribe( 'otherUpdateQuad', this, "notif_otherUpdateQuad" );
+            dojo.subscribe( 'selfUpdateQuad', this, "notif_selfUpdateQuad" );
+            this.notifqueue.setIgnoreNotificationCheck( 'otherUpdateQuad', (notif) => (notif.args.player_id == this.player_id) );
+            dojo.subscribe( 'otherResetTime', this, "notif_otherResetTime" );
+            dojo.subscribe( 'selfResetTime', this, "notif_selfResetTime" );
+            this.notifqueue.setIgnoreNotificationCheck( 'otherResetTime', (notif) => (notif.args.player_id == this.player_id) );
+            dojo.subscribe( 'BlockedSpace', this, "notif_BlockedSpace" );
+            dojo.subscribe( 'moveTokenOther', this, "notif_moveTokenOther" );
+            dojo.subscribe( 'moveTokenSelf', this, "notif_moveTokenSelf" );
+            this.notifqueue.setIgnoreNotificationCheck( 'moveTokenOther', (notif) => (notif.args.player_id == this.player_id) );
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
         
+        notif_selfUpdateQuad: function (notif) {
+            MakeSpacesClickable(notif.args.possibleMoves, notif.args.blocker, notif.args.blockerTokens, notif.args.cQuad);
+            this.updatePageTitle();
+        },
+
+        notif_selfResetTime: function (notif) {
+            MakeSpacesClickable(notif.args.possibleMoves, notif.args.blocker, notif.args.blockerTokens, notif.args.cQuad);
+            this.updatePageTitle();
+        },
+        
+        notif_otherDrawnCard: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_selfDrawnCard: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_otherUpdateQuad: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_otherResetTime: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+              
+        notif_BlockedSpace: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_moveTokenOther: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
+        notif_moveTokenSelf: function (notif) {
+            messageContainer = document.getElementById("messageContainer");
+            messageContainer.classList.remove("hidden");
+            logText = this.format_string_recursive(notif.log, notif.args);
+            document.getElementById("message-text").innerText = logText;
+        },
+
         /*
         Example:
-        
+
         notif_cardPlayed: function( notif )
         {
             console.log( 'notif_cardPlayed' );
